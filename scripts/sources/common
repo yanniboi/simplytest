@@ -412,7 +412,9 @@ s_rewrite_info_files() {
   # Find all info files within the path.
   local info_files=$(find "$1" -name '*.info')
   for info_file in $info_files; do
-    echo "; Information added by simplytest.me build script
+    echo "
+
+; Information added by simplytest.me build script
 version = \"$2\"
 project = \"$3\"
 " >> "$info_file"
