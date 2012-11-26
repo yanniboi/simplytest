@@ -41,12 +41,21 @@ function simplytest_progress_menu() {
  *  The submission id to return a progress bar page for.
  */
 function simplytest_progress_page($id) {
-  // Try to get state of submission.
+  // Make sure this submission is available.
   if (($state = simplytest_progress_state($id)) == FALSE) {
     drupal_set_message(t('The requested submission is not available.'), 'error');
     drupal_goto();
   }
 
+  // If the siterequest came by the meta no_js refresh.
+  if (isset($_GET['no_js'])) {
+    // Trigger submission processing on pageload.
+    simplytest_submissions_process_submission($id);
+    // If this submission is finished, HTTP redirect.
+    if ($state['percent'] == '100') {
+      simplytest_progress_goto($id);
+    }
+  }
   // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
   $meta_refresh = array(
     '#prefix' => '<noscript>',
@@ -59,12 +68,6 @@ function simplytest_progress_page($id) {
     ),
   );
   drupal_add_html_head($meta_refresh, 'simplytest_progress_meta_refresh');
-
-  // If the siterequest came by the meta no_js refresh.
-  if (isset($_GET['no_js'])) {
-    // Trigger submission processing on pageload.
-    simplytest_submissions_process_submission($id);
-  }
 
   // Return a progress bar and attach own javascript.
   return array(
@@ -271,6 +274,9 @@ function simplytest_progress_message($state, $id = NULL) {
 
 /**
  * Redirection page callback, to the final sandbox location.
+ *
+ * @param string $id
+ *  The submission id.
  */
 function simplytest_progress_goto($id) {
   $state = simplytest_submissions_get_state($id);
