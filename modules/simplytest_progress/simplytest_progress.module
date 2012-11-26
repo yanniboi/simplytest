@@ -46,6 +46,19 @@ function simplytest_progress_page($id) {
     drupal_set_message(t('The requested submission is not available.'), 'error');
     drupal_goto();
   }
+
+  // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
+  $meta_refresh = array(
+    '#prefix' => '<noscript>',
+    '#suffix' => '</noscript>',
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'http-equiv' => 'Refresh',
+      'content' => '2; URL=' . url(current_path()),
+    ),
+  );
+  drupal_add_html_head($meta_refresh, 'simplytest_progress_meta_refresh');
+
   // Return a progress bar and attach own javascript.
   return array(
     '#type' => 'container',
