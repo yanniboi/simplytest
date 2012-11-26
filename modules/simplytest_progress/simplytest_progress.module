@@ -54,10 +54,17 @@ function simplytest_progress_page($id) {
     '#tag' => 'meta',
     '#attributes' => array(
       'http-equiv' => 'Refresh',
-      'content' => '2; URL=' . url(current_path()),
+      // Keep refreshing the current page, but mark each refresh with no_js.
+      'content' => '2; URL=' . url(current_path(), array('query' => array('no_js' => NULL))),
     ),
   );
   drupal_add_html_head($meta_refresh, 'simplytest_progress_meta_refresh');
+
+  // If the siterequest came by the meta no_js refresh.
+  if (isset($_GET['no_js'])) {
+    // Trigger submission processing on pageload.
+    simplytest_submissions_process_submission($id);
+  }
 
   // Return a progress bar and attach own javascript.
   return array(
@@ -88,7 +95,9 @@ function simplytest_progress_page($id) {
  *  The submission id to return indication json for.
  */
 function simplytest_progress_state_json($id) {
+  // Trigger submission processing.
   simplytest_submissions_process_submission($id);
+  // Return the progress state.
   drupal_json_output(simplytest_progress_state($id));
 }
 
