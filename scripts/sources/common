@@ -499,7 +499,7 @@ s_resolve_dependencies() {
 # @return
 #  Relative path to the found info file.
 s_discover_info_file() {
-  find "$1" -name '*.info' | sort | head -n 1
+  find "$1" -name '*.info' | head -n 1
 }
 
 ##
