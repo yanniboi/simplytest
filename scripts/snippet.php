@@ -171,6 +171,15 @@ function _simplytest_snippet_infobar($variables) {
   if (document.getElementById('edit-mysql-password') !== null) {
     document.getElementById('edit-mysql-password').value="<?php echo $mysql ?>";
   }
+  if (document.getElementById('edit-db-path') !== null) {
+    document.getElementById('edit-db-path').value="<?php echo $mysql ?>";
+  }
+  if (document.getElementById('edit-db-user') !== null) {
+    document.getElementById('edit-db-user').value="<?php echo $mysql ?>";
+  }
+  if (document.getElementById('edit-db-pass') !== null) {
+    document.getElementById('edit-db-pass').value="<?php echo $mysql ?>";
+  }
   if (document.getElementById('edit-site-mail') !== null) {
     document.getElementById('edit-site-mail').value="<?php echo $id . $mail_suffix ?>";
   }
