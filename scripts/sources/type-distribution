@@ -115,6 +115,17 @@ s_project_fetch_dependencies() {
     lg "No index.php found in docroot."
     s_ste 9
   fi
+
+  # Make sure there's a files directory.
+  if [[ ! -d "/home/$S_ID/www/sites/default/files" ]]; then
+    mkdir "/home/$S_ID/www/sites/default/files"
+    chmod 777 "/home/$S_ID/www/sites/default/files"
+  fi
+  # Make sure there's writable settings.php.
+  if [[ ! -r "/home/$S_ID/www/sites/default/settings.php" ]]; then
+    cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php"
+    chmod 777 "/home/$S_ID/www/sites/default/settings.php"
+  fi
 }
 
 ##

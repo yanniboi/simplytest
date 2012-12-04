@@ -32,6 +32,7 @@ MySQL:
   mysql-server
 
 Other:
+  git
   drush (>= 5.7)
   at
   inotify-tools
@@ -44,13 +45,13 @@ See ./config file.
 
 ## INSTALLATION
 
-After all dependencies are resolved no further installation are necessary.
-Just upload them somewhere on the worker server.
+After all dependencies are resolved no further installation is necessary.
+Just upload the scripts somewhere on the worker server.
 
 The simplytest.me-site will connect by ssh2 to the server and needs to
 execute the spawn.sh script as root user.
 To do this without actually loggin in as root, create a new user
-and add these lines to your sudoers file by $visudo:
+and add these lines to your sudoers file by $ visudo:
   Cmnd_Alias SIMPLYTESTSPAWN_CMDS = [#1]
   [#2] ALL=(ALL) NOPASSWD: SIMPLYTESTSPAWN_CMDS
 Replace:
