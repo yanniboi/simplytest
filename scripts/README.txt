@@ -123,4 +123,14 @@ as root user with the same id as entered for ./build.sh.
 
 - Move MySQL database files into RAM
 
-  See http://wolfgangziegler.net/node/14990
+  $ stop mysql
+  $ mkdir /var/lib/.mysql
+  $ chown -R mysql:mysql /var/lib/.mysql
+  $ rsync -a --delete /var/lib/mysql/ /var/lib/.mysql
+  $ rm -r /var/lib/mysql/*
+  $ rm -f /etc/init/mysql.conf
+  copy the upstart-mysql-tmpfs.conf to /etc/init/mysql.conf
+  $ start mysql
+
+  If it worked you should be able to find /var/lib/mysql in
+  $ df -h
