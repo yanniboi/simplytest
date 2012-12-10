@@ -92,12 +92,20 @@ function simplytest_sponsors_block_list() {
 }
 
 /**
- * Prints out a random sponsor advertisement.
+ * Prints a slideable sponsoring advertisement.
  */
 function simplytest_sponsors_block_ad() {
+  // Get all sponsor ads and randomize order.
   $sponsors = variable_get('simplytest_sponsors', array());
-  $sponsor = $sponsors[rand(0, count($sponsors) - 1)];
-  return
-    '<span class="sponsor-ad-embed">' . $sponsor['ad_embed'] . '</span>'
-    . '<span class="sponsor-ad-info">' . t('Sponsor advertisement') . '</span>';
+  shuffle($sponsors);
+  // Generate slide content.
+  $output = '<div class="sponsor-ad-slide">';
+  foreach ($sponsors as $number => $sponsor) {
+    if (!empty($sponsor['ad_embed'])) {
+      $output .= '<div class="sponsor-ad-embed slide-' . $number . '">' . $sponsor['ad_embed'] . '</div>';
+    }
+  }
+  $output .= '</div>';
+  $output .= '<span class="sponsor-ad-info">' . t('Sponsor advertisement') . '</span>';
+  return $output;
 }

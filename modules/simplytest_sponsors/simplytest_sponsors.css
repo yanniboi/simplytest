@@ -19,3 +19,10 @@
   text-transform: uppercase;
   font-size: 10px;
 }
+
+#block-simplytest-sponsors-simplytest-sponsors-ad .sponsor-ad-embed {
+  display: none;
+}
+#block-simplytest-sponsors-simplytest-sponsors-ad .sponsor-ad-embed.slide-0 {
+  display: block;
+}
