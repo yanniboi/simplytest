@@ -187,6 +187,7 @@ s_install_drupal_8() {
   # Setup directories and permissions.
   mkdir "/home/$S_ID/www/sites/default/files"
   mkdir "/home/$S_ID/www/sites/default/files/tmp"
+  mkdir "/home/$S_ID/www/sites/default/files/translations"
   cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 10
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
