@@ -11,12 +11,14 @@
  * Form callback for administrative configuration.
  */
 function simplytest_sponsors_configuration_form($form, &$form_state) {
+  // Get sponsor configuration.
   $sponsors = variable_get('simplytest_sponsors', array());
+  // Add an extra row for new entries.
   $sponsors[] = array(
     'weight' => 1,
     'list_embed' => '',
     'ad_embed' => '',
-    'delete' => TRUE,
+    'active' => FALSE,
   );
   $form['#tree'] = TRUE;
 
@@ -38,10 +40,15 @@ function simplytest_sponsors_configuration_form($form, &$form_state) {
       '#default_value' => $sponsor['ad_embed'],
       '#maxlength' => 999,
     );
-    $form['sponsors'][$id]['delete'] = array(
+    $form['sponsors'][$id]['active'] = array(
       '#type' => 'checkbox',
-      '#default_value' => $sponsor['delete'],
+      '#default_value' => $sponsor['active'],
     );
+    if (!empty($sponsor['list_embed'])) {
+      $form['sponsors'][$id]['operations'] = array(
+        '#markup' => l(t('Delete'), 'admin/simplytest/sponsors/' . $id . '/delete'),
+      );
+    }
   }
 
   $form['submit'] = array(
@@ -59,7 +66,7 @@ function simplytest_sponsors_configuration_form_submit($form, &$form_state) {
   // Sort and save sponsors config.
   $sponsors = $form_state['values']['sponsors'];
   foreach ($sponsors as $id => $sponsor) {
-    if ($sponsor['delete']) {
+    if (empty($sponsor['list_embed'])) {
       unset($sponsors[$id]);
     }
   }
@@ -86,6 +93,7 @@ function theme_simplytest_sponsors_configuration_form($variables) {
   $rows = array();
   $output = '';
 
+  // Render each cell per row.
   foreach (element_children($form['sponsors']) as $id) {
     $form['sponsors'][$id]['weight']['#attributes']['class'] = array('sponsors-order-weight');
     $rows[] = array(
@@ -94,13 +102,15 @@ function theme_simplytest_sponsors_configuration_form($variables) {
         drupal_render($form['sponsors'][$id]['weight']),
         drupal_render($form['sponsors'][$id]['list_embed']),
         drupal_render($form['sponsors'][$id]['ad_embed']),
-        drupal_render($form['sponsors'][$id]['delete']),
+        drupal_render($form['sponsors'][$id]['active']),
+        drupal_render($form['sponsors'][$id]['operations']),
       ),
       'class' => array('draggable'),
     );
   }
 
-  $header = array('', t('weight'), t('Sponsor list embed'), t('Advertisement embed'), t('Delete'));
+  // Prepare the dragable table to be rendered.
+  $header = array('', t('weight'), t('Sponsor list embed'), t('Advertisement embed'), t('Active'), t('Operations'));
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'sponsors-order')));
 
   $output .= drupal_render_children($form);

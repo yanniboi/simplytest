@@ -19,7 +19,48 @@ function simplytest_sponsors_menu() {
     'access arguments' => array('administer simplytest'),
     'file' => 'simplytest_sponsors.admin.inc',
   );
+  // Path for updating a sponsor entry.
+  $items['admin/simplytest/sponsors/%/%'] = array(
+    'title callback' => '',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_sponsors_operation', 3, 4),
+    'access arguments' => array('administer simplytest'),
+  );
   return $items;
+}
+
+/**
+ * Confirms and executes an operation on a sponsor entry.
+ */
+function simplytest_sponsors_operation($form, $form_state, $id, $operation) {
+  $form['#sponsor_id'] = $id;
+
+  switch ($operation) {
+    case 'delete':
+      $form['#submit'][] = 'simplytest_sponsors_operation_delete';
+      break;
+    default:
+      return $form;
+      break;
+  }
+
+  $form = confirm_form(
+    $form,
+    t('Do you want to @operation this sponsor entry?', array('@operation' => $operation, '%id' => $id)),
+    'admin/simplytest/sponsors'
+  );
+  return $form;
+}
+
+/**
+ * Deletes an sponsor entry after confirmation.
+ */
+function simplytest_sponsors_operation_delete($form, $form_state) {
+  // Delete sponsor entry.
+  $sponsors = variable_get('simplytest_sponsors', array());
+  unset($sponsors[$form['#sponsor_id']]);
+  variable_set('simplytest_sponsors', $sponsors);
+  drupal_goto('admin/simplytest/sponsors');
 }
 
 /**
@@ -83,7 +124,9 @@ function simplytest_sponsors_block_list() {
   $sponsors = variable_get('simplytest_sponsors', array());
   $items = array();
   foreach ($sponsors as $sponsor) {
-    $items[] = $sponsor['list_embed'];
+    if ($sponsor['active']) {
+      $items[] = $sponsor['list_embed'];
+    }
   }
   return array(
     '#theme' => 'item_list',
@@ -97,15 +140,36 @@ function simplytest_sponsors_block_list() {
 function simplytest_sponsors_block_ad() {
   // Get all sponsor ads and randomize order.
   $sponsors = variable_get('simplytest_sponsors', array());
-  shuffle($sponsors);
-  // Generate slide content.
-  $output = '<div class="sponsor-ad-slide">';
   foreach ($sponsors as $number => $sponsor) {
-    if (!empty($sponsor['ad_embed'])) {
-      $output .= '<div class="sponsor-ad-embed slide-' . $number . '">' . $sponsor['ad_embed'] . '</div>';
+    if (!$sponsor['active']) {
+      unset($sponsors[$number]);
     }
   }
-  $output .= '</div>';
-  $output .= '<span class="sponsor-ad-info">' . t('Sponsor advertisement') . '</span>';
+  shuffle($sponsors);
+
+  $output = '';
+  // Generate slide content.
+  if (count($sponsors) > 1) {
+    $output .= '<div class="sponsor-ad-slide">';
+    foreach ($sponsors as $number => $sponsor) {
+      if (!empty($sponsor['ad_embed'])) {
+        $output .= '<div class="sponsor-ad-embed slide-' . $number . '">' . $sponsor['ad_embed'] . '</div>';
+      }
+    }
+    $output .= '</div>';
+  }
+
+  // Single slide.
+  else {
+    foreach ($sponsors as $sponsor) {
+      if (!empty($sponsor['ad_embed'])) {
+       $output .= '<div class="sponsor-ad-embed slide-single">' . $sponsor['ad_embed'] . '</div>';
+      }
+    }
+  }
+
+  if (!empty($output)) {
+    $output .= '<span class="sponsor-ad-info">' . t('Sponsor advertisement') . '</span>';
+  }
   return $output;
 }
