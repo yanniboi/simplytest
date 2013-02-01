@@ -6,7 +6,7 @@
           var progressbar = $('.simplytest-progress-bar');
           var reload = function () {
             $.ajax({
-              url: "/progress/" + Drupal.settings.simplytest_progress.id + "/state",
+              url: Drupal.settings.basePath + 'progress/' + Drupal.settings.simplytest_progress.id + '/state',
               dataType: "json",
               success: function( data ) {
                 $('.bar .filled', progressbar).stop().animate({
@@ -15,7 +15,7 @@
                 $('.percentage', progressbar).html(data.percent + '%');
                 $('.message', progressbar).html(data.message);
                 if (data.percent == 100) {
-                  window.location.replace('/goto/' + Drupal.settings.simplytest_progress.id);
+                  window.location.replace(Drupal.settings.basePath + 'goto/' + Drupal.settings.simplytest_progress.id);
                 }
                 setTimeout(reload, 2000);
               }

@@ -28,7 +28,7 @@
           $("#edit-project").autocomplete({
 			      source: function( request, response ) {
 				      $.ajax({
-					      url: "/simplytest/projects/autocomplete",
+					      url: Drupal.settings.basePath + 'simplytest/projects/autocomplete',
 					      dataType: "json",
 					      data: {
 						      string: request.term
@@ -52,7 +52,7 @@
                 if (ui.item.value !== Drupal.behaviors.simplytest_launch.project) {
                   $('#simplytest-launch-block-launcher-form').stop().animate({opacity: 0.25});
                   // Get json and put options into versions select box.
-                  $.getJSON('/simplytest/project/' + ui.item.value + '/versions', function(data) {
+                  $.getJSON(Drupal.settings.basePath + 'simplytest/project/' + ui.item.value + '/versions', function(data) {
                   Drupal.behaviors.simplytest_launch.project = ui.item.value;
                     var items = [];
                     $.each(data, function(key, val) {
