@@ -12,7 +12,10 @@ Modules
 
 ## simplytest_import
   Config: /admin/simplytest/import
-  Let's you import project data from XML.
+  Import project data from XML; Possible methods:
+  - Path to file: Imports the file from a local directory.
+  - Upload: Imports the file after uploading it.
+  - Automatic download: Downloads and imports the current project list.
 
 ## simplytest_projects
   Provides an API to import and fetch project data from drupal.org as well
@@ -59,17 +62,20 @@ Modules
 Setup
 =====
 
-After the usual drupal installation you should begin with
-
   1. Importing initial project data.
-
-  The submission autocomplete textfield for choosing a project should
-  have some initial data to work with.
-  Download the current project list with
-  $ wget http://updates.drupal.org/release-history/project-list/all
-  Go to /admin/simplytest/import, enter the path to the downloaded XML and
-  hit 'Start'. Importing the initial project data will take several minutes.
-  NOTE: It's faster to import the list from an existing database dump.
+      The submission autocomplete textfield for choosing a project should
+      have some initial data to work with.
+     Method A: Import during installation.
+      If not done yet, download the project list XML automatically by executing
+      the .make script with drush. The file must be in the projects root and
+      called projects.xml. It will automatically be imported during the
+      installation of the profile.
+     Method B: Manual download and import after installation.
+      After the usual drupal installation you download the current project list
+      $ wget http://updates.drupal.org/release-history/project-list/all
+      Go to /admin/simplytest/import, enter the path to the downloaded XML and
+      hit 'Start'. Importing the initial project data will take several minutes
+      NOTE: It's faster to import the list from an existing database dump.
 
   2. Setup the/a worker server.
 
