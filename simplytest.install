@@ -94,6 +94,7 @@ function simplytest_install() {
  * they want to supply the projects data.
  */
 function simplytest_install_tasks() {
+  $tasks = array();
   $file = drupal_get_path('profile', 'simplytest') . '/libraries/simplytest_import/projects.xml';
   if (file_exists($file)) {
     $tasks['simplytest_import'] = array(
