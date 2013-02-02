@@ -25,24 +25,27 @@ function simplytest_import_menu() {
  * Form builder function for the import batch.
  */
 function simplytest_import_form($form) {
+  // The defaults from the last use.
   $defaults = variable_get('simplytest_import', array(
     'method' => 'path',
     'path' => '',
     'count' => 100,
   ));
 
+  // Available import methods.
   $form['method'] = array(
     '#type' => 'radios',
-    '#title' => t('Method'),
+    '#title' => t('Import method'),
     '#options' => array(
-      'path' => t('Path to file'),
-      'upload' => t('Upload'),
-      'download' => t('Automatic download <em>(expirimental)</em>'),
+      'path' => t('Path to XML file'),
+      'upload' => t('Upload and import'),
+      'download' => t('Automatic download (experimental)'),
     ),
     '#default_value' => $defaults['method'],
     '#after_build' => array('simplytest_import_dependencies_curl'),
   );
 
+  // Import locally with path to XML file.
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to the file to import project data from'),
@@ -54,6 +57,7 @@ function simplytest_import_form($form) {
     ),
   );
 
+  // Upload and import.
   $form['upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload'),
@@ -94,13 +98,17 @@ function simplytest_import_dependencies_curl($element) {
  */
 function simplytest_import_form_validate($form, &$form_state) {
   switch ($form_state['values']['method']) {
+    // Local import by path.
     case 'path':
+      // Check whether the file exists.
       if (!file_exists($form_state['values']['path'])) {
         form_set_error('path', t('File not found'));
       }
       break;
 
+    // Upload and import.
     case 'upload':
+      // Check file name and extension.
       $file = new stdClass();
       $file->filename = $_FILES['files']['name']['upload'];
       $errors = file_validate_extensions($file, 'xml');
@@ -118,7 +126,7 @@ function simplytest_import_form_validate($form, &$form_state) {
         return FALSE;
       }
 
-      // Move the file into temporary://
+      // Move the file into temporary:// while import.
       $file = file_unmanaged_copy($_FILES['files']['tmp_name']['upload'], 'temporary://' . $_FILES['files']['name']['upload'], FILE_EXISTS_RENAME);
       if (!$file) {
         form_set_error('upload', t('The specified file %name could not be copied to %destination.', array(
@@ -151,17 +159,21 @@ function simplytest_import_form_submit($form, &$form_state) {
   );
 
   switch ($form_state['values']['method']) {
+    // Path to file, directly.
     case 'path':
       $file = $form_state['values']['path'];
       break;
 
+    // Path to uploaded file.
     case 'upload':
       $file = $form_state['values']['file'];
       break;
 
+    // Path to file to download.
     case 'download':
       $file = 'temporary://projects-' . REQUEST_TIME . '.xml';
       $batch['init_message'] = t('Downloading data. <br /><em><strong>Note:</strong> This may take a while.</em>');
+      // Set the download as first batch operation.
       $batch['operations'][] = array('simplytest_import_batch_operation_download_xml', array($file));
       break;
   }
@@ -182,8 +194,10 @@ function simplytest_import_form_submit($form, &$form_state) {
  * Batch operation; Download the XML file.
  */
 function simplytest_import_batch_operation_download_xml($file, &$context) {
+  // Try to set max_execution_time to unlimited during download.
   set_time_limit(0);
 
+  // Download file with cURL.
   $fp = fopen($file, 'w+');
   $ch = curl_init('http://updates.drupal.org/release-history/project-list/all');
 
