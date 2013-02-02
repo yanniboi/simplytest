@@ -11,8 +11,8 @@ function simplytest_import_menu() {
   $items = array();
 
   $items['admin/simplytest/import'] = array(
-    'title' => 'Import',
-    'description' => 'Import project data',
+    'title' => 'Import projects',
+    'description' => 'Import drupal.org project data.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_import_form'),
     'access arguments' => array('administer simplytest'),

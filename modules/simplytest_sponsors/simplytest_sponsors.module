@@ -21,7 +21,7 @@ function simplytest_sponsors_menu() {
   );
   // Path for updating a sponsor entry.
   $items['admin/simplytest/sponsors/%/%'] = array(
-    'title callback' => '',
+    'title' => 'Sponsor',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_sponsors_operation', 3, 4),
     'access arguments' => array('administer simplytest'),
