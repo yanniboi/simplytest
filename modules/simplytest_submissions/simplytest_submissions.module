@@ -6,20 +6,45 @@
  */
 
 /**
- * Submission states.
+ * Running submission states.
  */
-define('SIMPLYTEST_SUBMISSIONS_ENQUEUE',          0);
-define('SIMPLYTEST_SUBMISSIONS_PREPARE',          1);
-define('SIMPLYTEST_SUBMISSIONS_DOWNLOAD',         2);
-define('SIMPLYTEST_SUBMISSIONS_INSTALLING',       3);
-define('SIMPLYTEST_SUBMISSIONS_FINALIZE',         4);
-define('SIMPLYTEST_SUBMISSIONS_FINISHED',         5);
-define('SIMPLYTEST_SUBMISSIONS_TERMINATED',       6);
-define('SIMPLYTEST_SUBMISSIONS_ERROR_SERVER',     7);
-define('SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE',    8);
-define('SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD',   9);
-define('SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING', 10);
-define('SIMPLYTEST_SUBMISSIONS_ABORTED',          11);
+define('SIMPLYTEST_SUBMISSIONS_ENQUEUE',          100);
+define('SIMPLYTEST_SUBMISSIONS_SPAWNED',          101);
+define('SIMPLYTEST_SUBMISSIONS_PREPARE',          102);
+define('SIMPLYTEST_SUBMISSIONS_DOWNLOAD',         103);
+define('SIMPLYTEST_SUBMISSIONS_INSTALLING',       104);
+define('SIMPLYTEST_SUBMISSIONS_FINALIZE',         105);
+define('SIMPLYTEST_SUBMISSIONS_FINISHED',         106);
+
+/**
+ * Terminated submission states.
+ */
+define('SIMPLYTEST_SUBMISSIONS_TERMINATED',       200);
+define('SIMPLYTEST_SUBMISSIONS_ABORTED',          201);
+define('SIMPLYTEST_SUBMISSIONS_FAILED',           202);
+
+/**
+ * Failure submission states.
+ */
+define('SIMPLYTEST_SUBMISSIONS_ERROR_SERVER',     300);
+define('SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE',    301);
+define('SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD',   302);
+define('SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING', 303);
+
+/*
+define('SIMPLYTEST_SUBMISSIONS_ENQUEUE',          0);   100
+define('SIMPLYTEST_SUBMISSIONS_PREPARE',          1);   102
+define('SIMPLYTEST_SUBMISSIONS_DOWNLOAD',         2);   103
+define('SIMPLYTEST_SUBMISSIONS_INSTALLING',       3);   104
+define('SIMPLYTEST_SUBMISSIONS_FINALIZE',         4);   105
+define('SIMPLYTEST_SUBMISSIONS_FINISHED',         5);   106
+define('SIMPLYTEST_SUBMISSIONS_TERMINATED',       6);   200
+define('SIMPLYTEST_SUBMISSIONS_ERROR_SERVER',     7);   300
+define('SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE',    8);   301
+define('SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD',   9);   302
+define('SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING', 10);  303
+define('SIMPLYTEST_SUBMISSIONS_ABORTED',          11);  201
+*/
 
 /**
  * Implements hook_menu().
@@ -103,7 +128,7 @@ function simplytest_submissions_monitor_table() {
       ? 'http://drupal.org/sandbox/' . $submission['creator'] . '/' . $submission['project']
       : 'http://drupal.org/project/' . $submission['project']
     );
-    $state_text = _simplytest_submissions_state_to_string($submission['state']);
+    $state_text = simplytest_submissions_state_to_string($submission['state']);
     $rows[] = array(
       // Cells.
       'data' => array(
@@ -226,6 +251,7 @@ function simplytest_submissions_enqueue($project, $version) {
       'ip' => ip_address(),
       'data' => serialize($data),
       'timestamp' => REQUEST_TIME,
+      'state' => SIMPLYTEST_SUBMISSIONS_ENQUEUE,
     ))
     ->execute();
 
@@ -315,7 +341,7 @@ function simplytest_submissions_send($id) {
     return FALSE;
   }
   else {
-    simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_PREPARE,
+    simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED,
       'http://' . $id . '.' . $server->data['host'] . '/');
     return TRUE;
   }
@@ -403,24 +429,27 @@ function simplytest_submissions_generate_id() {
  * @param int $state
  *  The submissions state to set.
  */
-function _simplytest_submissions_state_to_string($state) {
+function simplytest_submissions_state_to_string($state) {
   $states = array(
-    // Processing submission states.
-    t('Enqueued'),
-    t('Preparing'),
-    t('Downloading'),
-    t('Installing'),
-    t('Finalizing'),
-    t('Finished'),
-    t('Terminated'),
-    // Error states.
-    t('Error server'),
-    t('Error prepare'),
-    t('Error download'),
-    t('Error installing'),
-    t('Error aborted'),
+    // Running submission states.
+    SIMPLYTEST_SUBMISSIONS_ENQUEUE          => t('Enqueued'),
+    SIMPLYTEST_SUBMISSIONS_SPAWNED          => t('Spawned'),
+    SIMPLYTEST_SUBMISSIONS_PREPARE          => t('Preparing'),
+    SIMPLYTEST_SUBMISSIONS_DOWNLOAD         => t('Downloading'),
+    SIMPLYTEST_SUBMISSIONS_INSTALLING       => t('Installing'),
+    SIMPLYTEST_SUBMISSIONS_FINALIZE         => t('Finalizing'),
+    SIMPLYTEST_SUBMISSIONS_FINISHED         => t('Finished'),
+    // Terminated submission states.
+    SIMPLYTEST_SUBMISSIONS_TERMINATED       => t('Terminated'),
+    SIMPLYTEST_SUBMISSIONS_ABORTED          => t('Aborted'),
+    SIMPLYTEST_SUBMISSIONS_FAILED           => t('Failed'),
+    // Failure submission states.
+    SIMPLYTEST_SUBMISSIONS_ERROR_SERVER     => t('Error server'),
+    SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE    => t('Error prepare'),
+    SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD   => t('Error download'),
+    SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING => t('Error installing'),
   );
-  return isset($states[$state]) ? $states[$state] : t('unknown');
+  return isset($states[$state]) ? $states[$state] : t('Unknown');
 }
 
 /**
@@ -433,8 +462,8 @@ function _simplytest_submissions_state_to_string($state) {
  */
 function _simplytest_submissions_state_log($id, $state) {
   
-  // Check what kind of state this is.
-  if ($state > SIMPLYTEST_SUBMISSIONS_TERMINATED) {
+  // Error state to log?
+  if ($state >= SIMPLYTEST_SUBMISSIONS_ERROR_SERVER) {
     $severity = WATCHDOG_ERROR;
   }
   else {
@@ -444,6 +473,6 @@ function _simplytest_submissions_state_log($id, $state) {
   // Log the state update.
   watchdog('simplytest_submissions', 'State of %id was set to %state.', array(
     '%id' => $id,
-    '%state' => _simplytest_submissions_state_to_string($state),
+    '%state' => simplytest_submissions_state_to_string($state),
   ), $severity);
 }

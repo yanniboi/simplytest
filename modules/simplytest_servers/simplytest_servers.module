@@ -165,7 +165,7 @@ function simplytest_servers_execute($server, $commands) {
  */
 function simplytest_servers_simplytest_submissions_update($id, $state) {
   // Update server slot count if a submission was terminated.
-  if ($state == SIMPLYTEST_SUBMISSIONS_TERMINATED) {
+  if ($state >= SIMPLYTEST_SUBMISSIONS_TERMINATED) {
     $servers = simplytest_servers_get();
     $ip_address = ip_address();
     foreach ($servers as $server) {

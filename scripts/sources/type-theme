@@ -53,7 +53,7 @@ s_project_fetch_dependencies() {
   # Prepare the themes directory and copy it in.
   lg "Prepare the theme project.."
   mkdir "/home/$S_ID/www/sites/default/themes"
-  cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/themes" || s_ste 10
+  cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/themes" || s_ste 303
 
   # Resolve dependencies.
   lg "Resolve dependencies"

@@ -64,3 +64,29 @@ function simplytest_submissions_schema() {
   );
   return $schema;
 }
+
+/**
+ * Updating submissions table to the new submission state system.
+ */
+function simplytest_submissions_update_7101() {
+  $states = array(
+    0  => 100,
+    1  => 102,
+    2  => 103,
+    3  => 104,
+    4  => 105,
+    5  => 106,
+    6  => 200,
+    7  => 300,
+    8  => 301,
+    9  => 302,
+    10 => 303,
+    11 => 201,
+  );
+  foreach ($states as $old => $new) {
+    db_update('simplytest_submissions')
+      ->fields(array('state' => $new))
+      ->condition('state', $old)
+      ->execute();
+  }
+}

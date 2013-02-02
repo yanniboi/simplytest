@@ -183,27 +183,30 @@ function simplytest_progress_percentage($total, $current) {
  *   - the completed count of steps.
  */
 function simplytest_progress_steps($state) {
-  $total = 5;
-  $current = 5;
+  $total = 6;
+  $current = 6;
 
   switch ($state) {
     case SIMPLYTEST_SUBMISSIONS_ENQUEUE:
       $current = 0;
       break;
-    case SIMPLYTEST_SUBMISSIONS_PREPARE:
+    case SIMPLYTEST_SUBMISSIONS_SPAWNED:
       $current = 1;
       break;
-    case SIMPLYTEST_SUBMISSIONS_DOWNLOAD:
+    case SIMPLYTEST_SUBMISSIONS_PREPARE:
       $current = 2;
       break;
-    case SIMPLYTEST_SUBMISSIONS_INSTALLING:
+    case SIMPLYTEST_SUBMISSIONS_DOWNLOAD:
       $current = 3;
       break;
-    case SIMPLYTEST_SUBMISSIONS_FINALIZE:
+    case SIMPLYTEST_SUBMISSIONS_INSTALLING:
       $current = 4;
       break;
-    case SIMPLYTEST_SUBMISSIONS_FINISHED:
+    case SIMPLYTEST_SUBMISSIONS_FINALIZE:
       $current = 5;
+      break;
+    case SIMPLYTEST_SUBMISSIONS_FINISHED:
+      $current = 6;
       break;
   }
 
@@ -233,6 +236,9 @@ function simplytest_progress_message($state, $id = NULL) {
         $message = t('Your submission is enqueued..');
       }
       break;
+    case SIMPLYTEST_SUBMISSIONS_SPAWNED:
+      $message = t('The submission was spawned..');
+      break;
     case SIMPLYTEST_SUBMISSIONS_PREPARE:
       $message = t('The environment is beeing prepared..');
       break;
@@ -251,6 +257,12 @@ function simplytest_progress_message($state, $id = NULL) {
     case SIMPLYTEST_SUBMISSIONS_TERMINATED:
       $message = t('This submission is already terminated.');
       break;
+    case SIMPLYTEST_SUBMISSIONS_ABORTED:
+      $message = t('The requested submission was aborted.');
+      break;
+    case SIMPLYTEST_SUBMISSIONS_FAILED:
+      $message = t('The requested submission failed.');
+      break;
     case SIMPLYTEST_SUBMISSIONS_ERROR_SERVER:
       $message = t('An error occurred while launching the submission.');
       break;
@@ -262,9 +274,6 @@ function simplytest_progress_message($state, $id = NULL) {
       break;
     case SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING:
       $message = t('An error occurred while installing the environment.');
-      break;
-    case SIMPLYTEST_SUBMISSIONS_ABORTED:
-      $message = t('The requested submission was aborted.');
       break;
     default:
       $message = t('An unknown error occurred.');
@@ -286,6 +295,7 @@ function simplytest_progress_goto($id) {
   }
   switch ($state) {
     case SIMPLYTEST_SUBMISSIONS_ENQUEUE:
+    case SIMPLYTEST_SUBMISSIONS_SPAWNED:
     case SIMPLYTEST_SUBMISSIONS_PREPARE:
     case SIMPLYTEST_SUBMISSIONS_DOWNLOAD:
     case SIMPLYTEST_SUBMISSIONS_INSTALLING:

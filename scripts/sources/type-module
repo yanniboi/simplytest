@@ -55,7 +55,7 @@ s_project_fetch_dependencies() {
   # Prepare the modules directory and copy it in.
   lg "Prepare the module project.."
   mkdir "/home/$S_ID/www/sites/default/modules"
-  cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/modules" || s_ste 10
+  cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/modules" || s_ste 303
 
   # Resolve dependencies.
   lg "Resolve dependencies"

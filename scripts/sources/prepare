@@ -4,7 +4,7 @@
 s_prepare() {
 
   # Add temporary user with minium rights as cage.
-  adduser --system --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 8
+  adduser --system --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 301
 
   # www directory and www/tmp will be re-created in chache_to_root().
   mkdir "/home/$S_ID/www"
@@ -111,8 +111,8 @@ s_prepare() {
     " > "/home/$S_ID/php.ini"
 
   # Enable vhost.
-  a2ensite $S_ID || s_ste 8
+  a2ensite $S_ID || s_ste 301
 
   # Reload apache config.
-  service apache2 reload || s_ste 8
+  service apache2 reload || s_ste 301
 }

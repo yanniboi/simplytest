@@ -69,10 +69,10 @@ s_fetch_project() {
   if [[ ! -r "$S_DRUSHCACHE/$1.git" ]]; then
     timeout 500 git clone --mirror "$2" "$S_DRUSHCACHE/$1.git"
   fi
-  timeout 350 git clone --reference "$S_DRUSHCACHE/$1.git" --recursive "$2" "$3" || s_ste 9
+  timeout 350 git clone --reference "$S_DRUSHCACHE/$1.git" --recursive "$2" "$3" || s_ste 302
   # Update repo by fetching newest changes.
-  cd "$3" || s_ste 9
-  git fetch || s_ste 9
+  cd "$3" || s_ste 302
+  git fetch || s_ste 302
   git pull
 }
 
@@ -82,7 +82,7 @@ s_fetch_project() {
 # @param $1
 #  SQL query to execute.
 s_sqlquery() {
-  mysql -u $S_SQLUSR "-p$S_SQLPWD" -e "$1" || s_ste 10
+  mysql -u $S_SQLUSR "-p$S_SQLPWD" -e "$1" || s_ste 303
 }
 
 ##
@@ -119,7 +119,7 @@ s_settimeout() {
 #  Version to check out.
 s_set_version() {
   cd $1
-  timeout 350 git checkout $2 || s_ste 9
+  timeout 350 git checkout $2 || s_ste 302
   rm -r "$1/.git"
 }
 
@@ -188,14 +188,14 @@ s_install_drupal_8() {
   mkdir "/home/$S_ID/www/sites/default/files"
   mkdir "/home/$S_ID/www/sites/default/files/tmp"
   mkdir "/home/$S_ID/www/sites/default/files/translations"
-  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 10
+  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 303
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/settings.php"
-  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 10
-  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 10
+  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
+  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 303
   # Drush's not ready for d8.
 }
 
@@ -210,24 +210,24 @@ s_install_drupal_7() {
   # Setup directories and permissions.
   mkdir "/home/$S_ID/www/sites/default/files"
   mkdir "/home/$S_ID/www/sites/default/files/tmp"
-  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 10
+  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www"/*
   chgrp --recursive nogroup "/home/$S_ID/www"/*
 
-  cd "/home/$S_ID/www" || s_ste 10
+  cd "/home/$S_ID/www" || s_ste 303
 
   # Start drupal installation.
-  timeout 350 sudo -u $S_ID drush site-install $2 --locale=en -y --db-url=mysql://$S_ID:$S_ID@localhost/$S_ID --account-name=$S_DUSR --account-pass=$S_DPWD --account-mail="$S_ID-$S_DMAIL_SUFFIX" --site-mail="$S_ID-$S_DMAIL_SUFFIX" --site-name="Drupal $1" || s_ste 10
+  timeout 350 sudo -u $S_ID drush site-install $2 --locale=en -y --db-url=mysql://$S_ID:$S_ID@localhost/$S_ID --account-name=$S_DUSR --account-pass=$S_DPWD --account-mail="$S_ID-$S_DMAIL_SUFFIX" --site-mail="$S_ID-$S_DMAIL_SUFFIX" --site-name="Drupal $1" || s_ste 303
 
   # Set temporary path to files dir.
   timeout 350 sudo -u $S_ID drush vset --always-set file_temporary_path "sites/default/files/tmp"
 
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
-  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 10
-  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 10
+  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
+  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 303
 }
 
 ##
@@ -240,15 +240,15 @@ s_install_drupal_7() {
 s_install_drupal_6() {
   mkdir "/home/$S_ID/www/sites/default/files"
   mkdir "/home/$S_ID/www/sites/default/files/tmp"
-  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 10
-  cd "/home/$S_ID/www" || s_ste 10
+  cp "/home/$S_ID/www/sites/default/default.settings.php" "/home/$S_ID/www/sites/default/settings.php" || s_ste 303
+  cd "/home/$S_ID/www" || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www"/*
   chgrp --recursive nogroup "/home/$S_ID/www"/*
 
   # Set mysql default settings for installation.
   echo "\$db_url = 'mysql://$S_ID:$S_ID@localhost/$S_ID';" >> "/home/$S_ID/www/sites/default/settings.php"
   # Start drupal installation.
-  timeout 350 sudo -u $S_ID  drush site-install $2 --locale=en -y --db-url=mysql://$S_ID:$S_ID@localhost/$S_ID --account-name=$S_DUSR --account-pass=$S_DPWD --account-mail="$S_ID-$S_DMAIL_SUFFIX" --site-mail="$S_ID-$S_DMAIL_SUFFIX" --site-name="Drupal $1" || s_ste 10
+  timeout 350 sudo -u $S_ID  drush site-install $2 --locale=en -y --db-url=mysql://$S_ID:$S_ID@localhost/$S_ID --account-name=$S_DUSR --account-pass=$S_DPWD --account-mail="$S_ID-$S_DMAIL_SUFFIX" --site-mail="$S_ID-$S_DMAIL_SUFFIX" --site-name="Drupal $1" || s_ste 303
 
   # Set temporary path to files dir.
   timeout 350 sudo -u $S_ID  drush vset --always-set file_directory_temp "sites/default/files/tmp"
@@ -259,10 +259,10 @@ s_install_drupal_6() {
   # Setup directories and permissions.
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
-  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 10
-  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 10
-  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 10
+  chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
+  chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
+  chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 303
 }
 
 ##
@@ -338,7 +338,7 @@ s_install_module() {
         timeout 350 sudo -u $S_ID drush en $2 -y
         ;;
     *)
-        s_ste 8
+        s_ste 301
   esac
 }
 
@@ -374,7 +374,7 @@ s_install_theme() {
         fi
         ;;
     *)
-        s_ste 8
+        s_ste 301
   esac
 }
 
@@ -554,22 +554,29 @@ lg() {
 #
 # @param $1
 #  State to set.
-#   ENQUEUE           0
-#   PREPARE           1
-#   DOWNLOAD          2
-#   INSTALLING        3
-#   FINALIZE          4
-#   FINISHED          5
-#   TERMINATED        6
-#   ERROR_SERVER      7
-#   ERROR_PREPARE     8
-#   ERROR_DOWNLOAD    9
-#   ERROR_INSTALLING 10
+#
+#  Running submission states:
+#   ENQUEUE           100
+#   SPAWNED           101
+#   PREPARE           102
+#   DOWNLOAD          103
+#   INSTALLING        104
+#   FINALIZE          105
+#   FINISHED          106
+#  Terminated submission states.
+#   TERMINATED        200
+#   ABORTED           201
+#   FAILED            202
+#  Failure submission states.
+#   ERROR_SERVER      301
+#   ERROR_PREPARE     302
+#   ERROR_DOWNLOAD    303
+#   ERROR_INSTALLING  304
 s_ste() {
   # Set the new state by querying the site's callback.
   wget -qO /dev/null "$S_CALLBACK/$S_ID/$1"
   # Destroy and exit on error state.
-  if [[ $1 -ge 7 ]]; then
+  if [[ $1 -ge 300 ]]; then
      echo "FAILED ON STATE $1"
      s_destruct "$S_ID"
      # Before sending the terminated state, we need some time
@@ -578,7 +585,8 @@ s_ste() {
      # error logging system
      sleep 30
      # Tell the server that a slot has become free.
-     wget -qO /dev/null "$S_CALLBACK/$S_ID/6"
+     # By setting the submission to FAILED.
+     wget -qO /dev/null "$S_CALLBACK/$S_ID/202"
      exit 1
   fi
 }

@@ -32,7 +32,7 @@ source "$DIRECTORY/sources/common"
 ### PREPARE.
 
 # Set state.
-s_ste 1
+s_ste 102
 
 lg "Prepare.."
 s_prepare
@@ -40,7 +40,7 @@ s_prepare
 ### DOWNLOAD AND FETCH DEPENDENCIES.
 
 # Set state.
-s_ste 2
+s_ste 103
 
 lg "Downloading project.."
 s_project_download
@@ -49,13 +49,13 @@ lg "Fetch dependencies.."
 s_project_fetch_dependencies
 
 ### INSTALL.
-s_ste 3
+s_ste 104
 
 lg "Installing project.."
 s_project_install
 
 ### FINALIZE.
-s_ste 4
+s_ste 105
 lg "Finalizing.."
 
 # Add infobar script snippet to index.php.
@@ -70,4 +70,4 @@ lg "Set timeout to destroy job.."
 s_settimeout "$DIRECTORY/destroy.sh $S_ID >>$DIRECTORY/log/$S_ID.log 2>&1" $S_TIMEOUT
 
 ### FINISHED
-s_ste 5
+s_ste 106
