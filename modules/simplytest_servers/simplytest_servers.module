@@ -10,12 +10,40 @@
  */
 function simplytest_servers_menu() {
   $items = array();
-  // Server configuration form.
+  // Server configuration overview.
   $items['admin/simplytest/servers'] = array(
     'title' => 'Servers',
     'description' => 'Server settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('simplytest_servers_servers_form'),
+    'page arguments' => array('simplytest_servers_overview_form'),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_servers.admin.inc',
+  );
+  // Server configuration; Add new server.
+  $items['admin/simplytest/servers/add'] = array(
+    'title' => 'Add server',
+    'description' => 'Adds a new server.',
+    'type' => MENU_LOCAL_ACTION,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_servers_config_form', NULL),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_servers.admin.inc',
+  );
+  // Server configuration; Edit a server.
+  $items['admin/simplytest/servers/%/edit'] = array(
+    'title' => 'Edit server',
+    'description' => 'Edit server configuration.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_servers_config_form', 3),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_servers.admin.inc',
+  );
+  // Server configuration; Operate on a server.
+  $items['admin/simplytest/servers/%/%'] = array(
+    'title' => 'Confirm operation',
+    'description' => 'Confirm operation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_servers_operation', 3, 4),
     'access arguments' => array('administer simplytest'),
     'file' => 'simplytest_servers.admin.inc',
   );
@@ -26,13 +54,14 @@ function simplytest_servers_menu() {
  * Returns an assocciative array of server information.
  */
 function simplytest_servers_get() {
-  $servers = db_select('simplytest_servers', 's')
-    ->fields('s', array('id', 'data', 'active', 'slots'))
-    ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  foreach($servers as &$server) {
-    $server = array_merge($server, unserialize($server['data']));
-  }
-  return $servers;
+  return variable_get('simplytest_servers', array());
+}
+
+/**
+ * Saves an assocciative array of server information.
+ */
+function simplytest_servers_set($servers) {
+  return variable_set('simplytest_servers', $servers);
 }
 
 /**

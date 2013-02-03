@@ -43,3 +43,26 @@ function simplytest_servers_schema() {
   );
   return $schema;
 }
+
+/**
+ * Move server configuration from database table to variables.
+ */
+function simplytest_servers_update_7101() {
+  // Get existing configuration from database.
+  $servers = db_select('simplytest_servers', 's')
+    ->fields('s', array('id', 'data', 'active', 'slots'))
+    ->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  // Merge with serialized data, and key by id.
+  $new_servers_array = array();
+  foreach($servers as &$server) {
+    $server = array_merge($server, unserialize($server['data']));
+    $new_servers_array[$server['id']] = $server;
+  }
+
+  // Save configuration as variable.
+  variable_set('simplytest_servers', $new_servers_array);
+
+  // Drop the old server config table.
+  db_drop_table('simplytest_servers');
+}

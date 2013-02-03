@@ -7,45 +7,59 @@
  * Configuration page.
  */
 
-
 /**
  * Server configuration form.
  */
-function simplytest_servers_servers_form($form = array()) {
+function simplytest_servers_overview_form($form = array()) {
 
+  // Get configured servers.
   $servers = simplytest_servers_get();
 
-  $form['#servers'] = $servers;
-
+  // Build rows.
+  $rows = array();
   foreach($servers as $server) {
-    $form[$server['id']] = simplytest_servers_config_form_elements($server);
+    $rows[] = array(
+      $server['id'],
+      $server['name'],
+      $server['host'],
+      $server['slots'],
+      ($server['active']) ? t('Active') : t('Inactive'),
+      ($server['active'])
+        ? l(t('Deactivate'), 'admin/simplytest/servers/' . $server['id'] . '/deactivate')
+        : l(t('Activate'), 'admin/simplytest/servers/' . $server['id'] . '/activate'),
+      l(t('Edit'), 'admin/simplytest/servers/' . $server['id'] . '/edit'),
+      l(t('Delete'), 'admin/simplytest/servers/' . $server['id'] . '/delete'),
+    );
   }
 
-  $form['new'] = simplytest_servers_config_form_elements();
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
+  // Build table.
+  $form['table'] = array(
+    '#theme' => 'table',
+    '#header' => array(
+      'id' => t('Id'),
+      'name' => t('Name'),
+      'host' => t('Host'),
+      'slots' => t('Slots'),
+      'active' => t('Active'),
+      'operations' => array('data' => t('Operations'), 'colspan' => 3),
+    ),
+    '#rows' => $rows,
+    '#empty' => t('No servers configured.'),
   );
-
   return $form;
 }
 
 /**
- * Server config elements.
+ * Server specific configuration.
  */
-function simplytest_servers_config_form_elements($config = NULL) {
-  // Build server config fieldset.
-  $elements = array(
-    '#type' => 'fieldset',
-    '#title' => isset($config['name']) ? $config['name'] : t('New server'),
-    '#collapsible' => TRUE,
-    '#collapsed' => !empty($config),
-  );
-  // Decide whether to use default config.
-  if (empty($config)) {
+function simplytest_servers_config_form($form = array(), $form_state, $id) {
+  $servers = simplytest_servers_get();
+  $form['#servers'] = $servers;
+
+  // No server id given, use default config.
+  if (!$id) {
     $config = array(
-      'id' => 'new',
+      'id' => NULL,
       'active' => FALSE,
       'name' => t('New server'),
       'host' => '',
@@ -56,91 +70,185 @@ function simplytest_servers_config_form_elements($config = NULL) {
       'spawn' => '',
     );
   }
+  // Server id given, get server data.
   else {
-    $elements['#title'] .= ' (' . ($config['active'] ? t('Active') : t('Inactive')) . ')';
+    if (isset($servers[$id])) {
+      $config = $servers[$id];
+    }
+    else {
+      return drupal_page_not_found();
+    }
   }
-  $elements[$config['id'] . '__active'] = array(
+
+  // Build form.
+  $form['id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Id'),
+    '#disabled' => ($config['id']) ? TRUE : FALSE,
+    '#required' => TRUE,
+    '#default_value' => $config['id'],
+  );
+  $form['active'] = array(
     '#type' => 'checkbox',
     '#title' => t('Active'),
     '#default_value' => $config['active'],
   );
-  $elements[$config['id'] . '__name'] = array(
+  $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
+    '#required' => TRUE,
     '#default_value' => $config['name'],
   );
-  $elements[$config['id'] . '__host'] = array(
+  $form['host'] = array(
     '#type' => 'textfield',
     '#title' => t('Server hostname'),
+    '#required' => TRUE,
     '#default_value' => $config['host'],
   );
-  $elements[$config['id'] . '__port'] = array(
+  $form['port'] = array(
     '#type' => 'textfield',
     '#title' => t('SSH port'),
+    '#required' => TRUE,
     '#default_value' => $config['port'],
   );
-  $elements[$config['id'] . '__user'] = array(
+  $form['user'] = array(
     '#type' => 'textfield',
     '#title' => t('SSH User'),
+    '#required' => TRUE,
     '#default_value' => $config['user'],
   );
-  $elements[$config['id'] . '__password'] = array(
+  $form['password'] = array(
     '#type' => 'textfield',
     '#title' => t('SSH Password'),
+    '#required' => TRUE,
     '#default_value' => $config['password'],
   );
-  $elements[$config['id'] . '__slots'] = array(
+  $form['slots'] = array(
     '#type' => 'textfield',
-    '#title' => t('Slots (current possible submissions)'),
+    '#title' => t('Slots'),
+    '#required' => TRUE,
     '#default_value' => $config['slots'],
   );
-  $elements[$config['id'] . '__spawn'] = array(
+  $form['spawn'] = array(
     '#type' => 'textfield',
     '#title' => t('Spawn by script execution'),
+    '#required' => TRUE,
     '#default_value' => $config['spawn'],
   );
-  return $elements;
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  return $form;
+}
+
+/**
+ * Server configuration form, validation handler.
+ */
+function simplytest_servers_config_form_validate($form, &$form_state) {
+  if (!is_numeric($form_state['values']['port'])) {
+    form_set_error('port', t('Port must be a number.'));
+  }
+  if (!is_numeric($form_state['values']['slots'])) {
+    form_set_error('slots', t('Slot number must be numeric.'));
+  }
 }
 
 /**
  * Server configuration form, submit handler.
  */
-function simplytest_servers_servers_form_submit($form, &$form_state) {
-  if (isset($form_state['values']['new__active']) && $form_state['values']['new__active']) {
-    db_insert('simplytest_servers')
-      ->fields(array(
-        'data' => serialize(array(
-          'name' => $form_state['values']['new__name'],
-          'host' => $form_state['values']['new__host'],
-          'port' => $form_state['values']['new__port'],
-          'user' => $form_state['values']['new__user'],
-          'password' => $form_state['values']['new__password'],
-          'spawn' => $form_state['values']['new__spawn'],
-        )),
-        'slots' => $form_state['values']['new__slots'],
-        'active' => TRUE,
-      ))
-      ->execute();
-  }
+function simplytest_servers_config_form_submit($form, &$form_state) {
+  $servers = $form['#servers'];
 
-  foreach ($form['#servers'] as $server) {
-    db_update('simplytest_servers')
-      ->condition('id', $server['id'])
-      ->fields(array(
-        'data' => serialize(array(
-          'name' => $form_state['values'][$server['id'] . '__name'],
-          'host' => $form_state['values'][$server['id'] . '__host'],
-          'port' => $form_state['values'][$server['id'] . '__port'],
-          'user' => $form_state['values'][$server['id'] . '__user'],
-          'password' => $form_state['values'][$server['id'] . '__password'],
-          'spawn' => $form_state['values'][$server['id'] . '__spawn'],
-        )),
-        'slots' => $form_state['values'][$server['id'] . '__slots'],
-        'active' => $form_state['values'][$server['id'] . '__active'],
-      ))
-      ->execute();
-  }
+  // Collect submitted server data.
+  $server = array(
+    'id' => $form_state['values']['id'],
+    'active' => $form_state['values']['active'],
+    'name' => $form_state['values']['name'],
+    'host' => $form_state['values']['host'],
+    'port' => $form_state['values']['port'],
+    'user' => $form_state['values']['user'],
+    'password' => $form_state['values']['password'],
+    'slots' => $form_state['values']['slots'],
+    'spawn' => $form_state['values']['spawn'],
+  );
+
+  // Save the server configuration.
+  $servers[$form_state['values']['id']] = $server;
+  simplytest_servers_set($servers);
 
   drupal_set_message(t('Updated configuration successfully!'));
+  drupal_goto('admin/simplytest/servers');
+}
 
+/**
+ * Confirms and executes an operation on a server.
+ */
+function simplytest_servers_operation($form, $form_state, $id, $operation) {
+  $form['#server_id'] = $id;
+
+  switch ($operation) {
+    case 'activate':
+      $form['#submit'][] = 'simplytest_servers_operation_activate';
+      break;
+    case 'deactivate':
+      $form['#submit'][] = 'simplytest_servers_operation_deactivate';
+      break;
+    case 'delete':
+      $form['#submit'][] = 'simplytest_servers_operation_delete';
+      break;
+    default:
+      return $form;
+      break;
+  }
+
+  $form = confirm_form(
+    $form,
+    t('Do you want to @operation server %id?', array('@operation' => $operation, '%id' => $id)),
+    'admin/simplytest/servers'
+  );
+  return $form;
+}
+
+/**
+ * Confirmed operation: Activate a server.
+ */
+function simplytest_servers_operation_activate($form, $form_state) {
+  $id = $form['#server_id'];
+  // Get the server.
+  $servers = simplytest_servers_get();
+  if (isset($servers[$id])) {
+    $servers[$id]['active'] = TRUE;
+    simplytest_servers_set($servers);
+  }
+  drupal_goto('admin/simplytest/servers');
+}
+
+/**
+ * Confirmed operation: Deactivate a server.
+ */
+function simplytest_servers_operation_deactivate($form, $form_state) {
+  $id = $form['#server_id'];
+  // Get the server.
+  $servers = simplytest_servers_get();
+  if (isset($servers[$id])) {
+    $servers[$id]['active'] = FALSE;
+    simplytest_servers_set($servers);
+  }
+  drupal_goto('admin/simplytest/servers');
+}
+
+/**
+ * Confirmed operation: Delete a server.
+ */
+function simplytest_servers_operation_delete($form, $form_state) {
+  $id = $form['#server_id'];
+  // Get the server.
+  $servers = simplytest_servers_get();
+  if (isset($servers[$id])) {
+    unset($servers[$id]);
+    simplytest_servers_set($servers);
+  }
+  drupal_goto('admin/simplytest/servers');
 }
