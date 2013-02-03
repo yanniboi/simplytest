@@ -43,13 +43,16 @@ function simplytest_submissions_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_submissions_config_form'),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_submissions.admin.inc',
   );
   // Submission monitor.
   $items['admin/simplytest/submissions/monitor'] = array(
     'title' => 'Submission monitor',
     'description' => 'Submission monitor',
-    'page callback' => 'simplytest_submissions_monitor',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_submissions_monitor'),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_submissions.admin.inc',
   );
   // Confirm action on submission.
   $items['admin/simplytest/submissions/monitor/%/%'] = array(
@@ -58,6 +61,7 @@ function simplytest_submissions_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_submissions_monitor_operation', 4, 5),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_submissions.admin.inc',
     'type' => MENU_CALLBACK,
   );
   // State update callback.
@@ -68,138 +72,6 @@ function simplytest_submissions_menu() {
     'type' => MENU_CALLBACK,
   );
   return $items;
-}
-
-/**
- * Configuration form.
- */
-function simplytest_submissions_config_form($form = array()) {
-
-  $form['simplytest_submissions_timeout'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default submission usage time (minutes)'),
-    '#default_value' => variable_get('simplytest_submissions_timeout', 15),
-  );
-
-  foreach (user_roles() as $rid => $role) {
-    $form['simplytest_submissions_timeout_' . $rid] = array(
-      '#type' => 'textfield',
-      '#title' => t('Submission usage time: %role', array('%role' => $role)),
-      '#default_value' => variable_get('simplytest_submissions_timeout_' . $rid,
-        variable_get('simplytest_submissions_timeout', 15)),
-    );
-  }
-
-  return system_settings_form($form);
-}
-
-/**
- * Submission monitor.
- */
-function simplytest_submissions_monitor_table() {
-  $submissions = db_select('simplytest_submissions', 'p')
-    ->fields('p', array('id', 'state', 'ip', 'timestamp', 'data'))
-    ->extend('PagerDefault')
-    ->limit(50)
-    ->orderBy('number', 'DESC')
-    ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $rows = array();
-  foreach ($submissions as &$submission) {
-    // Collect all data.
-    $submission = array_merge($submission, unserialize($submission['data']));
-    unset($submission['data']);
-    // Create rows contents.
-    $project_url = ($submission['sandbox']
-      ? 'http://drupal.org/sandbox/' . $submission['creator'] . '/' . $submission['project']
-      : 'http://drupal.org/project/' . $submission['project']
-    );
-    $state_text = simplytest_submissions_state_to_string($submission['state']);
-    $rows[] = array(
-      // Cells.
-      'data' => array(
-        l($submission['id'], 'goto/' . $submission['id']),
-        $state_text,
-        check_plain($submission['ip']),
-        format_date($submission['timestamp']),
-        l(format_string('!title (!version)', array(
-          '!title' => $submission['title'],
-          '!version' => $submission['version'],
-          )), $project_url),
-        check_plain($submission['type']),
-        ($submission['state'] != SIMPLYTEST_SUBMISSIONS_TERMINATED)
-          ? l(t('Terminate'), 'admin/simplytest/monitor/' . $submission['id'] . '/terminate')
-          : '',
-        ),
-      // Attributes for tr.
-      'class' => array(drupal_html_class('simplytest-submissions-' . $state_text)),
-    );
-  }
-
-  $build = array();
-  $build['table'] = array(
-    '#theme' => 'table',
-    '#header' => array(
-      'id' => t('Id'),
-      'state' => t('State'),
-      'ip' => t('IP'),
-      'timestamp' => t('Date/Time'),
-      'title' => t('Project title'),
-      'type' => t('Category'),
-      'operations' => t('Operations'),
-    ),
-    '#rows' => $rows,
-    '#empty' => t('No recent submissions.'),
-    '#attached' => array(
-      'css' => array(
-        drupal_get_path('module', 'simplytest_submissions') . '/simplytest_submissions.css',
-      ),
-    ),
-  );
-  $build['pager'] = array('#theme' => 'pager');
-  return $build;
-}
-
-/**
- * Submission monitor page.
- */
-function simplytest_submissions_monitor() {
-  $page = array();
-  // Build table.
-  $page[] = simplytest_submissions_monitor_table();
-  return $page;
-}
-
-/**
- * Confirms and executes an operation on a submission.
- */
-function simplytest_submissions_monitor_operation($form, $form_state, $id, $operation) {
-  $form['#submission_id'] = $id;
-
-  switch ($operation) {
-    case 'terminate':
-      $form['#submit'][] = 'simplytest_submissions_monitor_operation_terminate';
-      break;
-    default:
-      return $form;
-      break;
-  }
-
-  $form = confirm_form(
-    $form,
-    t('Do you want to @operation %id?', array('@operation' => $operation, '%id' => $id)),
-    'admin/simplytest/submissions/monitor'
-  );
-  return $form;
-}
-
-/**
- * Terminates the given submission.
- */
-function simplytest_submissions_monitor_operation_terminate($form, $form_state) {
-  // Set as terminated in database.
-  simplytest_submissions_set_state($form['#submission_id'], SIMPLYTEST_SUBMISSIONS_TERMINATED);
-  // @todo connect to server and terminate.
-  drupal_goto('admin/simplytest/submissions/monitor');
 }
 
 /**
@@ -415,7 +287,16 @@ function simplytest_submissions_generate_id() {
  *  The submissions state to set.
  */
 function simplytest_submissions_state_to_string($state) {
-  $states = array(
+  $states = simplytest_submissions_states();
+  return isset($states[$state]) ? $states[$state] : t('Unknown');
+}
+
+/**
+ * Returns an array of all submission states, keyed by state number
+ * containing the human readable string.
+ */
+function simplytest_submissions_states() {
+  return array(
     // Running submission states.
     SIMPLYTEST_SUBMISSIONS_ENQUEUE          => t('Enqueued'),
     SIMPLYTEST_SUBMISSIONS_SPAWNED          => t('Spawned'),
@@ -434,7 +315,6 @@ function simplytest_submissions_state_to_string($state) {
     SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD   => t('Error download'),
     SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING => t('Error installing'),
   );
-  return isset($states[$state]) ? $states[$state] : t('Unknown');
 }
 
 /**
