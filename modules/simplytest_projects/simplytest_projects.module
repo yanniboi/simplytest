@@ -6,96 +6,76 @@
  */
 
 /**
+ * Drupal.org full project GIT URL.
+ */
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT', 'git://git.drupal.org/project/');
+
+/**
+ * Drupal.org sandbox project GIT URL.
+ */
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX', 'git://git.drupal.org/sandbox/');
+
+/**
+ * Drupal.org webgit URL.
+ */
+define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://drupalcode.org/');
+
+/**
+ * Drupal.org URL
+ */
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG', 'http://drupal.org/');
+
+/**
  * Implements hook_menu().
  */
 function simplytest_projects_menu() {
   $items = array();
   // General configuration form.
+  $items['admin/simplytest/project'] = array(
+    'title' => 'Projects settings',
+    'description' => 'Settings of the project listings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_projects_settings_form'),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_projects.admin.inc',
+  );
+  // Project list management.
   $items['admin/simplytest/projects'] = array(
     'title' => 'Projects',
-    'description' => 'Project settings',
+    'description' => 'Manage project list.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('simplytest_projects_form'),
+    'page arguments' => array('simplytest_projects_management_form'),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_projects.admin.inc',
+  );
+  // Version cache listing of a project.
+  $items['admin/simplytest/projects/%/versions'] = array(
+    'title' => 'Project versions',
+    'description' => 'Cached project version listing.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_projects_version_list_form', 3),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_projects.admin.inc',
+  );
+  // Edit a project entry.
+  $items['admin/simplytest/projects/%/edit'] = array(
+    'title' => 'Edit project information',
+    'description' => 'Edit project information.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_projects_edit_form', 3),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_projects.admin.inc',
+  );
+  // Operation on a project entry.
+  $items['admin/simplytest/projects/%/%'] = array(
+    'title' => 'Edit project information',
+    'description' => 'Edit project information.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_projects_operation', 3, 4),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_projects.admin.inc',
   );
   return $items;
-}
-
-/**
- * Configuration form.
- */
-function simplytest_projects_form($form = array()) {
-
-  $form['simplytest_projects_version_timeout'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum age of version data'),
-    '#default_value' => variable_get('simplytest_projects_version_timeout', '-1 hour'),
-    '#description' => t('Example: %example', array('%example' => '-1 hour')),
-  );
-
-  $form['simplytest_projects_blacklisted_projects'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Blacklisted project'),
-    '#description' => t('A list of project shortnames to disable.'),
-    '#default_value' => implode(PHP_EOL, variable_get('simplytest_projects_blacklisted_projects', array())),
-  );
-
-  $form['simplytest_projects_blacklisted_versions'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Blacklisted versions'),
-    '#description' => t('A list of regular expressions for versions to disable.'),
-    '#default_value' => implode(PHP_EOL, variable_get('simplytest_projects_blacklisted_versions', array())),
-  );
-
-  $form = system_settings_form($form);
-
-  // We need to call our own submit callback first, not the one from
-  // system_settings_form(), so that we can process and save the blacklists.
-  unset($form['#submit']);
-  
-  $form['actions']['clear_version_cache'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save and flush version cache'),
-  );
-
-  return $form;
-}
-
-/**
- * Configuration form submit handler.
- */
-function simplytest_projects_form_submit($form, $form_state) {
-  // Save blacklists.
-  $blacklist_projects = explode(PHP_EOL, trim($form_state['values']['simplytest_projects_blacklisted_projects']));
-  $blacklist_versions = explode(PHP_EOL, trim($form_state['values']['simplytest_projects_blacklisted_versions']));
-  foreach ($blacklist_projects as $key => &$project) {
-    $project = trim($project);
-    if (empty($project)) {
-      unset($blacklist_projects[$key]);
-    }
-  }
-  foreach ($blacklist_versions as $key => &$version) {
-    $version = trim($version);
-    if (empty($version)) {
-      unset($blacklist_versions[$key]);
-    }
-  }
-  variable_set('simplytest_projects_blacklisted_projects', $blacklist_projects);
-  variable_set('simplytest_projects_blacklisted_versions', $blacklist_versions);
-  unset($form_state['values']['simplytest_projects_blacklisted_projects']);
-  unset($form_state['values']['simplytest_projects_blacklisted_versions']);
-
-  // Flush (obsolete) the version cache if desired.
-  if ($form_state['values']['op'] == t('Save and flush version cache')) {
-    db_update('simplytest_projects')
-      ->fields(array(
-        'timestamp' => 0,
-      ))
-      ->execute();
-  }
-
-  // Save the rest like using system_settings_form() normaly.
-  system_settings_form_submit($form, $form_state);
 }
 
 /**
@@ -130,10 +110,10 @@ function simplytest_projects_get_project($project) {
 
   // Generate the git url to clone the project from.
   if ($data->sandbox) {
-    $giturl = 'git://git.drupal.org/sandbox/' . $data->creator . '/' . $project . '.git';
+    $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX . $data->creator . '/' . $project . '.git';
   }
   else {
-    $giturl = 'git://git.drupal.org/project/' . $project . '.git';
+    $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT . $project . '.git';
   }
 
   return array(
@@ -237,10 +217,10 @@ function simplytest_projects_fetch_versions($project) {
   $project_data = simplytest_projects_get_project($project);
 
   if ($project_data['sandbox']) {
-    $drupalcode_url = 'http://drupalcode.org/sandbox/' . $project_data['creator'] . '/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $project_data['creator'] . '/' . $project . '.git';
   }
   else {
-    $drupalcode_url = 'http://drupalcode.org/project/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
   }
 
   // Fetch tags by request.
@@ -328,11 +308,11 @@ function simplytest_projects_fetch_versions($project) {
  */
 function simplytest_projects_fetch_project($project) {
   // Try as full project.
-  $result = drupal_http_request('http://drupal.org/project/' . $project);
+  $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'project/' . $project);
   $sandbox = FALSE;
   if ($result->code == 404 && is_numeric($project)) {
     // Fallback to sandbox project
-    $result = drupal_http_request('http://drupal.org/node/' . $project);
+    $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'node/' . $project);
     $sandbox = TRUE;
   }
   if ($result->code != 200 || !isset($result->data)) {
@@ -386,27 +366,17 @@ function simplytest_projects_fetch_project($project) {
     $creator = $creator[1][0];
   }
 
-  // Find out type.
-  switch ($type) {
-    case 'Drupal core':
-      $type = 'Drupal core';
-      break;
-    case 'Modules':
-      $type = 'Module';
-      break;
-    case 'Themes':
-      $type = 'Theme';
-      break;
-    case 'Distributions':
-      $type = 'Distribution';
-      break;
-    default:
-      watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Determine type).', array(
-        '%project' => $project,
-      ), WATCHDOG_WARNING);
-      return FALSE;
+  // Find out the type.
+  $type = simplytest_projects_get_project_type($term);
+  if ($type === FALSE) {
+    // Unknown type, error.
+    watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Determine type).', array(
+      '%project' => $project,
+    ), WATCHDOG_WARNING);
+    return FALSE;
   }
 
+  // Build, log and save the new project data.
   $data = array(
     'title' => $title,
     'shortname' => $project,
@@ -435,33 +405,46 @@ function simplytest_projects_xml_insert_project($xml) {
     return FALSE;
   }
   $type_term = (string) $xml->terms->term[0]->value;
+  $type = simplytest_projects_get_project_type($term);
+
+  if ($type === FALSE) {
+    return FALSE;
+  }
+
+  $data = array(
+    'title' => (string) $xml->title,
+    'shortname' => (string) $xml->short_name,
+    // Sandbox project?
+    'sandbox' => (int) (is_numeric((string) $xml->short_name) && substr($xml->link, 0, 26) === SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'sandbox/'),
+    // Get project type, as it is referenced as tag.
+    'type' => $type,
+    // Git creator name (for sandbox projects).
+    'creator' => (string) substr(substr($xml->link, 26), 0, -(strlen($xml->short_name) + 1)),
+  );
+
+  db_insert('simplytest_projects')
+    ->fields($data)
+    ->execute();
+}
+
+/**
+ * Finds out the readable project type by term.
+ */
+function simplytest_projects_get_project_type($term) {
   switch ($type_term) {
     case 'Drupal core':
-      $type = 'Drupal core';
-      break;
+      return 'Drupal core';
+
     case 'Modules':
-      $type = 'Module';
-      break;
+      return 'Module';
+
     case 'Themes':
-      $type = 'Theme';
-      break;
+      return 'Theme';
+
     case 'Distributions':
-      $type = 'Distribution';
-      break;
+      return 'Distribution';
+
     default:
       return FALSE;
   }
-
-  db_insert('simplytest_projects')
-    ->fields(array(
-      'title' => (string) $xml->title,
-      'shortname' => (string) $xml->short_name,
-      // Sandbox project?
-      'sandbox' => (int) (is_numeric((string) $xml->short_name) && substr($xml->link, 0, 26) === 'http://drupal.org/sandbox/'),
-      // Get project type, as it is referenced as tag.
-      'type' => $type,
-      // Git creator name (for sandbox projects).
-      'creator' => (string) substr(substr($xml->link, 26), 0, -(strlen($xml->short_name) + 1)),
-    ))
-    ->execute();
 }

@@ -6,7 +6,7 @@ S_SQLPWD=""
 S_HOME="http://simplytest.me/"
 
 # State callback URL.
-S_CALLBACK="http://simplytest.me/simplytest/state"
+S_CALLBACK="http://simplytest.me/simplytest/submissions/state"
 
 # Default login
 S_DUSR="admin"
