@@ -27,13 +27,14 @@
   background: #b7dfb2;
 }
 
-.simplytest-submissions-error-aborted.even {
+.simplytest-submissions-failed.even {
   background: #f3e1e1;
 }
-.simplytest-submissions-error-aborted.odd {
+.simplytest-submissions-failed.odd {
   background: #f7e7e7;
 }
 
+.simplytest-submissions-spawned.even,
 .simplytest-submissions-error-download.even,
 .simplytest-submissions-error-installing.even,
 .simplytest-submissions-error-prepare.even,
@@ -41,6 +42,7 @@
   background: #eeb9b9;
 }
 
+.simplytest-submissions-spawned.even,
 .simplytest-submissions-error-download.odd,
 .simplytest-submissions-error-installing.odd,
 .simplytest-submissions-error-prepare.odd,

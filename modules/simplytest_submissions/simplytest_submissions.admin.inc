@@ -36,19 +36,19 @@ function simplytest_submissions_config_form($form = array()) {
 function simplytest_submissions_monitor_table($form, $form_state = array()) {
   // Get list of submissions from database.
   $query = db_select('simplytest_submissions', 'p')
-    ->fields('p', array('id', 'state', 'ip', 'timestamp', 'data'))
+    ->fields('p', array('id', 'state', 'ip', 'timestamp', 'data', 'server'))
     ->extend('PagerDefault')
     ->limit(50)
     ->orderBy('number', 'DESC');
   // Apply the filter values if available.
-  if (isset($form_state['values']['id']) && !empty($form_state['values']['id'])) {
-    $query->condition('id', db_like($form_state['values']['id']), 'LIKE');
+  if (!empty($form['#filter']['id'])) {
+    $query->condition('id', db_like($form['#filter']['id']), 'LIKE');
   }
-  if (isset($form_state['values']['ip']) && !empty($form_state['values']['ip'])) {
-    $query->condition('ip', db_like($form_state['values']['ip']), 'LIKE');
+  if (!empty($form['#filter']['ip'])) {
+    $query->condition('ip', db_like($form['#filter']['ip']), 'LIKE');
   }
-  if (isset($form_state['values']['state']) && $form_state['values']['state']) {
-    $query->condition('state', $form_state['values']['state']);
+  if ($form['#filter']['state']) {
+    $query->condition('state', $form['#filter']['state']);
   }
   $submissions = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -69,6 +69,7 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
       'data' => array(
         l($submission['id'], 'goto/' . $submission['id']),
         $state_text,
+        '<em>' . $submission['server'] . '</em>',
         check_plain($submission['ip']),
         format_date($submission['timestamp']),
         l(format_string('!title (!version)', array(
@@ -86,17 +87,12 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
   }
 
   $build = array();
-  $build['wrapper'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'id' => 'submission-monitor-table-wrapper',
-    ),
-  );
-  $build['wrapper']['table'] = array(
+  $build['table'] = array(
     '#theme' => 'table',
     '#header' => array(
       'id' => t('Id'),
       'state' => t('State'),
+      'server' => t('Server'),
       'ip' => t('IP'),
       'timestamp' => t('Date/Time'),
       'title' => t('Project title'),
@@ -111,7 +107,7 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
       ),
     ),
   );
-  $build['wrapper']['pager'] = array('#theme' => 'pager');
+  $build['pager'] = array('#theme' => 'pager');
   return $build;
 }
 
@@ -119,6 +115,13 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
  * Submission monitor form page.
  */
 function simplytest_submissions_monitor($form = array(), $form_state) {
+
+  // Get current filter settings.
+  $form['#filter'] = variable_get('simplytest_submissions_monitor_filter', array(
+    'id' => '',
+    'ip' => '',
+    'state' => NULL,
+  ));
 
   // Filter form.
   $form['filters'] = array(
@@ -130,33 +133,41 @@ function simplytest_submissions_monitor($form = array(), $form_state) {
   $form['filters']['id'] = array(
     '#type' => 'textfield',
     '#description' => t('Submission ID'),
-    '#default_value' => '',
+    '#default_value' => $form['#filter']['id'],
     '#size' => 20,
   );
   $form['filters']['ip'] = array(
     '#type' => 'textfield',
     '#description' => t('IP address'),
-    '#default_value' => '',
+    '#default_value' => $form['#filter']['ip'],
     '#size' => 20,
   );
   $form['filters']['state'] = array(
     '#type' => 'select',
     '#description' => t('Submission state'),
-    '#default_value' => NULL,
+    '#default_value' => $form['#filter']['state'],
     '#options' => array(0 => t('- Any -')) + simplytest_submissions_states(),
   );
   $form['filters']['filter_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Filter'),
-    '#ajax' => array(
-      'callback' => 'simplytest_submissions_monitor_table',
-      'wrapper' => 'submission-monitor-table-wrapper',
-    ),
   );
 
   // Build table.
   $form += simplytest_submissions_monitor_table($form, $form_state);
   return $form;
+}
+
+/**
+ * Submission monitor form page; Submit callback.
+ */
+function simplytest_submissions_monitor_submit($form, $form_state) {
+  // Save filter settings.
+  variable_set('simplytest_submissions_monitor_filter', array(
+    'id' => $form_state['values']['id'],
+    'ip' => $form_state['values']['ip'],
+    'state' => $form_state['values']['state'],
+  ));
 }
 
 /**
