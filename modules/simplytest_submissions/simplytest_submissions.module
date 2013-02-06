@@ -185,10 +185,17 @@ function simplytest_submissions_send($id) {
   // Send submission and spawn worker.
   $server = simplytest_servers_spawn(unserialize($data));
   if ($server === FALSE) {
+    // Something went very wrong, sending submission failed.
     return FALSE;
   }
   else {
+    // Submission has been spawned, set submission state properly.
     simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED);
+    // Also save the servers id for the current submission.
+    db_update('simplytest_submissions')
+      ->fields(array('server' => $server['id']))
+      ->condition('id', $id)
+      ->execute();
     return TRUE;
   }
 }
