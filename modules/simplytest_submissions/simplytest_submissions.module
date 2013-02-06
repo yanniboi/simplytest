@@ -207,7 +207,7 @@ function simplytest_submissions_goto($id) {
     ->condition('id', $id)
     ->execute()->fetchField();
   // Get the servers hostname.
-  $host = simplytest_servers_get_hostname($id);
+  $host = simplytest_servers_get_hostname($server);
   // Build the servers URL.
   $url = 'http://' . $id . '.' . $host;
   // Redirect.
