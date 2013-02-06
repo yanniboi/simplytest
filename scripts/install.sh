@@ -142,6 +142,7 @@ $SPAWNER_USER ALL=(ALL) NOPASSWD: SIMPLYTESTSPAWN_CMDS" > /etc/sudoers.d/spawner
 chmod 0440 /etc/sudoers.d/spawner
 
 echo ">>>> Setting configuration"
+cat ~/simplytest/scripts/default-config >> ~/simplytest/scripts/config
 echo "" >> ~/simplytest/scripts/config
 echo "S_SQLPWD=\"$MYSQL_PASSWORD\"" >> ~/simplytest/scripts/config
 echo "S_HOME=\"$HOME_SERVER_URL\"" >> ~/simplytest/scripts/config

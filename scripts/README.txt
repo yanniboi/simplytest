@@ -3,7 +3,7 @@
 - build.sh        Sets up a complete simplytest environment.
 - spawn.sh        Spawns the build.sh script in the background.
 - destroy.sh      Destroys an environment (triggered by at jobs).
-- config          Scripts general configuration file.
+- default-config  Scripts general configuration file.
 - snippet.php     PHP info-snippet that is appended to all php requests.
 - log/            Directory for all logfiles of build and destroy scripts.
 
@@ -41,7 +41,8 @@ Other:
 
 ## CONFIGURATION
 
-See ./config file.
+Copy ./default-config to ./config file.
+And see descriptions in the file itself.
 
 ## INSTALLATION
 
