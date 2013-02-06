@@ -47,10 +47,10 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
     ->orderBy('number', 'DESC');
   // Apply the filter values if available.
   if (!empty($form['#filter']['id'])) {
-    $query->condition('id', db_like($form['#filter']['id']), 'LIKE');
+    $query->condition('id', db_like($form['#filter']['id']) . '%', 'LIKE');
   }
   if (!empty($form['#filter']['ip'])) {
-    $query->condition('ip', db_like($form['#filter']['ip']), 'LIKE');
+    $query->condition('ip', db_like($form['#filter']['ip']) . '%', 'LIKE');
   }
   if ($form['#filter']['state']) {
     $query->condition('state', $form['#filter']['state']);
@@ -128,8 +128,6 @@ function simplytest_submissions_monitor($form = array(), $form_state) {
   $form['filters'] = array(
     '#type' => 'fieldset',
     '#title' => t('Filters'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
   );
   $form['filters']['id'] = array(
     '#type' => 'textfield',

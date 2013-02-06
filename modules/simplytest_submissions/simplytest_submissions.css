@@ -56,3 +56,15 @@
 .simplytest-submissions-terminated a {
   color: gray;
 }
+
+/* format the filter form elements inline */
+#simplytest-submissions-monitor .form-item {
+  display: inline;
+  float: left;
+  margin-right: 10px;
+}
+
+#simplytest-submissions-monitor .form-submit {
+  float: right;
+  margin-top: 10px;
+}
