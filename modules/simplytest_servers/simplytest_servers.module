@@ -123,7 +123,7 @@ function simplytest_servers_spawn($submission) {
       if (isset($submission[$arg])) {
         $sub[] = escapeshellarg($submission[$arg]);
       }
-      if (isset($server[$arg])) {
+      elseif (isset($server[$arg])) {
         $sub[] = escapeshellarg($server[$arg]);
       }
     }
