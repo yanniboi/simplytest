@@ -2,10 +2,15 @@
 
 - build.sh        Sets up a complete simplytest environment.
 - spawn.sh        Spawns the build.sh script in the background.
+- install.sh      Sets up a complete environment for simplytest.me.
 - destroy.sh      Destroys an environment (triggered by at jobs).
 - default-config  Scripts general configuration file.
 - snippet.php     PHP info-snippet that is appended to all php requests.
+- drushrc.php     Example drush config file, optimized for simplytest.me.
+- upstart...conf  Example mysql configuration file.
 - log/            Directory for all logfiles of build and destroy scripts.
+- sources/        Contains some includables for shell scripts.
+
 
 ## WARNING
 
@@ -14,6 +19,34 @@ code, make mysql queries and access the filesystem - though everything is as
 restricted as possible - it can not be guaranteed that this server is secure
 from any attacks. Make sure your server can be easily rolled back in trouble.
 DO NOT USE THESE SCRIPTS ON A SERVER WHERE ANYTHING ELSE THAN THIS RUNS ON!
+
+
+## INSTALLATION
+
+- AUTOMATED
+
+  The install.sh script will set up a complete testing environment.
+  Upload !just! the install.sh to the server and execute it as root.
+  Follow the warnings and configuration messages of the script.
+
+- MANUAL
+
+  After all dependencies are resolved no further installation is necessary.
+  Just upload the scripts somewhere on the worker server.
+
+  The simplytest.me-site will connect by ssh2 to the server and needs to
+  execute the spawn.sh script as root user.
+  To do this without actually loggin in as root, create a new user
+  and add these lines to your sudoers file by $ visudo:
+    Cmnd_Alias SIMPLYTESTSPAWN_CMDS = [#1]
+    [#2] ALL=(ALL) NOPASSWD: SIMPLYTESTSPAWN_CMDS
+  Replace:
+    [#1]  Path to the spawn script.
+    [#2]  Name of the new user (other than root).
+
+  Copy ./default-config to ./config file.
+  And see descriptions in the file itself.
+
 
 ## DEPENDENCIES
 
@@ -39,25 +72,6 @@ Other:
   timeout
   dos2unix
 
-## CONFIGURATION
-
-Copy ./default-config to ./config file.
-And see descriptions in the file itself.
-
-## INSTALLATION
-
-After all dependencies are resolved no further installation is necessary.
-Just upload the scripts somewhere on the worker server.
-
-The simplytest.me-site will connect by ssh2 to the server and needs to
-execute the spawn.sh script as root user.
-To do this without actually loggin in as root, create a new user
-and add these lines to your sudoers file by $ visudo:
-  Cmnd_Alias SIMPLYTESTSPAWN_CMDS = [#1]
-  [#2] ALL=(ALL) NOPASSWD: SIMPLYTESTSPAWN_CMDS
-Replace:
-  [#1]  Path to the spawn script.
-  [#2]  Name of the new user (other than root).
 
 ## USAGE
 
@@ -85,6 +99,7 @@ A build environment will automatically be destroyed after [timeout] minutes
 (using ´at´ jobs) but this can also be done manually by executing
 $ ./destroy.sh [id]
 as root user with the same id as entered for ./build.sh.
+
 
 ## OPTIMISATION
 
