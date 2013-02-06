@@ -54,16 +54,6 @@ function simplytest_submissions_menu() {
     'access arguments' => array('administer simplytest'),
     'file' => 'simplytest_submissions.admin.inc',
   );
-  // Confirm action on submission.
-  $items['admin/simplytest/submissions/monitor/%/%'] = array(
-    'title' => 'Confirm operation',
-    'description' => 'Confirm operation',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('simplytest_submissions_monitor_operation', 4, 5),
-    'access arguments' => array('administer simplytest'),
-    'file' => 'simplytest_submissions.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
   // State update callback.
   $items['simplytest/submissions/state/%/%'] = array(
     'page callback' => 'simplytest_submissions_set_state',

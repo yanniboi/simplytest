@@ -12,21 +12,28 @@
  */
 function simplytest_projects_settings_form($form = array()) {
 
-  $form['simplytest_projects_version_timeout'] = array(
+  $form['settings_version'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Project versioning settings'),
+  );
+  $form['settings_version']['simplytest_projects_version_timeout'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum age of version data'),
     '#default_value' => variable_get('simplytest_projects_version_timeout', '-1 hour'),
     '#description' => t('Example: %example', array('%example' => '-1 hour')),
   );
 
-  $form['simplytest_projects_blacklisted_projects'] = array(
+  $form['settings_blacklists'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Blacklisting'),
+  );
+  $form['settings_blacklists']['simplytest_projects_blacklisted_projects'] = array(
     '#type' => 'textarea',
     '#title' => t('Blacklisted project'),
     '#description' => t('A list of project shortnames to disable.'),
     '#default_value' => implode(PHP_EOL, variable_get('simplytest_projects_blacklisted_projects', array())),
   );
-
-  $form['simplytest_projects_blacklisted_versions'] = array(
+  $form['settings_blacklists']['simplytest_projects_blacklisted_versions'] = array(
     '#type' => 'textarea',
     '#title' => t('Blacklisted versions'),
     '#description' => t('A list of regular expressions for versions to disable.'),
@@ -94,7 +101,8 @@ function simplytest_projects_management_form($form = array(), $form_state) {
 
   // Filter form.
   $form['filters'] = array(
-    '#type' => 'container',
+    '#type' => 'fieldset',
+    '#title' => t('Filter for title and shortname'),
     '#attributes' => array(
       'class' => array('container-inline'),
     ),

@@ -68,19 +68,24 @@ function simplytest_launch_menu() {
  */
 function simplytest_launch_flood_form($form = array()) { 
 
-  $form['simplytest_launch_flood_window'] = array(
+  $form['flood_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Flood protection settings'),
+  );
+  $form['flood_settings']['simplytest_launch_flood_window'] = array(
     '#type' => 'textfield',
     '#title' => t('Flood window in seconds'),
     '#default_value' => variable_get('simplytest_launch_flood_window', 900),
     '#element_validate' => array('element_validate_integer_positive'),
   );
-  $form['simplytest_launch_flood_threshold'] = array(
+  $form['flood_settings']['simplytest_launch_flood_threshold'] = array(
     '#type' => 'textfield',
     '#title' => t('Flood threshold'),
     '#default_value' => variable_get('simplytest_launch_flood_threshold', 5),
     '#element_validate' => array('element_validate_integer_positive'),
   );
 
+  // Get current flood entries.
   $select = db_select('flood', 'f');
   $select->addField('f', 'identifier');
   $select->addField('f', 'timestamp');
@@ -89,7 +94,7 @@ function simplytest_launch_flood_form($form = array()) {
   $select->orderBy('count', 'DESC');
   $select->condition('f.event', 'simplytest_launch_submit');
   $select->range(0, 50);
-
+  // Build rows.
   $rows = array();
   foreach ($select->execute()->fetchAll() as $entry) {
     $rows[] = array(
@@ -100,12 +105,11 @@ function simplytest_launch_flood_form($form = array()) {
       l(t('Reset'), 'admin/simplytest/flood/' . $entry->identifier . '/reset'),
     );
   }
-
-  $form['floot_table_title'] = array(
-    '#type' => 'item',
+  $form['flood_table'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Current flood logs'),
   );
-  $form['flood_table'] = array(
+  $form['flood_table']['table'] = array(
     '#theme' => 'table',
     '#header' => array(
       t('Identifier'),

@@ -32,10 +32,18 @@ function simplytest_import_form($form) {
     'count' => 100,
   ));
 
-  // Available import methods.
-  $form['method'] = array(
-    '#type' => 'radios',
+  $form['import_method'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Import method'),
+  );
+  $form['import_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Import settings'),
+  );
+
+  // Available import methods.
+  $form['import_method']['method'] = array(
+    '#type' => 'radios',
     '#options' => array(
       'path' => t('Path to XML file'),
       'upload' => t('Upload and import'),
@@ -46,7 +54,7 @@ function simplytest_import_form($form) {
   );
 
   // Import locally with path to XML file.
-  $form['path'] = array(
+  $form['import_settings']['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to the file to import project data from'),
     '#default_value' => $defaults['path'],
@@ -58,7 +66,7 @@ function simplytest_import_form($form) {
   );
 
   // Upload and import.
-  $form['upload'] = array(
+  $form['import_settings']['upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload'),
     '#states' => array(
@@ -68,7 +76,7 @@ function simplytest_import_form($form) {
     ),
   );
 
-  $form['count'] = array(
+  $form['import_settings']['count'] = array(
     '#type' => 'textfield',
     '#title' => t('Count of projects to import per operation'),
     '#default_value' => $defaults['count'],

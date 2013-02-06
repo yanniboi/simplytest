@@ -12,14 +12,19 @@
  */
 function simplytest_submissions_config_form($form = array()) {
 
-  $form['simplytest_submissions_timeout'] = array(
+  $form['submissions_timeout'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Submission timout'),
+  );
+  // Default submission timeout.
+  $form['submissions_timeout']['simplytest_submissions_timeout'] = array(
     '#type' => 'textfield',
     '#title' => t('Default submission usage time (minutes)'),
     '#default_value' => variable_get('simplytest_submissions_timeout', 15),
   );
-
+  // Submission timeouts per role.
   foreach (user_roles() as $rid => $role) {
-    $form['simplytest_submissions_timeout_' . $rid] = array(
+    $form['submissions_timeout']['simplytest_submissions_timeout_' . $rid] = array(
       '#type' => 'textfield',
       '#title' => t('Submission usage time: %role', array('%role' => $role)),
       '#default_value' => variable_get('simplytest_submissions_timeout_' . $rid,
@@ -77,9 +82,6 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
           '!version' => $submission['version'],
           )), $project_url),
         check_plain($submission['type']),
-        ($submission['state'] != SIMPLYTEST_SUBMISSIONS_TERMINATED)
-          ? l(t('Terminate'), 'admin/simplytest/submissions/monitor/' . $submission['id'] . '/terminate')
-          : '',
         ),
       // Attributes for tr.
       'class' => array(drupal_html_class('simplytest-submissions-' . $state_text)),
@@ -97,7 +99,6 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
       'timestamp' => t('Date/Time'),
       'title' => t('Project title'),
       'type' => t('Category'),
-      'operations' => t('Operations'),
     ),
     '#rows' => $rows,
     '#empty' => t('No recent submissions.'),
@@ -159,7 +160,7 @@ function simplytest_submissions_monitor($form = array(), $form_state) {
 }
 
 /**
- * Submission monitor form page; Submit callback.
+ * Submission monitor form page; Submit callback for filter options.
  */
 function simplytest_submissions_monitor_submit($form, $form_state) {
   // Save filter settings.
@@ -168,37 +169,4 @@ function simplytest_submissions_monitor_submit($form, $form_state) {
     'ip' => $form_state['values']['ip'],
     'state' => $form_state['values']['state'],
   ));
-}
-
-/**
- * Confirms and executes an operation on a submission.
- */
-function simplytest_submissions_monitor_operation($form, $form_state, $id, $operation) {
-  $form['#submission_id'] = $id;
-
-  switch ($operation) {
-    case 'terminate':
-      $form['#submit'][] = 'simplytest_submissions_monitor_operation_terminate';
-      break;
-    default:
-      return $form;
-      break;
-  }
-
-  $form = confirm_form(
-    $form,
-    t('Do you want to @operation %id?', array('@operation' => $operation, '%id' => $id)),
-    'admin/simplytest/submissions/monitor'
-  );
-  return $form;
-}
-
-/**
- * Terminates the given submission.
- */
-function simplytest_submissions_monitor_operation_terminate($form, $form_state) {
-  // Set as terminated in database.
-  simplytest_submissions_set_state($form['#submission_id'], SIMPLYTEST_SUBMISSIONS_TERMINATED);
-  // @todo connect to server and terminate.
-  drupal_goto('admin/simplytest/submissions/monitor');
 }
