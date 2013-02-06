@@ -120,11 +120,11 @@ function simplytest_servers_spawn($submission) {
     $args = explode(',', 'id,host,giturl,type,version,timeout,project');
     $sub = array();
     foreach ($args as $arg) {
-      if (isset($server[$arg])) {
-        $sub[] = escapeshellarg($server[$arg]);
-      }
       if (isset($submission[$arg])) {
         $sub[] = escapeshellarg($submission[$arg]);
+      }
+      if (isset($server[$arg])) {
+        $sub[] = escapeshellarg($server[$arg]);
       }
     }
 
