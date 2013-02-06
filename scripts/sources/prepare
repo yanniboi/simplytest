@@ -72,10 +72,10 @@ s_prepare() {
     ignore_user_abort = Off
     zend.enable_gc = On
     expose_php = Off
-    max_execution_time = 15
-    max_input_time = 30
+    max_execution_time = 30
+    max_input_time = 60
     max_input_nesting_level = 32
-    memory_limit = 200M
+    memory_limit = 256M
     error_reporting = E_ALL & ~E_DEPRECATED
     display_errors = On
     display_startup_errors = Off
@@ -101,7 +101,7 @@ s_prepare() {
     user_dir = /home/$S_ID/www
     enable_dl = Off
     file_uploads = On
-    upload_max_filesize = 2M
+    upload_max_filesize = 5M
     max_file_uploads = 5
     allow_url_fopen = On
     allow_url_include = Off
