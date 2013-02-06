@@ -188,8 +188,7 @@ function simplytest_submissions_send($id) {
     return FALSE;
   }
   else {
-    simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED,
-      'http://' . $id . '.' . $server->data['host'] . '/');
+    simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED);
     return TRUE;
   }
 }
@@ -243,17 +242,10 @@ function simplytest_submissions_callback_access() {
  * @param string $url
  *  Optional redirection url.
  */
-function simplytest_submissions_set_state($id, $state, $url = NULL) {
-  $fields = array(
-    'state' => $state,
-  );
-  if (isset($url)) {
-    $fields['url'] = $url;
-  }
-
+function simplytest_submissions_set_state($id, $state) {
   // Update the submission state.
   db_update('simplytest_submissions')
-    ->fields($fields)
+    ->fields(array('state' => $state))
     ->condition('id', $id)
     ->execute();
 
