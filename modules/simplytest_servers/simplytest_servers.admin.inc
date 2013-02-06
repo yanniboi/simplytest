@@ -22,8 +22,8 @@ function simplytest_servers_overview_form($form = array()) {
       $server['id'],
       $server['name'],
       $server['host'],
-      $server['slots'],
-      ($server['active']) ? t('Active') : t('Inactive'),
+      $server['fullslots'] . ' / ' . $server['slots'],
+      '<strong>' . (($server['active']) ? t('Active') : t('Inactive')) . '</strong>',
       ($server['active'])
         ? l(t('Deactivate'), 'admin/simplytest/servers/' . $server['id'] . '/deactivate')
         : l(t('Activate'), 'admin/simplytest/servers/' . $server['id'] . '/activate'),
@@ -40,7 +40,7 @@ function simplytest_servers_overview_form($form = array()) {
       'name' => t('Name'),
       'host' => t('Host'),
       'slots' => t('Slots'),
-      'active' => t('Active'),
+      'active' => t('Status'),
       'operations' => array('data' => t('Operations'), 'colspan' => 3),
     ),
     '#rows' => $rows,

@@ -54,7 +54,18 @@ function simplytest_servers_menu() {
  * Returns an assocciative array of server information.
  */
 function simplytest_servers_get() {
-  return variable_get('simplytest_servers', array());
+  // Get all configured servers.
+  $servers = variable_get('simplytest_servers', array());
+  // Get an ordered list of server id's and their full slots.
+  $server_slots = simplytest_submission_get_full_server_slots();
+  // Put the current slot states in.
+  foreach ($servers as &$server) {
+    // Count of filled slots.
+    $server['fullslots'] = isset($server_slots[$server['id']]) ? $server_slots[$server['id']] : 0;
+    // Count of free slots.
+    $server['freeslots'] = (($server['slots'] > $server['fullslots']) ? $server['slots'] - $server['fullslots'] : 0);
+  }
+  return $servers;
 }
 
 /**
@@ -62,6 +73,20 @@ function simplytest_servers_get() {
  */
 function simplytest_servers_set($servers) {
   return variable_set('simplytest_servers', $servers);
+}
+
+/**
+ * Returns the hostname for a specific server id.
+ *
+ * @param string $id
+ *  The server id.
+ *
+ * @return string
+ *  The servers host name.
+ */
+function simplytest_servers_get_hostname($id) {
+  $servers = simplytest_servers_get();
+  return isset($servers[$id]['host']) ? $servers[$id]['host'] : FALSE;
 }
 
 /**
@@ -74,36 +99,29 @@ function simplytest_servers_set($servers) {
  *  An associative array of data of the chosen server.
  */
 function simplytest_servers_spawn($submission) {
+  $servers = simplytest_servers_get();
 
-  // Decide which server to use.
-  $servers = db_select('simplytest_servers', 's')
-    ->fields('s', array('id', 'data', 'slots'))
-    ->condition('active', (int) TRUE)
-    ->condition('slots', 0, '>')
-    ->orderBy('slots', 'DESC')
-    ->execute()->fetchAll();
+  // Order the servers according to their free slots.
+  // Don't make use of full or inactive servers.
+  uasort($servers, 'simplytest_servers_sort_by_free_slots_desc');
+  foreach ($servers as $id => $server) {
+    if ($server['freeslots'] == 0 || !$server['active']) {
+      unset($servers[$id]);
+    }
+  }
+
   if (empty($servers)) {
     watchdog('simplytest_servers', 'Failed to choose servers. No active servers with free slots available.', array(), WATCHDOG_ERROR);
     return FALSE;
   }
 
   foreach ($servers as $server) {
-    // Update slot count.
-    db_update('simplytest_servers')
-      ->condition('id', $server->id)
-      ->fields(array(
-        'slots' => $server->slots - 1,
-      ))
-      ->execute();
-  
-    $server->data = unserialize($server->data);
-
     // Format arguments and data for worker script.
     $args = explode(',', 'id,host,giturl,type,version,timeout,project');
     $sub = array();
     foreach ($args as $arg) {
-      if (isset($server->data[$arg])) {
-        $sub[] = escapeshellarg($server->data[$arg]);
+      if (isset($server[$arg])) {
+        $sub[] = escapeshellarg($server[$arg]);
       }
       if (isset($submission[$arg])) {
         $sub[] = escapeshellarg($submission[$arg]);
@@ -112,7 +130,7 @@ function simplytest_servers_spawn($submission) {
 
     $commands = array(
       // Spawnscript with arguments.
-      $server->data['spawn'] . ' ' . implode(' ', $sub),
+      $server['spawn'] . ' ' . implode(' ', $sub),
     );
 
     // Execute spawn script.
@@ -121,9 +139,9 @@ function simplytest_servers_spawn($submission) {
     }
 
     watchdog('simplytest_servers', 'Spawned job on %host by SSH2 with user %user (Server: %name): $%cmd', array(
-      '%host' => $server->data['host'],
-      '%name' => $server->data['name'],
-      '%user' => $server->data['user'],
+      '%host' => $server['host'],
+      '%name' => $server['name'],
+      '%user' => $server['user'],
       '%cmd' => implode(', ', $commands),
     ), WATCHDOG_NOTICE);
     
@@ -147,21 +165,21 @@ function simplytest_servers_spawn($submission) {
  */
 function simplytest_servers_execute($server, $commands) {
   // Try to connect to server.
-  $connection = ssh2_connect($server->data['host'], $server->data['port']);
+  $connection = ssh2_connect($server['host'], $server['port']);
   if ($connection === FALSE) {
     watchdog('simplytest_servers', 'Failed to connect to %host by SSH2 (Server: %name).', array(
-      '%host' => $server->data['host'],
-      '%name' => $server->data['name'],
+      '%host' => $server['host'],
+      '%name' => $server['name'],
     ), WATCHDOG_ERROR);
     return FALSE;
   }
 
   // Try to  authenticate.
-  if(!ssh2_auth_password($connection, $server->data['user'], $server->data['password'])) {
+  if(!ssh2_auth_password($connection, $server['user'], $server['password'])) {
     watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user (Server: %name).', array(
-      '%host' => $server->data['host'],
-      '%name' => $server->data['name'],
-      '%user' => $server->data['user'],
+      '%host' => $server['host'],
+      '%name' => $server['name'],
+      '%user' => $server['user'],
     ), WATCHDOG_ERROR);
     return FALSE;
   }
@@ -171,9 +189,9 @@ function simplytest_servers_execute($server, $commands) {
     $stream = ssh2_exec($connection, escapeshellcmd($command));
     if ($stream === FALSE) {
       watchdog('simplytest_servers', 'Failed to execute command on %host by SSH2 with user %user (Server: %name): $%cmd', array(
-        '%host' => $server->data['host'],
-        '%name' => $server->data['name'],
-        '%user' => $server->data['user'],
+        '%host' => $server['host'],
+        '%name' => $server['name'],
+        '%user' => $server['user'],
         '%cmd' => $command,
       ), WATCHDOG_ERROR);
       return FALSE;
@@ -190,23 +208,10 @@ function simplytest_servers_execute($server, $commands) {
 }
 
 /**
- * Implements hook_simplytest_submissions_update().
+ * Sorting callback.
+ *
+ * Sorts an array of servers by free slots, ordered descending.
  */
-function simplytest_servers_simplytest_submissions_update($id, $state) {
-  // Update server slot count if a submission was terminated.
-  if ($state >= SIMPLYTEST_SUBMISSIONS_TERMINATED) {
-    $servers = simplytest_servers_get();
-    $ip_address = ip_address();
-    foreach ($servers as $server) {
-      if ($server['active'] && gethostbyname($server['host']) == $ip_address) {
-        // Update slot count.
-        db_update('simplytest_servers')
-          ->condition('id', $server['id'])
-          ->fields(array(
-            'slots' => $server['slots'] + 1,
-          ))
-          ->execute();
-      }
-    }
-  }
+function simplytest_servers_sort_by_free_slots_desc($a, $b) {
+  return ($b['freeslots'] - $a['freeslots']);
 }

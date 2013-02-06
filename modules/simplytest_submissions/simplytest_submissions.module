@@ -211,10 +211,16 @@ function simplytest_submissions_send($id) {
  *  The submission id.
  */
 function simplytest_submissions_goto($id) {
-  $url = db_select('simplytest_submissions', 'p')
-    ->fields('p', array('url'))
+  // Get server id of the submission.
+  $server = db_select('simplytest_submissions', 'p')
+    ->fields('p', array('server'))
     ->condition('id', $id)
     ->execute()->fetchField();
+  // Get the servers hostname.
+  $host = simplytest_servers_get_hostname($id);
+  // Build the servers URL.
+  $url = 'http://' . $id . '.' . $host;
+  // Redirect.
   if (!empty($url)) {
     drupal_goto($url, array('external' => TRUE), 307);
   }
@@ -222,6 +228,9 @@ function simplytest_submissions_goto($id) {
 
 /**
  * Submission state callback access check.
+ *
+ * This resolves all IP's of the known servers hostnames and
+ * checks whether the request came from one of them.
  */
 function simplytest_submissions_callback_access() {
   $servers = simplytest_servers_get();
@@ -260,9 +269,6 @@ function simplytest_submissions_set_state($id, $state, $url = NULL) {
 
   // Log the submission state update.
   _simplytest_submissions_state_log($id, $state);
-
-  // Let other modules react on the state update.
-  module_invoke_all('simplytest_submissions_update', $id, $state);
 }
 
 /**
@@ -340,4 +346,25 @@ function _simplytest_submissions_state_log($id, $state) {
     '%id' => $id,
     '%state' => simplytest_submissions_state_to_string($state),
   ), $severity);
+}
+
+/**
+ * Returns an ordered list of server id's and their full slots.
+ *
+ * @return array
+ *  Associative array, keyed by the server id,
+ *  containing the current count of filled slots.
+ */
+function simplytest_submission_get_full_server_slots() {
+  $query = db_select('simplytest_submissions', 's');
+  $query->fields('s', array('server'));
+  // Active, non terminated submissions.
+  $query->condition('state', SIMPLYTEST_SUBMISSIONS_TERMINATED, '<');
+  // Only spawned submissions.
+  $query->isNotNull('server');
+  // Count occurrance of server ids.
+  $query->groupBy('server');
+  $query->addExpression('count(server)', 'fullslots');
+  $query->orderBy('fullslots', 'ASC');
+  return $query->execute()->fetchAllKeyed();
 }
