@@ -58,7 +58,7 @@ function simplytest_submissions_menu() {
   $items['simplytest/submissions/state/%/%'] = array(
     'page callback' => 'simplytest_submissions_set_state',
     'access callback' => 'simplytest_submissions_callback_access',
-    'page arguments' => array(2, 3),
+    'page arguments' => array(3, 4),
     'type' => MENU_CALLBACK,
   );
   return $items;
