@@ -170,12 +170,11 @@ function simplytest_servers_spawn($submission) {
       continue;
     }
 
-    watchdog('simplytest_servers', 'Spawned %id on %host by SSH2 with user %user (Server: %name): $%cmd', array(
+    watchdog('simplytest_servers', 'Spawned %id on %host by SSH2 with user %user (Server: %id).', array(
       '%id' => $submission['id'],
       '%host' => $server['host'],
-      '%name' => $server['name'],
+      '%name' => $server['id'],
       '%user' => $server['user'],
-      '%cmd' => implode('<br/>$', $commands),
     ), WATCHDOG_NOTICE);
 
     return $server;

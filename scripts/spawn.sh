@@ -17,7 +17,7 @@ fi
 DIRECTORY="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Get arguments.
-S_CONFIGURATION=$1
+S_CONFIGURATION=$2
 
 # !!! Start build script WITH ROOT PERMISSIONS.
 # To do this without beeing root, add these lines to your sudoers file by visudo:
