@@ -77,8 +77,8 @@ function simplytest_submissions_enqueue($submission) {
   global $user;
 
   // Get available project information.
-  $data = simplytest_projects_get_project($submission['project']);
-  if (!$data) {
+  $submission = simplytest_projects_get_project($submission['project']);
+  if (!$submission) {
     return FALSE;
   }
 
@@ -90,8 +90,8 @@ function simplytest_submissions_enqueue($submission) {
   foreach ($user->roles as $rid => $role) {
     // Select highest timeout setting.
     $role_timeout = variable_get('simplytest_submissions_timeout_' . $rid, 0);
-    if ($role_timeout > $data['timeout']) {
-      $data['timeout'] = $role_timeout;
+    if ($role_timeout > $submission['timeout']) {
+      $submission['timeout'] = $role_timeout;
     }
   }
 
@@ -182,12 +182,12 @@ function simplytest_submissions_process_submission($id) {
  *  The submission id.
  */
 function simplytest_submissions_send($id) {
-  $data = db_select('simplytest_submissions', 's')
+  $submission = db_select('simplytest_submissions', 's')
     ->fields('s', array('data'))
     ->condition('id', $id)
     ->execute()->fetchField();
   // Send submission and spawn worker.
-  $server = simplytest_servers_spawn(unserialize($data));
+  $server = simplytest_servers_spawn(unserialize($submission));
   if ($server === FALSE) {
     // Something went very wrong, sending submission failed.
     return FALSE;
