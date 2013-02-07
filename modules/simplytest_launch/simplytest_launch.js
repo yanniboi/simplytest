@@ -2,12 +2,12 @@
   Drupal.behaviors.simplytest_launch = {
     attach: function (context, settings) {
       $(document).ready(function () {
-        if ($("#edit-project").length > 0) {
-          var project_textfield = $('#edit-project');
+        if ($("#edit-submission-project").length > 0) {
+          var project_textfield = $('#edit-submission-project');
           // Set focus on project textfield after site is ready.
           project_textfield.focus();
           // Hide version selection if empty.
-          var versions_box = $("#edit-version");
+          var versions_box = $("#edit-submission-version");
           if (versions_box.html() === '') {
             versions_box.hide();
           }
@@ -25,7 +25,7 @@
               .appendTo( ul );
           };
           // Attach autocomplete functionality to project textfield
-          $("#edit-project").autocomplete({
+          $("#edit-submission-project").autocomplete({
 			      source: function( request, response ) {
 				      $.ajax({
 					      url: Drupal.settings.basePath + 'simplytest/projects/autocomplete',
@@ -45,12 +45,12 @@
 			      },
 			      minLength: 1,
 			      select: function( event, ui ) {
-				      var project_textfield = $('#edit-project');
-              var versions_box = $("#edit-version");
+				      var project_textfield = $('#edit-submission-project');
+              var versions_box = $("#edit-submission-version");
               // Load available project versions.
               if (ui.item.value !== '') {
                 if (ui.item.value !== Drupal.behaviors.simplytest_launch.project) {
-                  $('#simplytest-launch-block-launcher-form').stop().animate({opacity: 0.25});
+                  $('#simplytest-submission-form').stop().animate({opacity: 0.25});
                   // Get json and put options into versions select box.
                   $.getJSON(Drupal.settings.basePath + 'simplytest/project/' + ui.item.value + '/versions', function(data) {
                   Drupal.behaviors.simplytest_launch.project = ui.item.value;
@@ -71,7 +71,7 @@
                       versions_box.show();
                       versions_box.html(items.join(''));
                     }
-                    $('#simplytest-launch-block-launcher-form').stop().animate({opacity: 1.0});
+                    $('#simplytest-submission-form').stop().animate({opacity: 1.0});
                   });
                 }
                 else {

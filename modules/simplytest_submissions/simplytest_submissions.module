@@ -66,23 +66,27 @@ function simplytest_submissions_menu() {
 
 /**
  * Enqueues a new submission for processing.
+ *
+ * @param array $submission
+ *  An associative array containing various submission data.
+ *  Must at least contain the following:
+ *  - project: The main project shortname for the submission.
+ *  - version: The version to checkout for the main project.
  */
-function simplytest_submissions_enqueue($project, $version) {
+function simplytest_submissions_enqueue($submission) {
   global $user;
 
   // Get available project information.
-  $data = simplytest_projects_get_project($project);
+  $data = simplytest_projects_get_project($submission['project']);
   if (!$data) {
     return FALSE;
   }
 
   // Generate unique submission id.
-  $data['id'] = simplytest_submissions_generate_id();
+  $submission['id'] = simplytest_submissions_generate_id();
 
-  // Collect submission data.
-  $data['version'] = $version;
-  $data['project'] = strtolower($project);
-  $data['timeout'] = variable_get('simplytest_submissions_timeout', 15);
+  // Determine the submission timeout to use.
+  $submission['timeout'] = variable_get('simplytest_submissions_timeout', 15);
   foreach ($user->roles as $rid => $role) {
     // Select highest timeout setting.
     $role_timeout = variable_get('simplytest_submissions_timeout_' . $rid, 0);
@@ -96,13 +100,13 @@ function simplytest_submissions_enqueue($project, $version) {
     ->fields(array(
       'id' => $data['id'],
       'ip' => ip_address(),
-      'data' => serialize($data),
+      'data' => serialize($submission),
       'timestamp' => REQUEST_TIME,
       'state' => SIMPLYTEST_SUBMISSIONS_ENQUEUE,
     ))
     ->execute();
 
-  return $data['id'];
+  return $submission['id'];
 }
 
 /**
@@ -246,8 +250,6 @@ function simplytest_submissions_callback_access() {
  *  The submission id.
  * @param int $state
  *  The submissions state to set.
- * @param string $url
- *  Optional redirection url.
  */
 function simplytest_submissions_set_state($id, $state) {
   // Update the submission state.

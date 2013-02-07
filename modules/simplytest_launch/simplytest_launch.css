@@ -1,20 +1,23 @@
 /* Launcher block form */
-#simplytest-launch-block-launcher-form input.form-text {
+#simplytest-submission-form {
+  margin-bottom: 1.5em;
+}
+#simplytest-submission-form input.form-text {
   background-color: #EFF2F5;
   color: #444;
   min-width: 200px;
 }
-#simplytest-launch-block-launcher-form .form-select {
+#simplytest-submission-form .form-select {
   background-color: #EFF2F5;
   color: #444;
 }
-#simplytest-launch-block-launcher-form .form-submit {
+#simplytest-submission-form .form-submit {
   float: right;
 }
-#simplytest-launch-block-launcher-form .form-item {
+#simplytest-submission-form .form-item {
   display: inline;
 }
-#simplytest-launch-block-launcher-form #edit-project {
+#simplytest-submission-form #edit-submission-project {
   width: 400px;
 }
 

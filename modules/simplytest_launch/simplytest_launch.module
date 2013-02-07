@@ -6,29 +6,14 @@
  */
 
 /**
- * Implements hook_block_info().
- */
-function simplytest_launch_block_info() {
-  $blocks = array();
-  $blocks['simplytest_launcher'] = array(
-    'info' => t('simplytest launcher'),
-    'status' => TRUE,
-    'cache' => DRUPAL_NO_CACHE,
-    'visibility' => BLOCK_VISIBILITY_LISTED,
-    'pages' => "<front>\nproject/*\nproject",
-    'region' => 'featured',
-  );
-  return $blocks;
-}
-
-/**
  * Implements hook_menu().
  */
 function simplytest_launch_menu() {
   $items = array();
   // Used for prefill by /project/[shortname][/version] functionality.
   $items['project'] = array(
-    'page callback' => 'simplytest_start_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simplytest_submission_form'),
     'access arguments' => array('access simplytest page'),
     'type' => MENU_CALLBACK,
   );
@@ -52,6 +37,7 @@ function simplytest_launch_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_launch_flood_form'),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_launch.admin.inc',
   );
   // Flood entry operation.
   $items['admin/simplytest/flood/%/%'] = array(
@@ -59,140 +45,27 @@ function simplytest_launch_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simplytest_launch_flood_operation', 3, 4),
     'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_launch.admin.inc',
   );
   return $items;
 }
 
 /**
- * Flood settings configuration form.
+ * Implements hook_simplytest_submission_form().
+ *
+ * Builds the basic submission launcher form.
  */
-function simplytest_launch_flood_form($form = array()) { 
-
-  $form['flood_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Flood protection settings'),
-  );
-  $form['flood_settings']['simplytest_launch_flood_window'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Flood window in seconds'),
-    '#default_value' => variable_get('simplytest_launch_flood_window', 900),
-    '#element_validate' => array('element_validate_integer_positive'),
-  );
-  $form['flood_settings']['simplytest_launch_flood_threshold'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Flood threshold'),
-    '#default_value' => variable_get('simplytest_launch_flood_threshold', 5),
-    '#element_validate' => array('element_validate_integer_positive'),
-  );
-
-  // Get current flood entries.
-  $select = db_select('flood', 'f');
-  $select->addField('f', 'identifier');
-  $select->addField('f', 'timestamp');
-  $select->addExpression('COUNT(fid)', 'count');
-  $select->groupBy('identifier');
-  $select->orderBy('count', 'DESC');
-  $select->condition('f.event', 'simplytest_launch_submit');
-  $select->range(0, 50);
-  // Build rows.
-  $rows = array();
-  foreach ($select->execute()->fetchAll() as $entry) {
-    $rows[] = array(
-      $entry->identifier,
-      format_date($entry->timestamp),
-      $entry->count,
-      l(t('Permanent block'), 'admin/config/people/ip-blocking/' . $entry->identifier),
-      l(t('Reset'), 'admin/simplytest/flood/' . $entry->identifier . '/reset'),
-    );
-  }
-  $form['flood_table'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Current flood logs'),
-  );
-  $form['flood_table']['table'] = array(
-    '#theme' => 'table',
-    '#header' => array(
-      t('Identifier'),
-      t('Start date'),
-      t('Count'),
-      array(
-        'data' => t('Operations'),
-        'colspan' => 2,
-      ),
-    ), 
-    '#rows' => $rows, 
-    '#empty' => t('No recent flood logs.'),
-  );
-
-  return system_settings_form($form);
-}
-
-/**
- * Confirms and executes an operation on a flood entry.
- */
-function simplytest_launch_flood_operation($form, $form_state, $id, $operation) {
-  $form['#identifier'] = $id;
-
-  switch ($operation) {
-    case 'reset':
-      $form['#submit'][] = 'simplytest_launch_foold_operation_reset';
-      break;
-    default:
-      return $form;
-      break;
-  }
-
-  $form = confirm_form(
-    $form,
-    t('Do you want to @operation this entry?', array('@operation' => $operation, '%id' => $id)),
-    'admin/simplytest/flood'
-  );
-  return $form;
-}
-
-/**
- * Deletes an sponsor entry after confirmation.
- */
-function simplytest_launch_foold_operation_reset($form, $form_state) {
-  db_delete('flood')
-    ->condition('event', 'simplytest_launch_submit')
-    ->condition('identifier', $form['#identifier'])
-    ->execute();
-  drupal_goto('admin/simplytest/flood');
-}
-
-/**
- * Implements hook_block_view().
- */
-function simplytest_launch_block_view($delta = '') {
-  if (!user_access('submit simplytest requests')) {
-    return;
-  }
-
-  switch ($delta) {
-    case 'simplytest_launcher':
-      $block['subject'] = t('Enter a project name:');
-      $block['content'] = drupal_get_form('simplytest_launch_block_launcher_form');
-      break;
-  }
-  return $block;
-}
-
-/**
- * The submission launcher block form.
- */
-function simplytest_launch_block_launcher_form($form = array()) {
+function simplytest_launch_simplytest_submission_form($form, $form_state, $project = NULL, $version = NULL) {
   $versions = array();
-  $project = NULL;
-  $version = NULL;
 
   // Check whether there are default values available.
-  // Although I don't like using arg() we got no choise here as
-  // this form will be rendered within a block.
-  if (arg(0) === 'project') {
-    $project = strtolower(trim(arg(1)));
-    $version = trim(arg(2));
+  if ($project) {
+    $project = strtolower(trim($project));
     if (!empty($project)) {
+      if ($version) {
+        $version = trim($version);
+      }
+      // Get available project versions.
       $versions = simplytest_launch_project_versions_options($project);
     }
   }
@@ -200,12 +73,21 @@ function simplytest_launch_block_launcher_form($form = array()) {
   // Flood protection check.
   $enabled = _simplytest_launch_flood_check();
   if (!$enabled) {
-    drupal_set_message(t('Unfortunately you hit the maximum usage quota. Please try again later.'), 'error');
+    drupal_set_message(
+      t('Unfortunately your IP hit the maximum usage quota. Please try again in about %interval.', array(
+        '%interval' => format_interval(variable_get('simplytest_launch_flood_window', 900)),
+      )),
+    'error');
   }
 
+  // Parent for grouping submission values.
+  $form['submission'] = array(
+    '#prefix' => '<h2>' . t('Enter a project name:') . '</h2>',
+  );
   // Project textfield.
-  $form['project'] = array(
+  $form['submission']['project'] = array(
     '#type' => 'textfield',
+    '#parents' => array('submission', 'project'),
     // Use jQuery autocomplete for this field.
     '#attached' => array(
       'library' => array(
@@ -217,8 +99,9 @@ function simplytest_launch_block_launcher_form($form = array()) {
   );
 
   // Version select box.
-  $form['version'] = array(
+  $form['submission']['version'] = array(
     '#type' => 'select',
+    '#parents' => array('submission', 'version'),
     '#options' => $versions,
     '#default_value' => $version,
     // Override illegal choice validation.
@@ -231,15 +114,18 @@ function simplytest_launch_block_launcher_form($form = array()) {
     '#default_value' => t('Launch sandbox'),
     '#disabled' => !$enabled,
   );
+  $form['#submit'][] = 'simplytest_launch_simplytest_submission_form_submit';
   return $form;
 }
 
 /**
- * The launcher block form submit handler.
+ * Submit handler for the basic submission form.
  */
-function simplytest_launch_block_launcher_form_submit(&$form, &$form_state) {
-  $project = strtolower(trim($form_state['values']['project']));
-  $version = $form_state['values']['version'];
+function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_state) {
+  $submission = &$form_state['values']['submission'];
+  $project = &$submission['project'];
+  $project = strtolower(trim($project));
+  $version = &$submission['version'];
 
   // Flood protection check.
   $enabled = _simplytest_launch_flood_check();
@@ -296,7 +182,7 @@ function simplytest_launch_block_launcher_form_submit(&$form, &$form_state) {
   else {
 
     // Enqueue the submission.
-    $submission_id = simplytest_submissions_enqueue($project, $version);
+    $submission_id = simplytest_submissions_enqueue($submission);
 
     watchdog('simplytest_launch', 'Submitted "%project": %version for launching a sandbox: %sid', array(
       '%project' => $project,
