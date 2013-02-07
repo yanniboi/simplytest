@@ -77,7 +77,7 @@ function simplytest_submissions_enqueue($submission) {
   global $user;
 
   // Get available project information.
-  $submission = simplytest_projects_get_project($submission['project']);
+  $submission += simplytest_projects_get_project($submission['project']);
   if (!$submission) {
     return FALSE;
   }
@@ -94,7 +94,7 @@ function simplytest_submissions_enqueue($submission) {
       $submission['timeout'] = $role_timeout;
     }
   }
-
+dsm($submission);return;
   // Enqueue submission.
   db_insert('simplytest_submissions')
     ->fields(array(
