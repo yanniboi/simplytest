@@ -9,22 +9,24 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Make sure all arguments are given.
-if [[ "$#" -ne 7 ]]; then 
-  echo "$0 [id] [host] [git url] [type] [version (tags/heads)] [timeout (in minutes)] [project (shortname)]"
+if [[ "$#" -ne 1 ]]; then 
+  echo "$0 [path to configuration file]"
   exit 1
 fi
 
+S_CONFIGURATION=$1
+
+# Make sure all arguments are given.
+if [ ! -f $S_CONFIGURATION ]; then
+  echo "Given configuration file could not be found."
+  exit 1
+fi
+
+# Load submission configuration.
+source "$S_CONFIGURATION" || exit 1
+
 # Absolute path to script dir.
 DIRECTORY="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Script parameters for global use.
-S_ID=$1
-S_HOST=$2
-S_GITURL=$3
-S_TYPE=$4
-S_VERSION=$5
-S_TIMEOUT=$6
-S_PROJECT=$7
 
 # Load function library.
 source "$DIRECTORY/sources/common"
