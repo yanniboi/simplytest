@@ -94,7 +94,7 @@ function simplytest_submissions_enqueue($submission) {
       $submission['timeout'] = $role_timeout;
     }
   }
-dsm($submission);return;
+
   // Enqueue submission.
   db_insert('simplytest_submissions')
     ->fields(array(
