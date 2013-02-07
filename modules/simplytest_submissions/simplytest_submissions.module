@@ -98,7 +98,7 @@ function simplytest_submissions_enqueue($submission) {
   // Enqueue submission.
   db_insert('simplytest_submissions')
     ->fields(array(
-      'id' => $data['id'],
+      'id' => $submission['id'],
       'ip' => ip_address(),
       'data' => serialize($submission),
       'timestamp' => REQUEST_TIME,
