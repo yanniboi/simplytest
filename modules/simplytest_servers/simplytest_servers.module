@@ -6,6 +6,33 @@
  */
 
 /**
+ * Submission config file upload target path.
+ */
+define('SIMPLYTEST_SERVERS_CONFIG_FILE_PATH', '/tmp');
+
+/**
+ * Server submission config data mapping.
+ *
+ * @return array
+ *  An associative array describing the mapping between the sites
+ *  submission data and the servers configuration.
+ */
+function simplytest_servers_config_data_map() {
+  $map = array(
+    'S_ID'      => 'submission:id',
+    'S_HOST'    => 'server:host',
+    'S_PROJECT' => 'submission:project',
+    'S_TYPE'    => 'submission:type',
+    'S_VERSION' => 'submission:version',
+    'S_GITURL'  => 'submission:giturl',
+    'S_TIMEOUT' => 'submission:timeout',
+  );
+  // Let other modules alter the config map.
+  drupal_alter('simplytest_servers_config_data_map', $map);
+  return $map;
+}
+
+/**
  * Implements hook_menu().
  */
 function simplytest_servers_menu() {
@@ -116,21 +143,26 @@ function simplytest_servers_spawn($submission) {
   }
 
   foreach ($servers as $server) {
-    // Format arguments and data for worker script.
-    $args = explode(',', 'id,host,giturl,type,version,timeout,project');
-    $sub = array();
-    foreach ($args as $arg) {
-      if (isset($submission[$arg])) {
-        $sub[] = escapeshellarg($submission[$arg]);
-      }
-      elseif (isset($server[$arg])) {
-        $sub[] = escapeshellarg($server[$arg]);
-      }
-    }
+    // Generate submission config file contents.
+    $submission_config = simplytest_servers_submission_config_file_generate(array(
+      'submission' => $submission,
+      'server' => $server,
+    ));
 
+    // Target submission config filepath.
+    $config_path = SIMPLYTEST_SERVERS_CONFIG_FILE_PATH . '/' . $submission['id'] . '.submission';
+
+    // Shell script commands.
     $commands = array(
-      // Spawnscript with arguments.
-      $server['spawn'] . ' ' . implode(' ', $sub),
+      // Save the submission configuration file.
+      array('echo %configuration_string > %configuration_path', array(
+        '%configuration_string' => $submission_config,
+        '%configuration_path' => $config_path,
+      )),
+      // Execute the spawn script.
+      array($server['spawn'] . ' %configuration_path', array(
+        '%configuration_path' => $config_path,
+      )),
     );
 
     // Execute spawn script.
@@ -138,27 +170,101 @@ function simplytest_servers_spawn($submission) {
       continue;
     }
 
-    watchdog('simplytest_servers', 'Spawned job on %host by SSH2 with user %user (Server: %name): $%cmd', array(
+    watchdog('simplytest_servers', 'Spawned %id on %host by SSH2 with user %user (Server: %name): $%cmd', array(
+      '%id' => $submission['id'],
       '%host' => $server['host'],
       '%name' => $server['name'],
       '%user' => $server['user'],
-      '%cmd' => implode(', ', $commands),
+      '%cmd' => implode('<br/>$', $commands),
     ), WATCHDOG_NOTICE);
-    
+
     return $server;
   }
 
-  watchdog('simplytest_servers', 'Failed to spawn a job on any servers.', array(), WATCHDOG_ERROR);
+  watchdog('simplytest_servers', 'Failed to spawn %id on any servers.', array(
+    '%id' => $submission['id'],
+  ), WATCHDOG_ERROR);
   return FALSE;
+}
+
+/**
+ * Sorting callback.
+ *
+ * Sorts an array of servers by free slots, ordered descending.
+ */
+function simplytest_servers_sort_by_free_slots_desc($a, $b) {
+  return ($b['freeslots'] - $a['freeslots']);
+}
+
+/**
+ * Generates the submission config file content for given data.
+ *
+ * @param array $data
+ *  Associative array containing necessary server submission
+ *  data to map for creatign the submission config file.
+ *
+ * @param string
+ *  The submission config file content.
+ */
+function simplytest_servers_submission_config_file_generate($data) {
+  $map = simplytest_servers_config_data_map();
+  $config = array();
+
+  // Map submission data to server submission configuration.
+  foreach ($map as $target => $source) {
+    // Find necessary value for this mapping.
+    $source_path = explode(':', $source);
+    $value = &$data;
+    foreach ($source_path as $path_part) {
+      if (isset($value[$path_part])) {
+        $value = &$value[$path_part];
+      }
+      else {
+        // If the value could not be found for the given
+        // mapping, jump over this config setting.
+        continue 2;
+      }
+      $config[$target] = $value;
+    }
+  }
+
+  // Generate config file content for bashscript shells.
+  return simplytest_server_submission_config_file_bashscript($config);
+}
+
+/**
+ * Generates the server submission config file contents for bash.
+ *
+ * @param array $config
+ *  An associative array containing mapped configuration data.
+ *
+ * @return string
+ *  A string of shell commands for setting the configuration variables.
+ */
+function simplytest_server_submission_config_file_bashscript($config) {
+  $config_content = '';
+  foreach ($config as $key => $value) {
+    // Build value setting shell commands depending on datatype.
+    if (is_array($value)) {
+      $config_content .= "declare -A " .  escapeshellarg(trim($key)) . ";\n";
+      foreach ($value as $k => $v) {
+        $config_content .= $key . "[" . escapeshellarg(trim($k)) . "]=" .  escapeshellarg(trim($v)) . ";\n";
+      }
+    }
+    elseif (is_string($value)) {
+      $config_content .= $key . "=" .  escapeshellarg(trim($value)) . ";\n";
+    }
+  }
+  return $config_content;
 }
 
 /**
  * Executes a command on a specific server.
  *
- * @param object $server
- *  A simplytest server object.
+ * @param array $server
+ *  A simplytest array object.
  * @param array $commands
- *  An array of command string to execute.
+ *  An array of command strings to execute.
  *
  * @return bool
  *  Whether the command could be executed.
@@ -186,13 +292,14 @@ function simplytest_servers_execute($server, $commands) {
 
   // Try to exec each command.
   foreach ($commands as $command) {
-    $stream = ssh2_exec($connection, escapeshellcmd($command));
+    $escaped_command = simplytest_servers_format_command($command[0], $command[1]);
+    $stream = ssh2_exec($connection, $escaped_command);
     if ($stream === FALSE) {
       watchdog('simplytest_servers', 'Failed to execute command on %host by SSH2 with user %user (Server: %name): $%cmd', array(
         '%host' => $server['host'],
         '%name' => $server['name'],
         '%user' => $server['user'],
-        '%cmd' => $command,
+        '%cmd' => $escaped_command,
       ), WATCHDOG_ERROR);
       return FALSE;
     }
@@ -208,10 +315,21 @@ function simplytest_servers_execute($server, $commands) {
 }
 
 /**
- * Sorting callback.
+ * Escapes a command strings arguments.
  *
- * Sorts an array of servers by free slots, ordered descending.
+ * @param string $command
+ *  The command string with %placeholders for arguments.
+ * @param array $args
+ *  An associative array keyed by %placeholder name and the
+ *  argument value itsself to escape in the command.
+ *
+ * @return string
+ *  The command with escaped arguments.
  */
-function simplytest_servers_sort_by_free_slots_desc($a, $b) {
-  return ($b['freeslots'] - $a['freeslots']);
+function simplytest_servers_format_command($command, array $args = array()) {
+  // Transform arguments before inserting them.
+  foreach ($args as $key => $value) {
+    $args[$key] = escapeshellarg($value);
+  }
+  return strtr($command, $args);
 }
