@@ -52,7 +52,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
 
   // Get the maximum count of pathes and additional project a user may add.
   $patches = variable_get('simplytest_advanced_patch_count', 3);
-  $additionals = variable_get('simplytest_advanced_additionals', 5);
+  $additionals = variable_get('simplytest_advanced_additionals', 10);
 
   // The "Advanced options" submission fieldset.
   $form['submission']['advanced'] = array(

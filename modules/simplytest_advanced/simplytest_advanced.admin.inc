@@ -37,7 +37,7 @@ function simplytest_advanced_settings_form($form = array()) {
   $form['additionals_settings']['simplytest_advanced_additionals'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum count of additional projects.'),
-    '#default_value' => variable_get('simplytest_advanced_additionals', 5),
+    '#default_value' => variable_get('simplytest_advanced_additionals', 10),
     '#element_validate' => array('element_validate_integer_positive'),
   );
 
