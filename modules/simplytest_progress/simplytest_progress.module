@@ -275,6 +275,9 @@ function simplytest_progress_message($state, $id = NULL) {
     case SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING:
       $message = t('An error occurred while installing the environment.');
       break;
+    case SIMPLYTEST_SUBMISSIONS_ERROR_PATCHING:
+      $message = t('An error occurred while patching the project.');
+      break;
     default:
       $message = t('An unknown error occurred.');
   }

@@ -1,9 +1,8 @@
 name = simplytest launch
-description = Submission launcher block of simplytest.me.
+description = Basic submission form of simplytest.me.
 package = simplytest
 core = 7.x
 
-dependencies[] = block
 dependencies[] = simplytest_projects
 dependencies[] = simplytest_submissions
 dependencies[] = simplytest_progress

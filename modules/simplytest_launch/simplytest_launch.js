@@ -87,10 +87,10 @@
               }
 			      },
 			      open: function() {
-				      $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+				      $( this ).removeClass("ui-corner-all").addClass("ui-corner-top");
 			      },
 			      close: function() {
-				      $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+				      $( this ).removeClass("ui-corner-top").addClass("ui-corner-all");
 			      }
 		      });
 		    }

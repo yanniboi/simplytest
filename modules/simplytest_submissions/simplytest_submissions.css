@@ -7,12 +7,15 @@
   background: #b0d3df;
 }
 
+.simplytest-submissions-spawned.even,
 .simplytest-submissions-downloading.even,
 .simplytest-submissions-installing.even,
 .simplytest-submissions-finalizing.even,
 .simplytest-submissions-preparing.even {
   background: #f1f58d;
 }
+
+.simplytest-submissions-spawned.odd,
 .simplytest-submissions-downloading.odd,
 .simplytest-submissions-installing.odd,
 .simplytest-submissions-finalizing.odd,
@@ -34,19 +37,19 @@
   background: #f7e7e7;
 }
 
-.simplytest-submissions-spawned.even,
 .simplytest-submissions-error-download.even,
 .simplytest-submissions-error-installing.even,
 .simplytest-submissions-error-prepare.even,
-.simplytest-submissions-error-server.even {
+.simplytest-submissions-error-server.even,
+.simplytest-submissions-error-patching.even {
   background: #eeb9b9;
 }
 
-.simplytest-submissions-spawned.even,
 .simplytest-submissions-error-download.odd,
 .simplytest-submissions-error-installing.odd,
 .simplytest-submissions-error-prepare.odd,
-.simplytest-submissions-error-server.odd {
+.simplytest-submissions-error-server.odd,
+.simplytest-submissions-error-patching.odd {
   background: #ecd4d4;
 }
 

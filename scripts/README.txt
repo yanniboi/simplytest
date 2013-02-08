@@ -82,17 +82,20 @@ Same parameter applies for the spawn script, though it executes the buildscript
 as a seperate/background process.
 
 A configuration file must consist of at least the following variables:
-S_ID=       The identification for this submission 1-16 (A-Za-Z0-9) characters.
-            Will be used for the vhost, unix user and mysql user, database and
-            password. Also logfiles will be saved as ./log/[id].log.
-S_HOST=     Hostname to use for this submission, eg.: s1.simplytest.me. The
-            resulting vhost will be [id].s1.simplytest.me.
-S_GITURL=   The projects git url to clone from, eg.:
-            git://git.drupal.org/project/drupal.git.
-S_TYPE=     The project type ('Drupal core', 'Module', 'Theme', 'Distribution').
-S_VERSION=  The branch or tag to checkout with git.
-S_TIMEOUT=  Count of minutes until the destroying script is executed.
-S_PROJECT=  The projects shortname as known from drupal.org.
+S_ID=           The identification for this submission 1-16 (A-Za-Z0-9) chars.
+                Will be used for the vhost, unix user and mysql user, database
+                and password. Also logfiles will be saved as ./log/[id].log.
+S_HOST=         Hostname to use for this submission, eg.: s1.simplytest.me. The
+                resulting vhost will be [id].s1.simplytest.me.
+S_GITURL=       The projects git url to clone from, eg.:
+                git://git.drupal.org/project/drupal.git.
+S_TYPE=         The project type.
+                (eg. 'Drupal core', 'Module', 'Theme', 'Distribution').
+S_VERSION=      The branch or tag to checkout with git.
+S_TIMEOUT=      Count of minutes until the destroying script is executed.
+S_PROJECT=      The projects shortname as known from drupal.org.
+S_ADDITIONALS   An associative array of additional projects to download.
+S_PATCHES       An associative array of patches to apply to the project.
 
 A build environment will automatically be destroyed after [timeout] minutes
 (using ´at´ jobs) but this can also be done manually by executing

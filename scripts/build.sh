@@ -50,6 +50,9 @@ s_project_download
 lg "Fetch dependencies.."
 s_project_fetch_dependencies
 
+lg "Download additional projects.."
+s_project_dl_additionals
+
 ### INSTALL.
 s_ste 104
 

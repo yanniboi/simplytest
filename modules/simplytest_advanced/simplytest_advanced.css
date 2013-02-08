@@ -1,0 +1,45 @@
+/* Formatting the advanced settings fieldset and its fields */
+
+#simplytest-submission-form #edit-advanced .form-item,
+#simplytest-submission-form #edit-advanced #edit-patches,
+#simplytest-submission-form #edit-advanced #edit-additionals {
+  display: block;
+}
+
+#simplytest-submission-form #edit-advanced .form-submit {
+  float: none;
+  display: none;
+  padding: 5px;
+}
+
+#simplytest-submission-form #edit-advanced label {
+  margin-top: 28px;
+  font-size: 13px;
+}
+
+#simplytest-submission-form .fieldset-legend {
+  background-image: none;
+  padding-left: 2px;
+}
+
+#simplytest-submission-form .fieldset-legend a {
+  font-size: 15px;
+  color: #FFF;
+  text-shadow: rgba(0, 0, 0, 0.3) 1px 1px 1px;
+  text-transform: none;
+}
+
+#simplytest-submission-form #edit-advanced {
+  margin-top: 30px;
+  padding-top: 0;
+}
+
+#simplytest-submission-form fieldset.collapsible {
+  border: 1px rgba(255, 255, 255, 0.5) dashed;
+}
+
+#simplytest-submission-form fieldset.collapsed {
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+}

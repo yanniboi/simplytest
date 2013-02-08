@@ -111,7 +111,7 @@ s_settimeout() {
 }
 
 ##
-# Checkout specified version and remove git.
+# Checkout specified version of the main project and remove git.
 #
 # @param $1
 #  Path to check the project out at.
@@ -119,8 +119,21 @@ s_settimeout() {
 #  Version to check out.
 s_set_version() {
   cd $1
+  # Try to checkout the version.
   timeout 350 git checkout $2 || s_ste 302
-  rm -r "$1/.git"
+
+  # Apply any patches.
+  for key in "${!S_PATCHES[@]}"
+  do
+    # Download the patch.
+    timeout 120 wget "${S_PATCHES[$key]}" --output-document="/tmp/patch.$S_ID"
+    # Try to apply the patch.
+    git apply "/tmp/patch.$S_ID" || s_ste 304
+    rm "/tmp/patch.$S_ID"
+  done
+
+  # Get rid of the git directory.
+  rm -rf "$1/.git"
 }
 
 ##
@@ -492,6 +505,16 @@ s_resolve_dependencies() {
 }
 
 ##
+# Downloads the submissions additional projects.
+#
+s_project_dl_additionals() {
+  for key in "${!S_ADDITIONALS[@]}"
+  do
+    timeout 60 drush dl --gitinfofile -y "${S_ADDITIONALS[$key]}"
+  done
+}
+
+##
 # Tries to find a main info file within the given path.
 #
 # @param $1
@@ -568,10 +591,11 @@ lg() {
 #   ABORTED           201
 #   FAILED            202
 #  Failure submission states.
-#   ERROR_SERVER      301
-#   ERROR_PREPARE     302
-#   ERROR_DOWNLOAD    303
-#   ERROR_INSTALLING  304
+#   ERROR_SERVER      300
+#   ERROR_PREPARE     301
+#   ERROR_DOWNLOAD    302
+#   ERROR_INSTALLING  303
+#   ERROR_PATCHING    304
 s_ste() {
   # Set the new state by querying the site's callback.
   wget -qO /dev/null "$S_CALLBACK/$S_ID/$1"

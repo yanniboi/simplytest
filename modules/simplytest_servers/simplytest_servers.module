@@ -19,13 +19,15 @@ define('SIMPLYTEST_SERVERS_CONFIG_FILE_PATH', '/tmp');
  */
 function simplytest_servers_config_data_map() {
   $map = array(
-    'S_ID'      => 'submission:id',
-    'S_HOST'    => 'server:host',
-    'S_PROJECT' => 'submission:project',
-    'S_TYPE'    => 'submission:type',
-    'S_VERSION' => 'submission:version',
-    'S_GITURL'  => 'submission:giturl',
-    'S_TIMEOUT' => 'submission:timeout',
+    'S_ID'            => 'submission:id',
+    'S_HOST'          => 'server:host',
+    'S_PROJECT'       => 'submission:project',
+    'S_TYPE'          => 'submission:type',
+    'S_VERSION'       => 'submission:version',
+    'S_GITURL'        => 'submission:giturl',
+    'S_TIMEOUT'       => 'submission:timeout',
+    'S_ADDITIONALS'   => 'submission:additionals',
+    'S_PATCHES'       => 'submission:patches',
   );
   // Let other modules alter the config map.
   drupal_alter('simplytest_servers_config_data_map', $map);

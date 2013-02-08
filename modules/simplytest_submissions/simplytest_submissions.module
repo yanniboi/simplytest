@@ -30,6 +30,7 @@ define('SIMPLYTEST_SUBMISSIONS_ERROR_SERVER',     300);
 define('SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE',    301);
 define('SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD',   302);
 define('SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING', 303);
+define('SIMPLYTEST_SUBMISSIONS_ERROR_PATCHING',   304);
 
 /**
  * Implements hook_menu().
@@ -293,7 +294,7 @@ function simplytest_submissions_state_to_string($state) {
  * containing the human readable string.
  */
 function simplytest_submissions_states() {
-  return array(
+  $states = array(
     // Running submission states.
     SIMPLYTEST_SUBMISSIONS_ENQUEUE          => t('Enqueued'),
     SIMPLYTEST_SUBMISSIONS_SPAWNED          => t('Spawned'),
@@ -311,7 +312,10 @@ function simplytest_submissions_states() {
     SIMPLYTEST_SUBMISSIONS_ERROR_PREPARE    => t('Error prepare'),
     SIMPLYTEST_SUBMISSIONS_ERROR_DOWNLOAD   => t('Error download'),
     SIMPLYTEST_SUBMISSIONS_ERROR_INSTALLING => t('Error installing'),
+    SIMPLYTEST_SUBMISSIONS_ERROR_PATCHING   => t('Error patching'),
   );
+  drupal_alter('simplytest_submissions_states', $states);
+  return $states;
 }
 
 /**

@@ -81,8 +81,8 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
   }
 
   // Parent for grouping submission values.
-  $form['submission'] = array(
-    '#prefix' => '<h2>' . t('Enter a project name:') . '</h2>',
+  $form['submission']['title'] = array(
+    '#markup' => '<h2>' . t('Enter a project name:') . '</h2>',
   );
   // Project textfield.
   $form['submission']['project'] = array(
@@ -93,6 +93,9 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
       'library' => array(
         array('system', 'ui.autocomplete'),
       ),
+    ),
+    '#attributes' => array(
+      'placeholder' => t('Start typing the name of a module, theme or distribution..'),
     ),
     '#default_value' => $project,
     '#disabled' => !$enabled,
@@ -109,19 +112,20 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
     '#disabled' => !$enabled,
   );
 
-  $form['launch'] = array(
+  $form['submission']['launch'] = array(
     '#type' => 'submit',
     '#default_value' => t('Launch sandbox'),
     '#disabled' => !$enabled,
   );
+  $form['#validate'][] = 'simplytest_launch_simplytest_submission_form_validate';
   $form['#submit'][] = 'simplytest_launch_simplytest_submission_form_submit';
   return $form;
 }
 
 /**
- * Submit handler for the basic submission form.
+ * Validation handler for the basic submission form.
  */
-function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_state) {
+function simplytest_launch_simplytest_submission_form_validate(&$form, &$form_state) {
   $submission = &$form_state['values']['submission'];
   $project = &$submission['project'];
   $project = strtolower(trim($project));
@@ -132,19 +136,22 @@ function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_stat
   // Register event to anti-flood mechanism.
   _simplytest_launch_flood_inc();
   if (!$enabled) {
+    form_set_error('launch', t('Unfortunately your IP hit the maximum usage quota. Please try again in about %interval.', array(
+        '%interval' => format_interval(variable_get('simplytest_launch_flood_window', 900)),
+    )));
     return;
   }
 
   // Check whether a project shortname was submitted.
   if (empty($project)) {
     form_set_error('project', t('Please enter a project shortname to launch a sandbox for.'));
-    drupal_goto();
+    return;
   }
 
   // Before we try to fetch anything, check whether this shortname is valid.
   if (preg_match('/[^a-z_\-0-9]/i', $project)) {
     form_set_error('project', t('Please enter a valid shortname of a module, theme or distribution.'));
-    drupal_goto();
+    return;
   }
 
   // Get available project versions.
@@ -177,23 +184,27 @@ function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_stat
     ));
     drupal_goto('project/' . $project);
   }
+}
 
-  // Everything seems fine, enqueue submission and start progress indicator.
-  else {
+/**
+ * Submit handler for the basic submission form.
+ */
+function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_state) {
+  $submission = &$form_state['values']['submission'];
+  $project = &$submission['project'];
+  $version = &$submission['version'];
 
-    // Enqueue the submission.
-    $submission_id = simplytest_submissions_enqueue($submission);
+  // Enqueue the submission.
+  $submission_id = simplytest_submissions_enqueue($submission);
 
-    watchdog('simplytest_launch', 'Submitted "%project": %version for launching a sandbox: %sid', array(
-      '%project' => $project,
-      '%version' => $version,
-      '%sid' => $submission_id,
-    ), WATCHDOG_NOTICE);
+  watchdog('simplytest_launch', 'Submitted "%project": %version for launching a sandbox: %sid', array(
+    '%project' => $project,
+    '%version' => $version,
+    '%sid' => $submission_id,
+  ), WATCHDOG_NOTICE);
 
-    // Redirect to the progress page.
-    drupal_goto('progress/' . $submission_id);
-
-  }
+  // Redirect to the progress page.
+  drupal_goto('progress/' . $submission_id);
 }
 
 /**

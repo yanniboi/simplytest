@@ -132,6 +132,8 @@ function simplytest_projects_get_project($project) {
  *  The prefix string to search projects for.
  * @param int $range
  *  Maximum number of results to return.
+ * @param array $types
+ *  An array of project types to filter for.
  *
  * @return array
  *  An array of standard objects containing:
@@ -140,16 +142,31 @@ function simplytest_projects_get_project($project) {
  *   - shortname: The project machine/shortname.
  *   - sandbox: Whether it's a sandbox.
  */
-function simplytest_projects_search_project($string, $range = 100) {
-  $db_or = db_or()
-    ->condition('title', db_like($string) . '%', 'LIKE')
-    ->condition('shortname', db_like($string) . '%', 'LIKE');
-  $result = db_select('simplytest_projects', 'p')
+function simplytest_projects_search_project($string, $range = 100, $types = NULL) {
+  $query = db_select('simplytest_projects', 'p')
     ->fields('p', array('title', 'shortname', 'type', 'sandbox'))
     ->orderBy('sandbox', 'ASC')
-    ->condition($db_or)
-    ->range(0, $range)->execute()->fetchAll();
+    ->range(0, $range);
 
+  // Search string in title and shortname.
+  $title_or_shortname = db_or()
+    ->condition('title', db_like($string) . '%', 'LIKE')
+    ->condition('shortname', db_like($string) . '%', 'LIKE');
+  $query->condition($title_or_shortname);
+
+  // Filter for specific types.
+  if ($types) {
+    $types_or = db_or();
+    foreach ($types as $type) {
+      $types_or->condition('type', $type);
+    }
+    $query->condition($types_or);
+  }
+
+  // Make the actual request.
+  $result = $query->execute()->fetchAll();
+
+  // Filter out blacklisted projects.
   if (is_array($result) && $result) {
     foreach ($result as $id => $entry) {
       // Check results for blacklisted projects.
