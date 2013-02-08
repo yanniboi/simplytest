@@ -79,7 +79,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
         'class' => array('additionals-autocomplete'),
         'placeholder' => t('Theme or module shortname..'),
       ),
-      '#size' => 30,
+      '#size' => 40,
       '#parents' => array('submission', 'additionals', $additional),
     );
   }
