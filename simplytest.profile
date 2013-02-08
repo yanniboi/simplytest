@@ -106,7 +106,7 @@ function simplytest_permission() {
       'title' => t('Administer simplytest'),
     ),
     'submit simplytest requests' => array(
-      'title' => t('Submit simplytest requests'),
+      'title' => t('Submit simplytest submissions'),
     ),
     'bypass antiflood' => array(
       'title' => t('Bypass anti-flood mechanisms'),
