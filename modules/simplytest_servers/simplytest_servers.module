@@ -153,7 +153,7 @@ function simplytest_servers_spawn($submission) {
 
     // Target submission config filepath.
     $config_path = SIMPLYTEST_SERVERS_CONFIG_FILE_PATH . '/' . $submission['id'] . '.submission';
-dsm($submission_config);return;
+
     // Shell script commands.
     $commands = array(
       // Save the submission configuration file.
