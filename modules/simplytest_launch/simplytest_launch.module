@@ -87,6 +87,8 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
   // Project textfield.
   $form['submission']['project'] = array(
     '#type' => 'textfield',
+    '#title' => t('Project name'),
+    '#title_display' => 'invisible',
     '#parents' => array('submission', 'project'),
     // Use jQuery autocomplete for this field.
     '#attached' => array(
@@ -104,6 +106,8 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
   // Version select box.
   $form['submission']['version'] = array(
     '#type' => 'select',
+    '#title' => t('Version number'),
+    '#title_display' => 'invisible',
     '#parents' => array('submission', 'version'),
     '#options' => $versions,
     '#default_value' => $version,

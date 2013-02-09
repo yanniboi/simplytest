@@ -75,6 +75,8 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
   for ($additional = 0; $additional < $additionals; $additional++) {
     $form['submission']['advanced']['additionals']['additional'][$additional] = array(
       '#type' => 'textfield',
+      '#title' => t('Theme or module shortname'),
+      '#title_display' => 'invisible',
       '#attributes' => array(
         'class' => array('additionals-autocomplete'),
         'placeholder' => t('Theme or module shortname..'),
@@ -100,6 +102,8 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
   for ($patch = 0; $patch < $patches; $patch++) {
     $form['submission']['advanced']['patches']['patch'][$patch] = array(
       '#type' => 'textfield',
+      '#title' => t('Theme or module shortname'),
+      '#title_display' => 'invisible',
       '#parents' => array('submission', 'patches', $patch),
       '#attributes' => array(
         'placeholder' => variable_get('simplytest_advanced_patch_source', 'http://drupal.org/files/'),
