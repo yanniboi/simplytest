@@ -1460,3 +1460,7 @@ div.tweet {
   border-bottom: 1px solid #999;
   padding-bottom: 10px;
 }
+
+#footer-menu-wrap .first.leaf {
+  font-weight: bold;
+}
