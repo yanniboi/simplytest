@@ -33,7 +33,7 @@
   padding-top: 0;
   font-size: 15px;
 }
-#simplytest-launch-block-launcher-form #edit-project {
+#simplytest-submission-form #edit-submission-project {
   width: 80%;
 }
 #homepage-featured {
@@ -41,7 +41,7 @@
   padding-left: 5%;
   padding-right: 5%;
 }
-#simplytest-launch-block-launcher-form .form-submit {
+#simplytest-submission-form .form-submit {
   float: none;
 }
 #bottom .column {
@@ -64,9 +64,4 @@
 }
 .ui-autocomplete.ui-menu {
   width: 80% !important;
-}
-#simplytest-launch-block-launcher-form .dropbutton-wrapper {
-  display: block;
-  float: none;
-  padding-right: 0;
 }
