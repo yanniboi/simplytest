@@ -400,6 +400,7 @@ table caption {
   line-height: 28px;
   cletter-spacing: -1px;
   color: #EEE;
+  cursor: default;
   font-family: "PT Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -849,11 +850,13 @@ margin:15px 0;
   font-size: 15px;
   display: inline;
   float: left;
+  cursor: default;
 }
 #created-by {
   font-size: 15px;
   display: inline;
   float: right;
+  cursor: default;
 }
 
 
@@ -1463,4 +1466,8 @@ div.tweet {
 
 #footer-menu-wrap .first.leaf {
   font-weight: bold;
+}
+
+#simplytest-submission-form {
+  cursor: default;
 }
