@@ -54,13 +54,16 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
   $patches = variable_get('simplytest_advanced_patch_count', 3);
   $additionals = variable_get('simplytest_advanced_additionals', 10);
 
+  // Don't collapse if the form was rebuild or if patches/additionals are set.
+  $collapsed = (empty($form_state['input']) && !isset($_GET['patch']) && !isset($_GET['add'])) ? TRUE : FALSE;
+
   // The "Advanced options" submission fieldset.
   $form['submission']['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced options'),
     '#weight' => 500,
     '#collapsible' => TRUE,
-    '#collapsed' => (empty($form_state['input']) ? TRUE : FALSE),
+    '#collapsed' => $collapsed,
   );
 
   // Form elements for adding additional projects.
@@ -69,11 +72,16 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
     '#title' => t('Add additional projects'),
     '#description' => t('Download additional modules and themes.'),
   );
+  // Generate the maximum count of additional projects fields.
   for ($additional = 0; $additional < $additionals; $additional++) {
+    // Check whether there's a value to pre-fill.
+    $preset = (isset($_GET['add']) && isset($_GET['add'][$additional])) ? $_GET['add'][$additional] : '';
+    // The addtional project textfield.
     $form['submission']['advanced']['additionals']['additional'][$additional] = array(
       '#type' => 'textfield',
       '#title' => t('Theme or module shortname'),
       '#title_display' => 'invisible',
+      '#default_value' => (is_string($preset)) ? $preset : '',
       '#attributes' => array(
         'class' => array('additionals-autocomplete'),
         'placeholder' => t('Theme or module shortname..'),
@@ -82,6 +90,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
       '#parents' => array('submission', 'additionals', $additional),
     );
   }
+  // The "Add another" project button, rather "Show another".
   $form['submission']['advanced']['additionals']['add_additional'] = array(
     '#type' => 'button',
     '#value' => t('Add an additional project'),
@@ -93,23 +102,31 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
     '#title' => t('Apply patches'),
     '#description' => t('Apply patches on the chosen project.'),
   );
+  // Generate the maximum count of patch fields.
   for ($patch = 0; $patch < $patches; $patch++) {
+    // Check whether there's a value to pre-fill.
+    $preset = (isset($_GET['patch']) && isset($_GET['patch'][$patch])) ? $_GET['patch'][$patch] : '';
+    // The patch textfield.
     $form['submission']['advanced']['patches']['patch'][$patch] = array(
       '#type' => 'textfield',
       '#title' => t('Theme or module shortname'),
       '#title_display' => 'invisible',
       '#parents' => array('submission', 'patches', $patch),
+      '#default_value' => (is_string($preset)) ? $preset : '',
       '#attributes' => array(
         'placeholder' => variable_get('simplytest_advanced_patch_source', 'http://drupal.org/files/'),
       ),
     );
   }
+  // The "Add another" patch button, rather "Show another".
   $form['submission']['advanced']['patches']['add_patch'] = array(
     '#type' => 'button',
     '#value' => t('Add a patch'),
   );
 
+  // Add a validation handler for these new fields.
   $form['#validate'][] = 'simplytest_advanced_simplytest_submission_form_validate';
+
   return $form;
 }
 
