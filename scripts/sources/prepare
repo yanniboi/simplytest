@@ -20,6 +20,7 @@ s_prepare() {
   <IfModule mod_fcgid.c>
     FcgidInitialEnv PHPRC /home/$S_ID
     FcgidWrapper /var/www/wrappers/$S_ID/php .php
+    FcgidMaxRequestLen 2000000
   </IfModule>
   <Directory /home/$S_ID/www>
     AllowOverride all
