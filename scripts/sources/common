@@ -442,6 +442,7 @@ project = \"$3\"
 #  Info file to read dependencies of.
 s_read_dependencies() {
   s_info_file_get_all "$1" "dependencies"
+  s_info_file_get_all "$1" "recommends"
   s_info_file_get_all "$1" "test_dependencies"
   s_info_file_get_all "$1" "simplytest_dependencies"
   s_info_file_get "$1" "base theme"
