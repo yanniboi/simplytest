@@ -36,6 +36,9 @@
 #simplytest-submission-form #edit-submission-project {
   width: 100%;
 }
+#simplytest-submission-form .form-item {
+  display: inline-block;
+}
 #homepage-featured {
   width: 90%;
   padding-left: 5%;
