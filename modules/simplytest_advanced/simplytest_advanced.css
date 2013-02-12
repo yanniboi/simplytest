@@ -12,11 +12,6 @@
   padding: 5px;
 }
 
-#simplytest-submission-form #edit-advanced label {
-  margin-top: 28px;
-  font-size: 13px;
-}
-
 #simplytest-submission-form .fieldset-legend {
   background-image: none;
   padding-left: 2px;
@@ -27,6 +22,32 @@
   color: #FFF;
   text-shadow: rgba(0, 0, 0, 0.3) 1px 1px 1px;
   text-transform: none;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  margin-top: 28px;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper legend {
+  margin: 0;
+  padding: 0;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper .form-submit {
+  margin-top: 5px;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper .fieldset-legend {
+  font-size: 13px;
+  font-weight: bold;
+  padding-left: 0;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper .fieldset-description {
+  font-size: 0.85em;
 }
 
 #simplytest-submission-form #edit-advanced {

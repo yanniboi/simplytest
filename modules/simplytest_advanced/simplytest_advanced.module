@@ -64,13 +64,10 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
   );
 
   // Form elements for adding additional projects.
-  $form['submission']['advanced']['additional_title'] = array(
-    '#type' => 'item',
+  $form['submission']['advanced']['additionals'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Add additional projects'),
     '#description' => t('Download additional modules and themes.'),
-  );
-  $form['submission']['advanced']['additionals'] = array(
-    '#type' => 'container',
   );
   for ($additional = 0; $additional < $additionals; $additional++) {
     $form['submission']['advanced']['additionals']['additional'][$additional] = array(
@@ -85,19 +82,16 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
       '#parents' => array('submission', 'additionals', $additional),
     );
   }
-  $form['submission']['advanced']['add_additional'] = array(
+  $form['submission']['advanced']['additionals']['add_additional'] = array(
     '#type' => 'button',
     '#value' => t('Add an additional project'),
   );
 
   // Form elements for applying patches.
-  $form['submission']['advanced']['patch_title'] = array(
-    '#type' => 'item',
+  $form['submission']['advanced']['patches'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Apply patches'),
     '#description' => t('Apply patches on the chosen project.'),
-  );
-  $form['submission']['advanced']['patches'] = array(
-    '#type' => 'container',
   );
   for ($patch = 0; $patch < $patches; $patch++) {
     $form['submission']['advanced']['patches']['patch'][$patch] = array(
@@ -110,7 +104,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
       ),
     );
   }
-  $form['submission']['advanced']['add_patch'] = array(
+  $form['submission']['advanced']['patches']['add_patch'] = array(
     '#type' => 'button',
     '#value' => t('Add a patch'),
   );
