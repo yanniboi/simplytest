@@ -7,6 +7,22 @@ evaluating drupal.org project like modules, themes and distributions.
 Simple, fast and for free!
 
 
+Service architecture
+====================
+
+The service basically has a main web-server, which in the official case
+is simplytest.me and several worker servers for the temporary sandbox sites.
+The list of existing projects is imported data from the update API at
+updates.drupal.org and the current list of Tags and Branches is extracted
+from drupalcode.org.
+
+If a submission was received, the worker server with the least active
+submissions will be selected and a configuration file with detailed
+submission-information will be transferred by SSH. Then a build-ShellScript
+is triggered which will clone the selected project, checkout the specified
+version and build a compatible Drupal site.
+
+
 Modules
 =======
 
@@ -24,29 +40,44 @@ Modules
   therefore the project pages are parsed for getting data of unknown projects
   (projects that were not imported initially by XML). Also the list of current
   heads and tags is parsed from the drupal.org repository viewer.
-  Config: /admin/simplytest/projects
+  Config: /admin/simplytest/project
+  List: /admin/simplytest/projects
 
 ## simplytest_launch
-  Provides the "simplytest launcher" block.
-  The probably most important block with an autocomplete textfield an a project
-  version select bock.
+  Provides the basic submission form.
+  Contains the probably most important form with an autocomplete textfield and
+  a project version selection.
   Also handles flood protection, configure: /admin/simplytest/flood
+
+## simplytest_advanced
+  Extends the basic submission form with the possibility to add additional
+  modules/themes and apply patches on the selected main project.
+  Config: /admin/simplytest/advanced
 
 ## simplytest_submissions
   Manages the submissions made through the launcher.
   Config: /admin/simplytest/submission
-  Submission monitor: /admin/simplytest/monitor
+  Submission monitor: /admin/simplytest/submissions/monitor
 
 ## simplytest_progress
   Provides a progress bar, showing the current state of a submission.
-  (Based on Batch API, tough it wasn't good for observing states).
+  (Based on Batch API, unfortunately it was not good for observing states).
+
+## simplytest_servers
+  Manages the available servers, their selections and the execution of commands
+  It basically generates a submission configuration file and transfers it to
+  the selected sandbox server. The build shellscript will be executed which
+  builds the sandbox environment for the project specified in the submission
+  configuration file (more information about the worker server site and scripts
+  can be found at ./scripts/README.txt).
+  Config: /admin/simplytest/servers
 
 ## simplytest_sponsors
   Provides two "sponsor" blocks.
   - Block "simplytest sponsors - sponsor list":
     Shows a list of all sponsors by small logos below the submission block.
   - Block "simplytest sponsors - advertisement":
-    Shows a random advertisement of one of the sponsors.
+    Shows a slideshow of sponsor advertisement in random order.
   The list of sponsors, their order, logo and advertisement is configurable at:
     /admin/simplytest/sponsors
 
@@ -54,10 +85,6 @@ Modules
   Provides the "simplytest issues" block that fetches the current state of
   the issue queue from drupal.org/project/simplytest and caches it.
 
-## simplytest_servers
-  Manages the available servers, their selections and the execution of commands
-  (mostly the spawn.sh script for building a sandbox environment).
-  Config: /admin/simplytest/servers
 
 Setup
 =====
@@ -77,27 +104,29 @@ Setup
       hit 'Start'. Importing the initial project data will take several minutes
       NOTE: It's faster to import the list from an existing database dump.
 
+
   2. Setup the/a worker server.
 
   To actually provide any functionality, submissions must be executed on a
   external worker server with the build scrips set up and executable.
   Follow the documentation in ./scripts/README.txt for further information.
 
+
   3. Referencing the servers on the site.
 
   Configure the simplytest.me site to make use of the server, by adding a new
   server on /admin/simplytest/servers.
-  NOTE: New servers will only be added if [X] Active is ticked!
   Most fields should be self explainable:
+  Id:               Short identification string.
   Name:             Only for referencing a human readable name on the
                     simplytest.me site.
   Server Hostname:  The hostname of the server to connect to by ssh2, also used
                     as main hostname for sandbox sites.
-                    "s1.simplytest.me" -> "[id].s1.simplytest.me"
+                    Eg.: "s1.simplytest.me" -> "[id].s1.simplytest.me"
   Slots:            The current count of slots available on the server.
                     One slot stands for one sandbox environment.
   Spawn script:     The absolute path to the script for building the site.
                     Eg.: /home/spawner/spawn.sh
 
-This was the basic configuration to make the service itself work.
+This is the basic configuration to make the service itself work.
 You should now be able to submit a project and launch a sandbox environment.
