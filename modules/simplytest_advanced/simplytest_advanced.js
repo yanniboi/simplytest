@@ -8,12 +8,21 @@
 
           // "Add an addtional module" function.
           $('#edit-additionals .form-item', advanced).each(function() {
+            // First hide all textfields, which have no default value set.
             if (!$('input', this).val()) {
               $(this).hide();
             }
+            // Add a remove link to each textfield, to hide and clear it.
+            $(this).append('<a class="remove-field" title="' + Drupal.t('Remove') + '">×</a>');
+            $('.remove-field', this).click(function() {
+              $(this).parent().slideUp();
+              $('input', $(this).parent()).val('');
+            });
           })
           $('#edit-add-additional', advanced).show().click(function(e) {
             e.preventDefault();
+            // Every time the add another button gets clicked, make another
+            // one of the textfields visible.
             $('#edit-additionals .form-item', advanced).each(function() {
               if (!$(this).is(':visible')) {
                 $(this).slideDown();
@@ -25,12 +34,21 @@
 
           // "Add a patch" function.
           $('#edit-patches .form-item', advanced).each(function() {
+            // First hide all textfields, which have no default value set.
             if (!$('input', this).val()) {
               $(this).hide();
             }
+            // Add a remove link to each textfield, to hide and clear it.
+            $(this).append('<a class="remove-field" title="' + Drupal.t('Remove') + '">×</a>');
+            $('.remove-field', this).click(function() {
+              $(this).parent().slideUp();
+              $('input', $(this).parent()).val('');
+            });
           })
           $('#edit-add-patch', advanced).show().click(function(e) {
             e.preventDefault();
+            // Every time the add another button gets clicked, make another
+            // one of the textfields visible.
             $('#edit-patches .form-item', advanced).each(function() {
               if (!$(this).is(':visible')) {
                 $(this).slideDown();

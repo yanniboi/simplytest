@@ -40,6 +40,18 @@
   margin-top: 5px;
 }
 
+#simplytest-submission-form #edit-advanced .fieldset-wrapper .form-type-textfield a {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  text-shadow: rgba(0, 0, 0, 0.3) 1px 1px 1px;
+}
+
+#simplytest-submission-form #edit-advanced .fieldset-wrapper .form-type-textfield a:hover {
+  text-shadow: rgba(0, 0, 0, 0.5) -1px -1px 3px;
+}
+
 #simplytest-submission-form #edit-advanced .fieldset-wrapper .fieldset-legend {
   font-size: 13px;
   font-weight: bold;
