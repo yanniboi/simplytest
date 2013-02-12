@@ -1444,7 +1444,22 @@ h3.comment-title a{
   transform:skew(3deg,2deg);
 }
 
-/* custom */
+/* Placeholder text styling */
+
+::-webkit-input-placeholder { /* WebKit browsers */
+  color: #999 !important;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color: #999 !important;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color: #999 !important;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+  color: #999 !important;
+}
+
+/* Random custom overrides */
 
 .column.D .widgets iframe {
   width: 130px !important;
