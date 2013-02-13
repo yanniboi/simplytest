@@ -17,18 +17,21 @@ function simplytest_submissions_config_form($form = array()) {
     '#title' => t('Submission timout'),
   );
   // Default submission timeout.
+  $default = variable_get('simplytest_submissions_timeout', 15);
   $form['submissions_timeout']['simplytest_submissions_timeout'] = array(
     '#type' => 'textfield',
     '#title' => t('Default submission usage time (minutes)'),
-    '#default_value' => variable_get('simplytest_submissions_timeout', 15),
+    '#default_value' => $default,
+    '#field_suffix' => '(' . format_interval($default * 60) . ')',
   );
   // Submission timeouts per role.
   foreach (user_roles() as $rid => $role) {
+    $timeout = variable_get('simplytest_submissions_timeout_' . $rid, $default);
     $form['submissions_timeout']['simplytest_submissions_timeout_' . $rid] = array(
       '#type' => 'textfield',
       '#title' => t('Submission usage time: %role', array('%role' => $role)),
-      '#default_value' => variable_get('simplytest_submissions_timeout_' . $rid,
-        variable_get('simplytest_submissions_timeout', 15)),
+      '#default_value' => $timeout,
+      '#field_suffix' => '(' . format_interval($timeout * 60) . ')',
     );
   }
 
