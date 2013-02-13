@@ -219,6 +219,46 @@ function simplytest_projects_get_versions($project) {
 }
 
 /**
+ * Checks whether a projects commit hash is valid and exists.
+ *
+ * @param string $project
+ *  The projects shortname to check the commit for.
+ * @param string $hash
+ *  The hash of a commit to validate.
+ *
+ * @return bool
+ *  TRUE if valid, FALSE otherwise.
+ */
+function simplytest_projects_check_commit_hash($project, $hash) {
+  // First check whether the string is a valid hash.
+  if ((strlen($hash) < 6) || preg_match('/[^a-z0-9]/i', $hash)) {
+    return FALSE;
+  }
+
+  // Need some project information.
+  $project_data = simplytest_projects_get_project($project);
+  if (!$project_data) {
+    return FALSE;
+  }
+
+  // Build URL to check the commits existance from.
+  if ($project_data['sandbox']) {
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $project_data['creator'] . '/' . $project . '.git';
+  }
+  else {
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
+  }
+
+  // Now check whether the commit actually exists by looking it up.
+  $response_status = simplytest_projects_get_http_status_code($drupalcode_url . '/' . $hash);
+  if ($response_status != 200 && $response_status != 301 && $response_status != 304) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
  * Fetches, saves and returns all available versions for a project.
  *
  * @param string $project
@@ -464,4 +504,50 @@ function simplytest_projects_get_project_type($term) {
     default:
       return FALSE;
   }
+}
+
+/**
+ * Makes a HTTP HEAD request to an specific URL and return the status code.
+ *
+ * @param string $url
+ *  The URL to send a request to.
+ *
+ * @return int
+ *  The HTTP status code of the response.
+ */
+function simplytest_projects_get_http_status_code($url) {
+  $response = simplytest_projects_get_headers($url);
+  // Get the HTTP status code from the response headers.
+  if (isset($response[0])) {
+    $response_status = (int) substr($response[0], 9, 3);
+  }
+  else {
+    $response_status = 0;
+  }
+  return $response_status;
+}
+
+/**
+ * Wrapper function for the PHP get_headers().
+ *
+ * This function makes sure that correct stream defaults like user-agent
+ * and http method set so the request wont be blocked by 404 forbidden
+ * on servers requiring a User-Agent header to be set.
+ *
+ * @param string $url
+ *  The URL to request the HTTP headers for.
+ *
+ * @return array
+ *  An associative array of headers, keyed by HTTP header key.
+ */
+function simplytest_projects_get_headers($url) {
+  stream_context_set_default(array(
+    'http' => array(
+      // Set HEAD request, instead of the default GET.
+      'method' => 'HEAD',
+      // Set a User-Agent header.
+      'user_agent' => 'PHP',
+    )
+  ));
+  return get_headers($url, TRUE);
 }

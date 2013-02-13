@@ -203,10 +203,8 @@ function simplytest_advanced_simplytest_submission_form_validate(&$form, &$form_
       continue;
     }
 
-    // Make a request to the patch url.
-    $response = simplytest_advanced_get_headers($patch, TRUE);
-    // Get status code.
-    $response_status = substr($response[0], 9, 3);
+    // Make a HEAD request to the patch url.
+    $response_status = simplytest_projects_get_http_status_code($patch);
 
     // Check whether we got a good response status.
     if ($response_status != 200 && $response_status != 301 && $response_status != 304) {
@@ -258,29 +256,4 @@ function simplytest_advanced_additionals_autcomplete() {
     }
   }
   drupal_json_output($matches);
-}
-
-/**
- * Wrapper function for the PHP get_headers().
- *
- * This function makes sure that correct stream defaults like user-agent
- * and http method set so the request wont be blocked by 404 forbidden
- * on servers requiring a User-Agent header to be set.
- *
- * @param string $url
- *  The URL to request the HTTP headers for.
- *
- * @return array
- *  An associative array of headers, keyed by HTTP header key.
- */
-function simplytest_advanced_get_headers($url) {
-  stream_context_set_default(array(
-    'http' => array(
-      // Set HEAD request, instead of the default GET.
-      'method' => 'HEAD',
-      // Set a User-Agent header.
-      'user_agent' => 'PHP',
-    )
-  ));
-  return get_headers($url, TRUE);
 }

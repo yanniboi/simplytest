@@ -60,13 +60,30 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
 
   // Check whether there are default values available.
   if ($project) {
+    // Prefill project field.
     $project = strtolower(trim($project));
     if (!empty($project)) {
+
       if ($version) {
+        // Prefill version field.
         $version = trim($version);
       }
+
       // Get available project versions.
       $versions = simplytest_launch_project_versions_options($project);
+
+      // Check whether there's a specific commit to checkout.
+      if (isset($_GET['commit'])) {
+        // We don't need a full commit hash to find the right one.
+        $commit = substr(trim($_GET['commit']), 0, 11);
+        if (simplytest_projects_check_commit_hash($project, $commit)) {
+          // Commit hash is valid? use it as version to prefill.
+          $version = $form['#commit'] = $commit;
+          // Adding it to the versions list is also required.
+          $versions['Commit'][$version] = $commit;
+        }
+      }
+
     }
   }
 
@@ -169,24 +186,30 @@ function simplytest_launch_simplytest_submission_form_validate(&$form, &$form_st
     drupal_goto('project/' . $project);
   }
 
-  // Check whether the selected version is valid / a version was chosen.
+  // Check whether the selected has any available releases.
   elseif (empty($versions['heads']) && empty($versions['tags'])) {
     form_set_error('project', t('The selected project %project has no available releases.',
       array('%project' => $project)
     ));
     drupal_goto('project/' . $project);
   }
+  // Check if there was even a version selected for the project.
   elseif (empty($version)) {
     form_set_error('project', t('No version was selected for the requested project.',
       array('%project' => $project)
     ));
     drupal_goto('project/' . $project);
   }
+  // Check whether the selected version is a known tag or branch.
   elseif (!isset($versions['tags'][$version]) && !isset($versions['heads'][$version])) {
-    form_set_error('project', t('There is no release available with the selected version %version.',
-      array('%version' => $version)
-    ));
-    drupal_goto('project/' . $project);
+    // Even if the selected version is no known tag or branch it's still
+    // possible that it's not a version but a specific commit.
+    if (!isset($form['#commit']) || $form['#commit'] != $version) {
+      form_set_error('project', t('There is no release available with the selected version %version.',
+        array('%version' => $version)
+      ));
+      drupal_goto('project/' . $project);
+    }
   }
 }
 
