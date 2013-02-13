@@ -26,6 +26,14 @@ define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://drupalcode.org/');
 define('SIMPLYTEST_PROJECTS_DRUPAL_ORG', 'http://drupal.org/');
 
 /**
+ * Drupal.org project types.
+ */
+define('SIMPLYTEST_PROJECTS_TYPE_CORE',   'Drupal core');
+define('SIMPLYTEST_PROJECTS_TYPE_MODULE', 'Module');
+define('SIMPLYTEST_PROJECTS_TYPE_THEME',  'Theme');
+define('SIMPLYTEST_PROJECTS_TYPE_DISTRO', 'Distribution');
+
+/**
  * Implements hook_menu().
  */
 function simplytest_projects_menu() {
@@ -87,15 +95,38 @@ function simplytest_projects_menu() {
  * @return array
  *  An assocciative array containing:
  *   - title: The human readable project title.
- *   - type: The projects type.
+ *   - type: The human readable project type.
  *   - creator: The drupal.org user who created it.
- *   - giturl: The project's git url.
- *   - sandbox: Whether it's a sandbox.
+ *   - giturl: The project's git URL.
+ *   - drupalcode_url: The projects webgit URL.
+ *   - sandbox: A boolean, whether it's a sandbox.
+ *   - versions: An associative array of versions containing:
+ *      - tags: Existing tags of the project.
+ *      - heads: Existing heads of the project.
+ *   - timestamp: The last time the versions where updated.
  */
 function simplytest_projects_get_project($project) {
-  // Get general information from database.
+  // Check the static cache for this function for data first.
+  static $static_cache;
+  if (isset($static_cache[$project])) {
+    // Found project data in cache.
+    return $static_cache[$project];
+  }
+  if (!is_array($static_cache)) {
+    // Initialize static cache array.
+    $static_cache = array();
+  }
+
+  // Get project information from database.
   $data = db_select('simplytest_projects', 'p')
-    ->fields('p', array('title', 'type', 'sandbox', 'creator'))
+    ->fields('p', array(
+      'title',
+      'type',
+      'sandbox',
+      'creator',
+      'versions',
+      'timestamp',
+    ))
     ->condition('shortname', $project)
     ->execute()->fetchObject();
 
@@ -103,26 +134,41 @@ function simplytest_projects_get_project($project) {
     // Need to fetch initial project data.
     $data = simplytest_projects_fetch_project($project);
     if ($data === FALSE) {
+      // Fetching initial data failed, also cache these results
+      // so it will not be retried within the same request.
+      $static_cache[$project] = FALSE;
       return FALSE;
     }
     $data = (object) $data;
   }
 
-  // Generate the git url to clone the project from.
+  // Build the git URL to clone the project from and the webgit URL.
   if ($data->sandbox) {
     $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX . $data->creator . '/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $data->creator . '/' . $project . '.git';
   }
   else {
     $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
   }
 
-  return array(
+  // Build the project data array to return.
+  $project_data = array(
     'title' => $data->title,
     'type' => $data->type,
     'creator' => $data->creator,
     'giturl' => $giturl,
+    'drupalcode_url' => $drupalcode_url,
     'sandbox' => (bool) $data->sandbox,
+    // If initial project data has just been fetched, this wont be available.
+    'versions' => empty($data->versions) ? NULL : unserialize($data->versions),
+    'timestamp' => empty($data->timestamp) ? 0 : (int) $data->timestamp,
   );
+
+  // Statically cache the data.
+  $static_cache[$project] = $project_data;
+
+  return $project_data;
 }
 
 /**
@@ -143,18 +189,24 @@ function simplytest_projects_get_project($project) {
  *   - sandbox: Whether it's a sandbox.
  */
 function simplytest_projects_search_project($string, $range = 100, $types = NULL) {
+  // Search it within the projects table.
   $query = db_select('simplytest_projects', 'p')
-    ->fields('p', array('title', 'shortname', 'type', 'sandbox'))
+    ->fields('p', array(
+      'title',
+      'shortname',
+      'type',
+      'sandbox',
+    ))
     ->orderBy('sandbox', 'ASC')
     ->range(0, $range);
 
-  // Search string in title and shortname.
+  // Add OR condition: Search string in title and shortname.
   $title_or_shortname = db_or()
     ->condition('title', db_like($string) . '%', 'LIKE')
     ->condition('shortname', db_like($string) . '%', 'LIKE');
   $query->condition($title_or_shortname);
 
-  // Filter for specific types.
+  // Filter for specific types, if needed.
   if ($types) {
     $types_or = db_or();
     foreach ($types as $type) {
@@ -163,7 +215,7 @@ function simplytest_projects_search_project($string, $range = 100, $types = NULL
     $query->condition($types_or);
   }
 
-  // Make the actual request.
+  // Execute the search query.
   $result = $query->execute()->fetchAll();
 
   // Filter out blacklisted projects.
@@ -201,19 +253,22 @@ function simplytest_projects_get_versions($project) {
       return FALSE;
     }
   }
-  // Try to get current version data out of database.
+
+  // Get project information.
+  $project_data = simplytest_projects_get_project($project);
+  if (!$project_data) {
+    // If there's no such project, we don't need to try fetching its versions.
+    return FALSE;
+  }
+
+  // Check whether the projects version information is not too old.
   $timeout = strtotime(variable_get('simplytest_projects_version_timeout', '-1 hour'));
-  $result = db_select('simplytest_projects', 'p')
-    ->fields('p', array('versions'))
-    ->condition('shortname', $project)
-    ->condition('timestamp', $timeout, '>')
-    ->execute()->fetchField();
-  // Found recent results in database.
-  if ($result) {
-    return unserialize($result);
+  if ($project_data['timestamp'] > $timeout) {
+    // Return the known version information.
+    return $project_data['versions'];
   }
   else {
-    // Need to fetch fresh results.
+    // Need to fetch fresh version information.
     return simplytest_projects_fetch_versions($project);
   }
 }
@@ -241,16 +296,8 @@ function simplytest_projects_check_commit_hash($project, $hash) {
     return FALSE;
   }
 
-  // Build URL to check the commits existance from.
-  if ($project_data['sandbox']) {
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $project_data['creator'] . '/' . $project . '.git';
-  }
-  else {
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
-  }
-
   // Now check whether the commit actually exists by looking it up.
-  $response_status = simplytest_projects_get_http_status_code($drupalcode_url . '/' . $hash);
+  $response_status = simplytest_projects_get_http_status_code($project_data['drupalcode_url'] . '/' . $hash);
   if ($response_status != 200 && $response_status != 301 && $response_status != 304) {
     return FALSE;
   }
@@ -273,15 +320,8 @@ function simplytest_projects_fetch_versions($project) {
   // Check whether project is known in database.
   $project_data = simplytest_projects_get_project($project);
 
-  if ($project_data['sandbox']) {
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $project_data['creator'] . '/' . $project . '.git';
-  }
-  else {
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
-  }
-
   // Fetch tags by request.
-  $result = drupal_http_request($drupalcode_url . '/tags');
+  $result = drupal_http_request($project_data['drupalcode_url'] . '/tags');
   if (!isset($result->data) || $result->code != 200) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Requested tags).', array(
       '%project' => $project,
@@ -298,7 +338,7 @@ function simplytest_projects_fetch_versions($project) {
   }
 
   // Fetch branches by request.
-  $result = drupal_http_request($drupalcode_url . '/heads');
+  $result = drupal_http_request($project_data['drupalcode_url'] . '/heads');
   if (!isset($result->data) || $result->code != 200) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Requested heads).', array(
       '%project' => $project,
@@ -329,12 +369,13 @@ function simplytest_projects_fetch_versions($project) {
     }
   }
 
+  // Build the final versions array to save and return.
   $versions = array(
     'tags' => drupal_map_assoc($tags[1]),
     'heads' => drupal_map_assoc($heads[1]),
   );
 
-  // Save fresh data to database.
+  // Save the fresh data to database.
   $found = db_update('simplytest_projects')
     ->fields(array(
       'timestamp' => REQUEST_TIME,
@@ -356,15 +397,16 @@ function simplytest_projects_fetch_versions($project) {
  * @param string $project
  *  The project's shortname to fetch information for.
  *
- * @return object
- *  A standard object containing:
+ * @return array
+ *  An associative array containing:
  *   - title: Human readable project title
  *   - sandbox: Boolean whether it's a sandbox project.
  *   - type: What the projects type is.
  *   - creator: The projects creator.
  */
 function simplytest_projects_fetch_project($project) {
-  // Try as full project.
+  // To find out whether the project is a full one or not - we have to try.
+  // Try as full project first.
   $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'project/' . $project);
   $sandbox = FALSE;
   if ($result->code == 404 && is_numeric($project)) {
@@ -389,16 +431,16 @@ function simplytest_projects_fetch_project($project) {
   }
   $title = $title[1][0];
 
-  // Try to match out the project type.
+  // Try to match out the project type by term.
   preg_match_all('! active[^<]*"><a href="/project/[^<]*" class="[^<]*active">([^<]*)</a></li>!', $result->data, $type);
   if(isset($type[1][0])) {
-    $type = $type[1][0];
+    $term = $type[1][0];
   }
   else {
     watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch type).', array(
       '%project' => $project,
     ), WATCHDOG_WARNING);
-    $type = NULL;
+    $term = NULL;
   }
 
   // Try to match out the creator name.
@@ -433,7 +475,7 @@ function simplytest_projects_fetch_project($project) {
     return FALSE;
   }
 
-  // Build, log and save the new project data.
+  // Build an array of all the new project data.
   $data = array(
     'title' => $title,
     'shortname' => $project,
@@ -446,6 +488,7 @@ function simplytest_projects_fetch_project($project) {
     '%project' => $project,
   ), WATCHDOG_NOTICE);
 
+  // Now save the information about this project to database.
   db_insert('simplytest_projects')
     ->fields($data)
     ->execute();
@@ -461,13 +504,15 @@ function simplytest_projects_xml_insert_project($xml) {
   if (!isset($xml->terms->term[0]->value)) {
     return FALSE;
   }
-  $type_term = (string) $xml->terms->term[0]->value;
+  $term = (string) $xml->terms->term[0]->value;
   $type = simplytest_projects_get_project_type($term);
 
   if ($type === FALSE) {
+    // We don't import unsupported project types.
     return FALSE;
   }
 
+  // Build an associative array of the projects data from the XML file.
   $data = array(
     'title' => (string) $xml->title,
     'shortname' => (string) $xml->short_name,
@@ -479,6 +524,7 @@ function simplytest_projects_xml_insert_project($xml) {
     'creator' => (string) substr(substr($xml->link, 26), 0, -(strlen($xml->short_name) + 1)),
   );
 
+  // Save this project information into database.
   db_insert('simplytest_projects')
     ->fields($data)
     ->execute();
@@ -486,20 +532,26 @@ function simplytest_projects_xml_insert_project($xml) {
 
 /**
  * Finds out the readable project type by term.
+ *
+ * @param string $term
+ *  A drupal.org project term.
+ *
+ * @param string
+ *  The corresponding project type.
  */
 function simplytest_projects_get_project_type($term) {
-  switch ($type_term) {
-    case 'Drupal core':
-      return 'Drupal core';
+  switch (strtolower(trim($term))) {
+    case 'drupal core':
+      return SIMPLYTEST_PROJECTS_TYPE_CORE;
 
-    case 'Modules':
-      return 'Module';
+    case 'modules':
+      return SIMPLYTEST_PROJECTS_TYPE_MODULE;
 
-    case 'Themes':
-      return 'Theme';
+    case 'themes':
+      return SIMPLYTEST_PROJECTS_TYPE_THEME;
 
-    case 'Distributions':
-      return 'Distribution';
+    case 'distributions':
+      return SIMPLYTEST_PROJECTS_TYPE_DISTRO;
 
     default:
       return FALSE;
