@@ -11,6 +11,9 @@ source "$DIRECTORY/config"
 # Include prepare script.
 source "$DIRECTORY/sources/prepare"
 
+# Make sure drush temporary directory is writable.
+chmod 777 /tmp/drush
+
 ##
 # Reads a value from a .info file
 #
