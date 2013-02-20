@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Make sure all arguments are given.
-if [[ "$#" -lt 1 ]]; then 
+if [[ "$#" -lt 1 ]]; then
   echo "$0 [path to configuration file]"
   exit 1
 fi
@@ -18,6 +18,9 @@ DIRECTORY="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Get arguments.
 S_CONFIGURATION=$2
+
+# Load submission configuration.
+source "$S_CONFIGURATION"
 
 # !!! Start build script WITH ROOT PERMISSIONS.
 # To do this without beeing root, add these lines to your sudoers file by visudo:
