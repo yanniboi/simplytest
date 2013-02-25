@@ -45,7 +45,7 @@ s_project_fetch_dependencies() {
   if [[ -e "/home/$S_ID/$S_PROJECT/simplytest.make" ]]; then
     lg "-> Chosen makefile: simplytest.make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete "/home/$S_ID/$S_PROJECT/simplytest.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/simplytest.make" "/home/$S_ID/www" -y
     # Make sure the profile is available.
     if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT" ]]; then
       cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
@@ -55,7 +55,7 @@ s_project_fetch_dependencies() {
   elif [[ -n $build_make ]]; then
     lg "-> Chosen makefile: $build_make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete "/home/$S_ID/$S_PROJECT/$build_make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/$build_make" "/home/$S_ID/www" -y
     # Make sure the profile is available.
     if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT" ]]; then
       cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
@@ -69,7 +69,7 @@ s_project_fetch_dependencies() {
       echo "includes[] = drupal-org.make" >> "/home/$S_ID/$S_PROJECT/drupal-org-core.make"
     fi
     # Build site by makefile.
-    timeout 500 drush make --force-complete "/home/$S_ID/$S_PROJECT/drupal-org-core.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/drupal-org-core.make" "/home/$S_ID/www" -y
     # Move files to profiles folder.
     cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
     # If no drupal-org.make file is available resolve dependencies manually.
@@ -86,7 +86,7 @@ s_project_fetch_dependencies() {
       core = $S_CORE.x
       projects[drupal][type] = core" >> "/home/$S_ID/$S_PROJECT/drupal-org.make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete "/home/$S_ID/$S_PROJECT/drupal-org.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/drupal-org.make" "/home/$S_ID/www" -y
     # Move files to profiles folder.
     cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
 
