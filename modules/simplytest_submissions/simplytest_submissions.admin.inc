@@ -75,11 +75,9 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
     $rows[] = array(
       // Cells.
       'data' => array(
-        l($submission['id'], 'goto/' . $submission['id']),
+        l($submission['id'], 'admin/simplytest/submissions/' . $submission['id']),
         $state_text,
-        '<em>' . $submission['server'] . '</em>',
-        check_plain($submission['ip']),
-        format_date($submission['timestamp']),
+        l($submission['server'] . ' ↗', 'goto/' . $submission['id']),
         l(format_string('!title (!version)', array(
           '!title' => $submission['title'],
           '!version' => $submission['version'],
@@ -98,8 +96,6 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
       'id' => t('Id'),
       'state' => t('State'),
       'server' => t('Server'),
-      'ip' => t('IP'),
-      'timestamp' => t('Date/Time'),
       'title' => t('Project title'),
       'type' => t('Category'),
     ),
@@ -170,4 +166,127 @@ function simplytest_submissions_monitor_submit($form, $form_state) {
     'ip' => $form_state['values']['ip'],
     'state' => $form_state['values']['state'],
   ));
+}
+
+/**
+ * Submission detail page.
+ */
+function simplytest_submissions_view($sid) {
+  // Get submissions data.
+  $submission = db_select('simplytest_submissions', 'p')
+    ->fields('p', array('number', 'id', 'state', 'ip', 'timestamp', 'data', 'server'))
+    ->condition('id', $sid)
+    ->execute()->fetchObject();
+  $submission->data = unserialize($submission->data);
+  if (!$submission) {
+    return drupal_not_found();
+  }
+
+  $state_text = simplytest_submissions_state_to_string($submission->state);
+
+  drupal_set_title(t('Submission: @id', array('@id' => $submission->id)));
+
+  $build = array();
+  $rows = array(
+    array(
+      array(
+        'data' => t('Number'),
+        'header' => TRUE,
+      ),
+      '#' . $submission->number,
+    ),
+    array(
+      array(
+        'data' => t('Date'),
+        'header' => TRUE,
+      ),
+      format_date($submission->timestamp, 'short'),
+    ),
+    array(
+      array(
+        'data' => t('State'),
+        'header' => TRUE,
+      ),
+      $state_text . ' (' . $submission->state . ')',
+    ),
+    array(
+      array(
+        'data' => t('User IP'),
+        'header' => TRUE,
+      ),
+      check_plain($submission->ip),
+    ),
+    array(
+      array(
+        'data' => t('Server ID'),
+        'header' => TRUE,
+      ),
+      ($submission->server) ? l($submission->server . ' ↗', 'goto/' . $sid) : t('none'),
+    ),
+    array(
+      array(
+        'data' => t('Project shortname'),
+        'header' => TRUE,
+      ),
+      l($submission->data['project'], 'http://drupal.org/project/' . $submission->data['project']),
+    ),
+    array(
+      array(
+        'data' => t('Project title'),
+        'header' => TRUE,
+      ),
+      check_plain($submission->data['title']),
+    ),
+    array(
+      array(
+        'data' => t('Project type'),
+        'header' => TRUE,
+      ),
+      check_plain($submission->data['type']),
+    ),
+    array(
+      array(
+        'data' => t('Project version'),
+        'header' => TRUE,
+      ),
+      check_plain($submission->data['version']),
+    ),
+    array(
+      array(
+        'data' => t('Duration'),
+        'header' => TRUE,
+      ),
+      format_interval($submission->data['timeout'] * 60),
+    ),
+  );
+
+  if (isset($submission->data['additionals'])) {
+    foreach ($submission->data['additionals'] as $id => $additional) {
+      $rows[] = array(
+        array(
+          'data' => t('Additional project #@n', array('@n' => $id)),
+          'header' => TRUE,
+        ),
+        l($additional, 'http://drupal.org/project/' . $additional),
+      );
+    }
+  }
+
+  if (isset($submission->data['patches'])) {
+    foreach ($submission->data['patches'] as $id => $patch) {
+      $rows[] = array(
+        array(
+          'data' => t('Patch #@n', array('@n' => $id)),
+          'header' => TRUE,
+        ),
+        l($patch, $patch),
+      );
+    }
+  }
+
+  $build['submission_table'] = array(
+    '#theme' => 'table',
+    '#rows' => $rows,
+  );
+  return $build;
 }

@@ -55,6 +55,14 @@ function simplytest_submissions_menu() {
     'access arguments' => array('administer simplytest'),
     'file' => 'simplytest_submissions.admin.inc',
   );
+  // Shows a submissions details.
+  $items['admin/simplytest/submissions/%'] = array(
+    'title' => 'Submission detail',
+    'page callback' => 'simplytest_submissions_view',
+    'page arguments' => array(3),
+    'access arguments' => array('administer simplytest'),
+    'file' => 'simplytest_submissions.admin.inc',
+  );
   // State update callback.
   $items['simplytest/submissions/state/%/%'] = array(
     'page callback' => 'simplytest_submissions_set_state',
@@ -327,7 +335,7 @@ function simplytest_submissions_states() {
  *  The submissions state to set.
  */
 function _simplytest_submissions_state_log($id, $state) {
-  
+
   // Error state to log?
   if ($state >= SIMPLYTEST_SUBMISSIONS_ERROR_SERVER) {
     $severity = WATCHDOG_ERROR;
