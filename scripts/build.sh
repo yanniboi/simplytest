@@ -9,7 +9,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Make sure all arguments are given.
-if [[ "$#" -ne 1 ]]; then 
+if [[ "$#" -ne 1 ]]; then
   echo "$0 [path to configuration file]"
   exit 1
 fi
@@ -50,14 +50,14 @@ s_project_download
 lg "Fetch dependencies.."
 s_project_fetch_dependencies
 
-lg "Download additional projects.."
-s_project_dl_additionals
-
 ### INSTALL.
 s_ste 104
 
 lg "Installing project.."
 s_project_install
+
+lg "Download additional projects.."
+s_project_dl_additionals
 
 ### FINALIZE.
 s_ste 105

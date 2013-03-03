@@ -514,7 +514,7 @@ s_resolve_dependencies() {
 s_project_dl_additionals() {
   for key in "${!S_ADDITIONALS[@]}"
   do
-    timeout 120 drush dl --gitinfofile -y "${S_ADDITIONALS[$key]}"
+    timeout 120 drush dl --gitinfofile --root="/home/$S_ID/www" -y "${S_ADDITIONALS[$key]}"
   done
 }
 
