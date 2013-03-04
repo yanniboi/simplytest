@@ -175,17 +175,17 @@ s_get_coreversion() {
   if [ -e "/home/$S_ID/www/core/install.php" ] # Core files were moved from root to core/.
   then
     echo "8"
-  
+
   # Check for Drupal 7.
   elif [ -e "/home/$S_ID/www/authorize.php" ] # authorize.php for module ftp upload/installation was added.
   then
     echo "7"
-  
+
   # Check for Drupal 6.
   elif [ -e "/home/$S_ID/www/misc/tabledrag.js" ] # Tabledrag was added.
   then
     echo "6"
-  
+
   # Unknown version.
   else
     echo "X"
