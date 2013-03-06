@@ -18,6 +18,8 @@ s_project_download() {
   rm -rf "/home/$S_ID/www"
   # Now clone it.
   s_fetch_project "$S_PROJECT" "$S_GITURL" "/home/$S_ID/www"
+  # Create a sites/all directory for drush 6 with drupal 8.
+  mkdir "/home/$S_ID/www/sites/all"
 
   # Checkout specified version and remove .git.
   lg "Set version.."
