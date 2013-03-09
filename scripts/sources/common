@@ -491,7 +491,7 @@ declare -A __RESOLVED_DEPENDENCIES
 s_resolve_dependencies() {
   cd "$2"
   # Find all info files within the path.
-  local info_files=$(find . -name '.*\.info\(\.yml\)?')
+  local info_files=$(find . -regex '.*\.info\(\.yml\)?')
   for info_file in $info_files; do
     # Read out dependencies (dependencies = "", base theme = "").
     local cur_dependencies=$(s_read_dependencies "$info_file")
@@ -504,7 +504,7 @@ s_resolve_dependencies() {
         # Mark current dependency as resolved.
         __RESOLVED_DEPENDENCIES[$cur_dependency]="1"
         # Dependency is not already resolved? (prevent infinite recursion).
-        if [[ -z $(find . -name "$cur_dependency\.info\(\.yml\)?") ]]; then
+        if [[ -z $(find . -regex "$cur_dependency\.info\(\.yml\)?") ]]; then
           local cur_real_dependency=$cur_dependency
           local cur_recursive_dependency=$cur_dependency
           # Try to resolve dependency by project alias list (eg. content -> cck).
@@ -522,7 +522,7 @@ s_resolve_dependencies() {
           # If that succeeded, resolve dependencies of the dependency (recursion).
           if [[ -n "$result" ]]; then
             lg "-> Successfully resolved $cur_real_dependency (Project: $cur_dependency)."
-            s_resolve_dependencies "$1" $(dirname $(find "$1" -name "$cur_dependency\.info\(\.yml\)?" | sort | head -n 1))
+            s_resolve_dependencies "$1" $(dirname $(find "$1" -regex "$cur_dependency\.info\(\.yml\)?" | sort | head -n 1))
           fi
         fi
         # Back to root dir.
