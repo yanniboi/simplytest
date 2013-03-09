@@ -522,7 +522,7 @@ s_resolve_dependencies() {
           # If that succeeded, resolve dependencies of the dependency (recursion).
           if [[ -n "$result" ]]; then
             lg "-> Successfully resolved $cur_real_dependency (Project: $cur_dependency)."
-            s_resolve_dependencies "$1" $(dirname $(find "$1" -regex "$cur_dependency\.info\(\.yml\)?" | sort | head -n 1))
+            s_resolve_dependencies "$1" $(dirname $(find "$1" -regex "$cur_recursive_dependency\.info\(\.yml\)?" | sort | head -n 1))
           fi
         fi
         # Back to root dir.
