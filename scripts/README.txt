@@ -60,6 +60,9 @@ PHP5 CGI:
   php5-suhosin
   php5-gd
 
+PYTHON:
+  pyyaml
+
 MySQL:
   mysql-client
   mysql-server

@@ -5,6 +5,9 @@
 # project-build script to include depending on the projects type (see bottom).
 ##
 
+# Path to the python scripts directory.
+S_PYTH="$DIRECTORY/py"
+
 # Load config.
 source "$DIRECTORY/config"
 
@@ -15,7 +18,7 @@ source "$DIRECTORY/sources/prepare"
 chmod 777 /tmp/drush
 
 ##
-# Reads a value from a .info file
+# Reads a value from a .info/.info.yml file
 #
 # @param $1
 #  Info filepath to read from.
@@ -24,12 +27,18 @@ chmod 777 /tmp/drush
 s_info_file_get() {
   # Make sure info files are unix encoded before reading them.
   dos2unix -q "$1"
+  # get the extension.
+  local extension="${1##*.}"
   # Cut out the value.
-  grep -m 1 "$2[ ]*=" "$1" | sed 's/^ *//g' | sed -n "s/$2[^=]*=[ ]*//p" | sed "s/[\"|\']//g"
+  if [ "$extension" == "info" ]; then
+    grep -m 1 "$2[ ]*=" "$1" | sed 's/^ *//g' | sed -n "s/$2[^=]*=[ ]*//p" | sed "s/[\"|\']//g"
+  elif [ "$extension" == "yml" ]; then
+    "$S_PYTH/read_yaml_info.py" "$1" "$2" | head -n 1
+  fi
 }
 
 ##
-# Reads all values from a .info file.
+# Reads all values from a .info/.info.yml file.
 #
 # @param $1
 #  Info filepath to read from.
@@ -38,8 +47,14 @@ s_info_file_get() {
 s_info_file_get_all() {
   # Make sure info files are unix encoded before reading them.
   dos2unix -q "$1"
-  # Cut out the values.
-  cat "$1" | grep "$2\[\][ ]*" | sed 's/^ *//g' | sed -n "s/$2[^=]*=[ ]*//p" | sed "s/[\"|\']//g"
+  # get the extension.
+  local extension="${1##*.}"
+  # Cut out the value.
+  if [ "$extension" == "info" ]; then
+    cat "$1" | grep "$2\[\][ ]*" | sed 's/^ *//g' | sed -n "s/$2[^=]*=[ ]*//p" | sed "s/[\"|\']//g"
+  elif [ "$extension" == "yml" ]; then
+    "$S_PYTH/read_yaml_info.py" "$1" "$2"
+  fi
 }
 
 ##
@@ -148,7 +163,7 @@ s_set_version() {
 # @param $1
 #  Path to the projects directory.
 s_get_project_filename() {
-  ls -l "$1" | grep -m 1 -o "[_a-zA-Z0-9]*.info$" | sed -n 's/.info//p'
+  ls -l "$1" | grep -m 1 -o "[_a-zA-Z0-9]*.info.*$" | sed -n 's/.info.*//p'
 }
 
 ##
@@ -415,7 +430,7 @@ s_addsnippet() {
 }
 
 ##
-# Rewrites all .info files in the specified directory.
+# Rewrites all .info/info.yml files in the specified directory.
 #
 # @param $1
 #  Directory to rewrite all .info files from.
@@ -424,7 +439,7 @@ s_addsnippet() {
 # @param $3
 #  Project value to insert.
 s_rewrite_info_files() {
-  # Find all info files within the path.
+  # Find all .info files within the path.
   local info_files=$(find "$1" -name '*.info')
   for info_file in $info_files; do
     echo "
@@ -432,6 +447,17 @@ s_rewrite_info_files() {
 ; Information added by simplytest.me build script
 version = \"$2\"
 project = \"$3\"
+" >> "$info_file"
+  done
+
+  # Find all .info.yml files within the path.
+  local info_files=$(find "$1" -name '*.info.yml')
+  for info_file in $info_files; do
+    echo "
+
+# Information added by simplytest.me build script
+version: \"$2\"
+project: \"$3\"
 " >> "$info_file"
   done
 }
@@ -465,7 +491,7 @@ declare -A __RESOLVED_DEPENDENCIES
 s_resolve_dependencies() {
   cd "$2"
   # Find all info files within the path.
-  local info_files=$(find . -name '*.info')
+  local info_files=$(find . -name '.*\.info\(\.yml\)?')
   for info_file in $info_files; do
     # Read out dependencies (dependencies = "", base theme = "").
     local cur_dependencies=$(s_read_dependencies "$info_file")
@@ -478,7 +504,7 @@ s_resolve_dependencies() {
         # Mark current dependency as resolved.
         __RESOLVED_DEPENDENCIES[$cur_dependency]="1"
         # Dependency is not already resolved? (prevent infinite recursion).
-        if [[ -z $(find . -name "$cur_dependency.info") ]]; then
+        if [[ -z $(find . -name "$cur_dependency\.info\(\.yml\)?") ]]; then
           local cur_real_dependency=$cur_dependency
           local cur_recursive_dependency=$cur_dependency
           # Try to resolve dependency by project alias list (eg. content -> cck).
@@ -496,7 +522,7 @@ s_resolve_dependencies() {
           # If that succeeded, resolve dependencies of the dependency (recursion).
           if [[ -n "$result" ]]; then
             lg "-> Successfully resolved $cur_real_dependency (Project: $cur_dependency)."
-            s_resolve_dependencies "$1" $(dirname $(find "$1" -name "$cur_recursive_dependency.info" | sort | head -n 1))
+            s_resolve_dependencies "$1" $(dirname $(find "$1" -name "$cur_dependency\.info\(\.yml\)?" | sort | head -n 1))
           fi
         fi
         # Back to root dir.
@@ -525,7 +551,7 @@ s_project_dl_additionals() {
 # @return
 #  Relative path to the found info file.
 s_discover_info_file() {
-  find "$1" -name '*.info' | head -n 1
+  find "$1" -regex '.*\.info\(\.yml\)?' | head -n 1
 }
 
 ##

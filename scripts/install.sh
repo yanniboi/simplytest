@@ -96,6 +96,10 @@ apt-get install -y php5-suhosin
 apt-get install -y php5-gd
 apt-get install -y php5-mysql
 
+echo ">>>> Install python libraries"
+apt-get install python-setuptools
+easy_install pyyaml
+
 echo ">>>> Install MySQL."
 echo "mysql-server-5.5 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
 echo "mysql-server-5.5 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections
@@ -116,7 +120,7 @@ pear upgrade --force Console_Getopt
 pear upgrade --force pear
 pear upgrade-all
 pear channel-discover pear.drush.org
-pear install drush/drush-5.7.0
+pear install drush/drush-6.9.0
 
 echo ">>>> Setup apache."
 a2enmod suexec
