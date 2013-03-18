@@ -12,7 +12,6 @@ register_shutdown_function(function() {
       if (strstr($header, 'content-type:') !== FALSE) {
         if (strstr($header, 'content-type: text/html') !== FALSE) {
           // Everything is fine, print the snippet.
-          // Print infobar.
           _simplytest_snippet_infobar($simplytest_snippet);
           return;
         }
@@ -34,157 +33,178 @@ function _simplytest_snippet_infobar($variables) {
   // Calculate time left in seconds and pass it into the js.
   $seconds = ($timeout * 60 + $created_timestamp) - time();
   ?>
-  <html><head><style type="text/css" media="all">
-  .simplytest-snippet-infobar * {
-    margin: 0;
-    padding: 0;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.2;
-    color: #fff !important;
-    background-color: transparent;
-  }
-  .simplytest-snippet-infobar {
-    position: fixed;
-    z-index: 999999;
-    bottom: 0px;
-    left: 0px;
-    width: 100%;
-    background-color: #1B557A;
-    border-top: #C0C5FF dashed 1px;
-    padding-top: 3px;
-  }
-  .simplytest-snippet-countdown {
-    margin-left: 10px;
-    font-weight: bold;
-  }
-  .simplytest-snippet-title {
-    margin-left: 10px;
-  }
-  .simplytest-snippet-back {
-    float: right;
-    margin-right: 10px;
-  }
-  </style></head><body>
-  <div class="simplytest-snippet-infobar">
-    <span class="simplytest-snippet-countdown" title="Time left">
-      <span id="simplytest_snippet_countdown_timer"></span>
-    </span>
-    <span class="simplytest-snippet-title">
-      <?php print $save_project; ?> <?php print $save_version; ?>
-    </span>
-    </span>
-    <span class="simplytest-snippet-back">
-      Back to <strong>
-        <a href="<? print 'http://simplytest.me/project/' . urlencode($project) . '/' . urlencode($version); ?>">
-          simplytest.me
-        </a>
-      </strong>
-    </span>
-  </div>
-  <script>
-  var simplytest_counter = function () {
-	  var keep_counting = 1;
-	  var no_time_left_message = 'Time over!';
-   
-	  function countdown() {
-		  if(time_left < 2) {
-			  keep_counting = 0;
-		  }
-   
-		  time_left = time_left - 1;
-	  }
-   
-	  function add_leading_zero(n) {
-		  if(n.toString().length < 2) {
-			  return '0' + n;
-		  } else {
-			  return n;
-		  }
-	  }
-   
-	  function format_output() {
-		  var hours, minutes, seconds;
-		  seconds = time_left % 60;
-		  minutes = Math.floor(time_left / 60) % 60;
-		  hours = Math.floor(time_left / 3600);
-   
-		  seconds = add_leading_zero( seconds );
-		  minutes = add_leading_zero( minutes );
-		  hours = add_leading_zero( hours );
-   
-		  return hours + ':' + minutes + ':' + seconds;
-	  }
-   
-	  function show_time_left() {
-		  document.getElementById(output_element_id).innerHTML = format_output();
-	  }
-   
-	  function no_time_left() {
-		  document.getElementById(output_element_id).innerHTML = no_time_left_message;
-		  window.location = 'http://simplytest.me/';
-	  }
-   
-	  return {
-		  count: function () {
-			  countdown();
-			  show_time_left();
-		  },
-		  timer: function () {
-			  simplytest_counter.count();
-   
-			  if(keep_counting) {
-				  setTimeout("simplytest_counter.timer();", 1000);
-			  } else {
-				  no_time_left();
-			  }
-		  },
-		  setTimeLeft: function (t) {
-			  time_left = t;
-			  if(keep_counting == 0) {
-				  simplytest_counter.timer();
-			  }
-		  },
-		  init: function (t, element_id) {
-			  time_left = t;
-			  output_element_id = element_id;
-			  simplytest_counter.timer();
-		  }
-	  };
-  }();
-  simplytest_counter.init(<?php echo $seconds ?>, 'simplytest_snippet_countdown_timer');
-  if (document.getElementById('edit-name') !== null && document.getElementById('edit-pass') !== null) {
-    document.getElementById('edit-name').value="<?php echo $admin_user ?>";
-    document.getElementById('edit-pass').value="<?php echo $admin_password ?>";
-  }
-  if (document.getElementById('edit-account-name') !== null && document.getElementById('edit-account-pass-pass1') !== null) {
-    document.getElementById('edit-account-name').value="<?php echo $admin_user ?>";
-    document.getElementById('edit-account-pass-pass1').value="<?php echo $admin_password ?>";
-    document.getElementById('edit-account-pass-pass2').value="<?php echo $admin_password ?>";
-  }
-  if (document.getElementById('edit-mysql-database') !== null) {
-    document.getElementById('edit-mysql-database').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-mysql-username') !== null) {
-    document.getElementById('edit-mysql-username').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-mysql-password') !== null) {
-    document.getElementById('edit-mysql-password').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-db-path') !== null) {
-    document.getElementById('edit-db-path').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-db-user') !== null) {
-    document.getElementById('edit-db-user').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-db-pass') !== null) {
-    document.getElementById('edit-db-pass').value="<?php echo $mysql ?>";
-  }
-  if (document.getElementById('edit-site-mail') !== null) {
-    document.getElementById('edit-site-mail').value="<?php echo $id . $mail_suffix ?>";
-  }
-  if (document.getElementById('edit-account-mail') !== null) {
-    document.getElementById('edit-account-mail').value="<?php echo $id . $mail_suffix ?>";
-  }
-  </script></body></html>
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width">
+      <style type="text/css" media="all">
+        #simplytest-snippet-container * {
+            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size:1em;
+            line-height: 1.2;
+            color: #fff;
+        }
+        #simplytest-snippet-container {
+            position:fixed;
+            bottom: 0;
+            cursor:default;
+            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size:1em;
+            line-height: 1.2;
+            color: #fff !important;
+            z-index: 9999999999;
+            font-weight:bold;
+            padding: 0 5px;
+            background-color: rgb(155,155,155);
+            background-color: rgba(0,0,0,0.2);
+            color: white; text-shadow: black 0.1em 0.1em 0.2em, black 0.1em 0.1em 0.2em;
+            border: 1px solid transparent;
+            border-radius:5px;
+        }
+        #simplytest-snippet-container.st-warn{
+            background-color: #D86761;
+            border: 1px solid #BD362F;
+        }
+        #simplytest-snippet-infobar.st-hide{
+           display: none;
+        }
+        #simplytest-snippet-open {
+            display: none;
+            font-size: 19px;
+            cursor:pointer;
+        }
+        #simplytest-snippet-open.st-show{
+            display: inline;
+        }
+        #simplytest-snippet-close{
+            cursor:pointer;
+        }
+        #simplytest-snippet-close:hover{
+            color:red;
+        }
+        #simplytest-snippet-backlink {
+            margin-left: 10px;
+            margin-right: 10px;
+            text-decoration:none;
+        }
+        @media only screen and (max-width: 18.125em) {
+            #simplytest-snippet-backlink {
+                display:none;
+            }
+        }
+      </style>
+    </head>
+    <body>
+      <div id="simplytest-snippet-container">
+        <span id="simplytest-snippet-infobar">
+          <span id="simplytest-snippet-countdown-time"></span>
+          <a href="<? print 'http://simplytest.me/project/' . urlencode($project) . '/' . urlencode($version); ?>" id="simplytest-snippet-backlink" title="Back to simplytest.me"><?php print $save_project; ?> <?php print $save_version; ?></a>
+          <span id="simplytest-snippet-close" title="Hide bar">&#x2718;</span>
+        </span>
+        <span id="simplytest-snippet-open" title="Show bar">&#8801;</span>
+      </div>
+      <script>
+        (function () {
+          "use strict";
+
+          // Don't display the bar inside iframes.
+          if (window.self !== window.top) {
+            document.getElementById('simplytest-snippet-container').style.display = 'none';
+            return;
+          }
+
+          // getElementById alias.
+          var get = function(id) {
+            return document.getElementById(id);
+          };
+
+          // The countdown timer.
+          var counter = function() {
+            var end, delta, counter_element;
+
+            function formatNumber(n) {
+              return ((n < 10) ? "0" : "") + n;
+            };
+            function updateCountDown() {
+              delta = end - (new Date().getTime());
+
+              if (delta <= 60000) { // warn when 1 min left
+                bar_container.className = 'st-warn';
+              }
+              if (delta >=0){
+                var d = new Date(delta);
+                var hh = formatNumber(d.getUTCHours());
+                var mm = formatNumber(d.getUTCMinutes());
+                var ss = formatNumber(d.getUTCSeconds());
+                counter_element.innerHTML = hh + ':' + mm + ':' + ss;
+              } else {
+                counter_element.innerHTML = 'Time over!';
+                window.location = 'http://simplytest.me/';
+              }
+            };
+            return {
+              init: function (seconds, counter_id) {
+                counter_element = get(counter_id);
+                end = new Date().getTime() + (1000 * seconds);
+                updateCountDown();
+                setInterval(updateCountDown, 990);
+              }
+            };
+          }();
+          // Initialize countdown.
+          counter.init(<?php echo $seconds ?>, 'simplytest-snippet-countdown-time');
+
+          var bar_container = get('simplytest-snippet-container');
+          var bar_element = get('simplytest-snippet-infobar');
+          var bar_close = get('simplytest-snippet-close');
+          var bar_open = get('simplytest-snippet-open');
+          var toggle = false;
+
+          // Bar hide/show toggling.
+          var toggle_simplytest_infobar = function (e){
+            if (e) { e.preventDefault(); }
+            bar_element.className = (toggle) ? '' : 'st-hide';
+            bar_open.className = (toggle) ? '' : 'st-show';
+            toggle = !toggle;
+          };
+          bar_close.onclick = toggle_simplytest_infobar;
+          bar_open.onclick = toggle_simplytest_infobar;
+
+          // Preset form fields (admin username / password, mysql credentials).
+          if (get('edit-name') !== null && get('edit-pass') !== null) {
+            get('edit-name').value = "<?php echo $admin_user ?>";
+            get('edit-pass').value = "<?php echo $admin_user ?>";
+          }
+          if (get('edit-account-name') !== null && get('edit-account-pass-pass1') !== null) {
+            get('edit-account-name').value = "<?php echo $admin_user ?>";
+            get('edit-account-pass-pass1').value = "<?php echo $admin_user ?>";
+            get('edit-account-pass-pass2').value = "<?php echo $admin_user ?>";
+          }
+          if (get('edit-mysql-database') !== null) {
+            get('edit-mysql-database').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-mysql-username') !== null) {
+            get('edit-mysql-username').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-mysql-password') !== null) {
+            get('edit-mysql-password').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-db-path') !== null) {
+            get('edit-db-path').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-db-user') !== null) {
+            get('edit-db-user').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-db-pass') !== null) {
+            get('edit-db-pass').value = "<?php echo $mysql ?>";
+          }
+          if (get('edit-site-mail') !== null) {
+            get('edit-site-mail').value = "<?php echo $id . $mail_suffix ?>";
+          }
+          if (get('edit-account-mail') !== null) {
+            get('edit-account-mail').value = "<?php echo $id . $mail_suffix ?>";
+          }
+        }());
+      </script>
+    </body>
+  </html>
 <?php } ?>
