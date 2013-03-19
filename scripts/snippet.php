@@ -39,7 +39,7 @@ function _simplytest_snippet_infobar($variables) {
       <style type="text/css" media="all">
         #simplytest-snippet-container * {
             font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size:1em;
+            font-size: 16px !important;
             line-height: 1.2;
             color: #fff;
         }
@@ -47,9 +47,6 @@ function _simplytest_snippet_infobar($variables) {
             position:fixed;
             bottom: 0;
             cursor:default;
-            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size:1em;
-            line-height: 1.2;
             color: #fff !important;
             z-index: 9999999999;
             font-weight:bold;
@@ -69,7 +66,7 @@ function _simplytest_snippet_infobar($variables) {
         }
         #simplytest-snippet-open {
             display: none;
-            font-size: 19px;
+            font-size: 19px !important;
             cursor:pointer;
         }
         #simplytest-snippet-open.st-show{
@@ -150,14 +147,15 @@ function _simplytest_snippet_infobar($variables) {
               }
             };
           }();
-          // Initialize countdown.
-          counter.init(<?php echo $seconds ?>, 'simplytest-snippet-countdown-time');
 
           var bar_container = get('simplytest-snippet-container');
           var bar_element = get('simplytest-snippet-infobar');
           var bar_close = get('simplytest-snippet-close');
           var bar_open = get('simplytest-snippet-open');
           var toggle = false;
+
+          // Initialize countdown.
+          counter.init(<?php echo $seconds ?>, 'simplytest-snippet-countdown-time');
 
           // Bar hide/show toggling.
           var toggle_simplytest_infobar = function (e){
