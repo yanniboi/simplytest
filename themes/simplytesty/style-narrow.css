@@ -47,6 +47,10 @@
 #simplytest-submission-form .form-submit {
   float: none;
 }
+#simplytest-submission-form #edit-advanced .form-text {
+  width: 85%;
+  min-width: 100px;
+}
 #bottom .column {
   width: 90% !important;
   float: none;
