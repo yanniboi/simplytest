@@ -52,7 +52,7 @@ function _simplytest_snippet_infobar($variables) {
             font-weight:bold;
             padding: 0 5px;
             background-color: rgb(155,155,155);
-            background-color: rgba(0,0,0,0.2);
+            background-color: rgba(0,0,0,0.5);
             color: white; text-shadow: black 0.1em 0.1em 0.2em, black 0.1em 0.1em 0.2em;
             border: 1px solid transparent;
             border-radius:5px;
@@ -72,9 +72,6 @@ function _simplytest_snippet_infobar($variables) {
         #simplytest-snippet-open.st-show{
             display: inline;
         }
-        #simplytest-snippet-close{
-            cursor:pointer;
-        }
         #simplytest-snippet-close:hover{
             color:red;
         }
@@ -83,9 +80,21 @@ function _simplytest_snippet_infobar($variables) {
             margin-right: 10px;
             text-decoration:none;
         }
+        #simplytest-snippet-qr-code {
+            position: relative;
+            top: 2px;
+            margin-left: 10px;
+        }
+        #simplytest-snippet-close,
+        #simplytest-snippet-qr-code {
+            cursor:pointer;
+        }
         @media only screen and (max-width: 18.125em) {
             #simplytest-snippet-backlink {
                 display:none;
+            }
+            #simplytest-snippet-qr-code {
+              display: none;
             }
         }
       </style>
@@ -94,6 +103,7 @@ function _simplytest_snippet_infobar($variables) {
       <div id="simplytest-snippet-container">
         <span id="simplytest-snippet-infobar">
           <span id="simplytest-snippet-countdown-time"></span>
+          <img id="simplytest-snippet-qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAM1BMVEUAAAD29vb+/v76+vr4+Pj09PT5+fnz8/Pw8PD4+Pj19fX29vbz8/P39/fy8vLu7u75+flIu1cCAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBQ4NAQBbiP8AAAAAaUlEQVQY02WNCQ6AIAwER0XAouD/X2vLZaJTGja7TQs/1luBC/tXNXxtNwQctZzrAsta3gWXgfddDJZlypT0pUIO7NIsEYSYCTvvXIGgkcnTUEMnEJsIrSNjR65V3h2x99yxFYWNz5XJAxK4A86fTNrwAAAAAElFTkSuQmCC" title="Generate QR code" />
           <a href="<? print 'http://simplytest.me/project/' . urlencode($project) . '/' . urlencode($version); ?>" id="simplytest-snippet-backlink" title="Back to simplytest.me"><?php print $save_project; ?> <?php print $save_version; ?></a>
           <span id="simplytest-snippet-close" title="Hide bar">&#x2718;</span>
         </span>
@@ -150,6 +160,7 @@ function _simplytest_snippet_infobar($variables) {
 
           var bar_container = get('simplytest-snippet-container');
           var bar_element = get('simplytest-snippet-infobar');
+          var bar_qr_code = get('simplytest-snippet-qr-code');
           var bar_close = get('simplytest-snippet-close');
           var bar_open = get('simplytest-snippet-open');
           var toggle = false;
@@ -166,6 +177,19 @@ function _simplytest_snippet_infobar($variables) {
           };
           bar_close.onclick = toggle_simplytest_infobar;
           bar_open.onclick = toggle_simplytest_infobar;
+
+          // QR code functionality.
+          var display_qr_code = function (e) {
+            if (e) { e.preventDefault(); }
+            var currentURL = window.location.hostname + window.location.pathname;
+            var width = 200;
+            var height = 200;
+            var wx = (screen.width - width) >> 1;
+            var wy = (screen.height - height) >> 1;
+            var url = "http://chart.googleapis.com/chart?cht=qr&chl=http://" + currentURL + "&chs=200x200";
+            window.open(url, '', "top=" + wy + ",left=" + wx + ",width=" + width + ",height=" + height);
+          };
+          bar_qr_code.onclick = display_qr_code;
 
           // Preset form fields (admin username / password, mysql credentials).
           if (get('edit-name') !== null && get('edit-pass') !== null) {
