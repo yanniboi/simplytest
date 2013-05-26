@@ -8,12 +8,12 @@
 /**
  * Drupal.org full project GIT URL.
  */
-define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT', 'git://git.drupal.org/project/');
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT', 'http://git.drupal.org/project/');
 
 /**
  * Drupal.org sandbox project GIT URL.
  */
-define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX', 'git://git.drupal.org/sandbox/');
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX', 'http://git.drupal.org/sandbox/');
 
 /**
  * Drupal.org webgit URL.
