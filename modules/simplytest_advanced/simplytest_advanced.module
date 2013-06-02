@@ -207,7 +207,7 @@ function simplytest_advanced_simplytest_submission_form_validate(&$form, &$form_
     $response_status = simplytest_projects_get_http_status_code($patch);
 
     // Check whether we got a good response status.
-    if ($response_status != 200 && $response_status != 301 && $response_status != 304) {
+    if ($response_status != 200 && $response_status != 301 && $response_status != 302 && $response_status != 304) {
       form_set_error($form_element_id, t('The patch URL "%patch" failed by HTTP status %status.', array(
         '%patch' => $patch,
         '%status' => $response_status,
