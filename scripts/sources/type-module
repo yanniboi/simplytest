@@ -63,8 +63,8 @@ s_project_fetch_dependencies() {
   lg "Resolve dependencies"
   s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/sites/default"
 
-  # Choose the first make file it can find.
-  S_MAKEFILE=$(ls -l "/home/$S_ID/$S_PROJECT" | grep -m 1 -o "[-_a-zA-Z0-9]*.make")
+  # Choose the first .make/.make.example file to be found.
+  S_MAKEFILE=$(ls -l "/home/$S_ID/$S_PROJECT" | egrep -m 1 -o "[-_a-zA-Z0-9]*\.(make|make\.example)$")
   if [[ -n "$S_MAKEFILE" ]]; then
     lg "-> found makefile: $S_MAKEFILE"
     # Try to execute the makefile (eg. for downloading missing libraries).
