@@ -36,66 +36,75 @@ function _simplytest_snippet_infobar($variables) {
   <html>
     <head>
       <meta name="viewport" content="width=device-width">
-      <style type="text/css" media="all">
+      <style>
         #simplytest-snippet-container * {
-            font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 16px !important;
-            line-height: 1.2;
-            color: #fff;
+          color: #fff;
+          font-size: 16px !important;
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+          line-height: 1.2;
         }
+
         #simplytest-snippet-container {
-            position:fixed;
-            bottom: 0;
-            cursor:default;
-            color: #fff !important;
-            z-index: 9999999999;
-            font-weight:bold;
-            padding: 0 5px;
-            background-color: rgb(155,155,155);
-            background-color: rgba(0,0,0,0.5);
-            color: white; text-shadow: black 0.1em 0.1em 0.2em, black 0.1em 0.1em 0.2em;
-            border: 1px solid transparent;
-            border-radius:5px;
+          position: fixed;
+          bottom: 0;
+          z-index: 2147483647;
+          padding: 0 5px;
+          border: 1px solid transparent;
+          border-radius: 5px;
+          background-color: rgb(155,155,155);
+          background-color: rgba(0,0,0,0.5);
+          color: #fff !important;
+          text-shadow: black 0.1em 0.1em 0.2em, black 0.1em 0.1em 0.2em;
+          font-weight: bold;
+          cursor: default;
         }
-        #simplytest-snippet-container.st-warn{
-            background-color: #D86761;
-            border: 1px solid #BD362F;
+
+        #simplytest-snippet-container.st-warn {
+          border: 1px solid #BD362F;
+          background-color: #D86761;
         }
-        #simplytest-snippet-infobar.st-hide{
-           display: none;
+
+        #simplytest-snippet-infobar.st-hide {
+          display: none;
         }
+
         #simplytest-snippet-open {
-            display: none;
-            font-size: 19px !important;
-            cursor:pointer;
+          display: none;
+          font-size: 19px !important;
+          cursor: pointer;
         }
-        #simplytest-snippet-open.st-show{
-            display: inline;
+
+        #simplytest-snippet-open.st-show {
+          display: inline;
         }
-        #simplytest-snippet-close:hover{
-            color:red;
+
+        #simplytest-snippet-close:hover {
+          color: red;
         }
+
         #simplytest-snippet-backlink {
-            margin-left: 10px;
-            margin-right: 10px;
-            text-decoration:none;
+          margin-right: 10px;
+          margin-left: 10px;
+          text-decoration: none;
         }
+
         #simplytest-snippet-qr-code {
-            position: relative;
-            top: 2px;
-            margin-left: 10px;
+          position: relative;
+          top: 2px;
+          margin-left: 10px;
+          vertical-align: top !important;
         }
+
         #simplytest-snippet-close,
         #simplytest-snippet-qr-code {
-            cursor:pointer;
+          cursor: pointer;
         }
+
         @media only screen and (max-width: 18.125em) {
-            #simplytest-snippet-backlink {
-                display:none;
-            }
-            #simplytest-snippet-qr-code {
-              display: none;
-            }
+          #simplytest-snippet-backlink,
+          #simplytest-snippet-qr-code {
+            display: none;
+          }
         }
       </style>
     </head>
@@ -126,31 +135,32 @@ function _simplytest_snippet_infobar($variables) {
 
           // The countdown timer.
           var counter = function() {
-            var end, delta, counter_element;
+            var end, delta, counterElement;
 
             function formatNumber(n) {
-              return ((n < 10) ? "0" : "") + n;
+              return ((n < 10) ? '0' : '') + n;
             };
             function updateCountDown() {
               delta = end - (new Date().getTime());
 
-              if (delta <= 60000) { // warn when 1 min left
-                bar_container.className = 'st-warn';
+              // Warn when 1 min left.
+              if (delta <= 60000) {
+                barContainer.className = 'st-warn';
               }
               if (delta >=0){
                 var d = new Date(delta);
                 var hh = formatNumber(d.getUTCHours());
                 var mm = formatNumber(d.getUTCMinutes());
                 var ss = formatNumber(d.getUTCSeconds());
-                counter_element.innerHTML = hh + ':' + mm + ':' + ss;
+                counterElement.innerHTML = hh + ':' + mm + ':' + ss;
               } else {
-                counter_element.innerHTML = 'Time over!';
+                counterElement.innerHTML = 'Time over!';
                 window.location = 'http://simplytest.me/';
               }
             };
             return {
               init: function (seconds, counter_id) {
-                counter_element = get(counter_id);
+                counterElement = get(counter_id);
                 end = new Date().getTime() + (1000 * seconds);
                 updateCountDown();
                 setInterval(updateCountDown, 990);
@@ -158,72 +168,72 @@ function _simplytest_snippet_infobar($variables) {
             };
           }();
 
-          var bar_container = get('simplytest-snippet-container');
-          var bar_element = get('simplytest-snippet-infobar');
-          var bar_qr_code = get('simplytest-snippet-qr-code');
-          var bar_close = get('simplytest-snippet-close');
-          var bar_open = get('simplytest-snippet-open');
+          var barContainer = get('simplytest-snippet-container');
+          var barElement = get('simplytest-snippet-infobar');
+          var barQrCode = get('simplytest-snippet-qr-code');
+          var barClose = get('simplytest-snippet-close');
+          var barOpen = get('simplytest-snippet-open');
           var toggle = false;
 
           // Initialize countdown.
           counter.init(<?php echo $seconds ?>, 'simplytest-snippet-countdown-time');
 
           // Bar hide/show toggling.
-          var toggle_simplytest_infobar = function (e){
+          var toggleSimplytestInfobar = function (e){
             if (e) { e.preventDefault(); }
-            bar_element.className = (toggle) ? '' : 'st-hide';
-            bar_open.className = (toggle) ? '' : 'st-show';
+            barElement.className = (toggle) ? '' : 'st-hide';
+            barOpen.className = (toggle) ? '' : 'st-show';
             toggle = !toggle;
           };
-          bar_close.onclick = toggle_simplytest_infobar;
-          bar_open.onclick = toggle_simplytest_infobar;
+          barClose.onclick = toggleSimplytestInfobar;
+          barOpen.onclick = toggleSimplytestInfobar;
 
           // QR code functionality.
-          var display_qr_code = function (e) {
+          var displayQrCode = function (e) {
             if (e) { e.preventDefault(); }
             var currentURL = window.location.hostname + window.location.pathname;
             var width = 200;
             var height = 200;
             var wx = (screen.width - width) >> 1;
             var wy = (screen.height - height) >> 1;
-            var url = "http://chart.googleapis.com/chart?cht=qr&chl=http://" + currentURL + "&chs=200x200";
-            window.open(url, '', "top=" + wy + ",left=" + wx + ",width=" + width + ",height=" + height);
+            var url = 'http://chart.googleapis.com/chart?cht=qr&chl=http://' + currentURL + '&chs=200x200';
+            window.open(url, '', 'top=' + wy + ',left=' + wx + ',width=' + width + ',height=' + height);
           };
-          bar_qr_code.onclick = display_qr_code;
+          barQrCode.onclick = displayQrCode;
 
           // Preset form fields (admin username / password, mysql credentials).
           if (get('edit-name') !== null && get('edit-pass') !== null) {
-            get('edit-name').value = "<?php echo $admin_user ?>";
-            get('edit-pass').value = "<?php echo $admin_user ?>";
+            get('edit-name').value = '<?php echo $admin_user ?>';
+            get('edit-pass').value = '<?php echo $admin_user ?>';
           }
           if (get('edit-account-name') !== null && get('edit-account-pass-pass1') !== null) {
-            get('edit-account-name').value = "<?php echo $admin_user ?>";
-            get('edit-account-pass-pass1').value = "<?php echo $admin_user ?>";
-            get('edit-account-pass-pass2').value = "<?php echo $admin_user ?>";
+            get('edit-account-name').value = '<?php echo $admin_user ?>';
+            get('edit-account-pass-pass1').value = '<?php echo $admin_user ?>';
+            get('edit-account-pass-pass2').value = '<?php echo $admin_user ?>';
           }
           if (get('edit-mysql-database') !== null) {
-            get('edit-mysql-database').value = "<?php echo $mysql ?>";
+            get('edit-mysql-database').value = '<?php echo $mysql ?>';
           }
           if (get('edit-mysql-username') !== null) {
-            get('edit-mysql-username').value = "<?php echo $mysql ?>";
+            get('edit-mysql-username').value = '<?php echo $mysql ?>';
           }
           if (get('edit-mysql-password') !== null) {
-            get('edit-mysql-password').value = "<?php echo $mysql ?>";
+            get('edit-mysql-password').value = '<?php echo $mysql ?>';
           }
           if (get('edit-db-path') !== null) {
-            get('edit-db-path').value = "<?php echo $mysql ?>";
+            get('edit-db-path').value = '<?php echo $mysql ?>';
           }
           if (get('edit-db-user') !== null) {
-            get('edit-db-user').value = "<?php echo $mysql ?>";
+            get('edit-db-user').value = '<?php echo $mysql ?>';
           }
           if (get('edit-db-pass') !== null) {
-            get('edit-db-pass').value = "<?php echo $mysql ?>";
+            get('edit-db-pass').value = '<?php echo $mysql ?>';
           }
           if (get('edit-site-mail') !== null) {
-            get('edit-site-mail').value = "<?php echo $id . $mail_suffix ?>";
+            get('edit-site-mail').value = '<?php echo $id . $mail_suffix ?>';
           }
           if (get('edit-account-mail') !== null) {
-            get('edit-account-mail').value = "<?php echo $id . $mail_suffix ?>";
+            get('edit-account-mail').value = '<?php echo $id . $mail_suffix ?>';
           }
         }());
       </script>
