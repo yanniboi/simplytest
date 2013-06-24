@@ -23,7 +23,7 @@ S_CONFIGURATION=$2
 source "$S_CONFIGURATION"
 
 # !!! Start build script WITH ROOT PERMISSIONS.
-# To do this without beeing root, add these lines to your sudoers file by visudo:
+# To do this without being root, add these lines to your sudoers file by visudo:
 # Cmnd_Alias SIMPLYTESTSPAWN_CMDS = <PATH TO THIS SCRIPT>
 # <THIS USERS NAME> ALL=(ALL) NOPASSWD: SIMPLYTESTSPAWN_CMDS
 timeout 900 sudo "$DIRECTORY/build.sh" "$S_CONFIGURATION" > "$DIRECTORY/log/$S_ID.log" 2>&1

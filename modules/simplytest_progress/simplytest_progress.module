@@ -240,7 +240,7 @@ function simplytest_progress_message($state, $id = NULL) {
       $message = t('The submission was spawned..');
       break;
     case SIMPLYTEST_SUBMISSIONS_PREPARE:
-      $message = t('The environment is beeing prepared..');
+      $message = t('The environment is being prepared..');
       break;
     case SIMPLYTEST_SUBMISSIONS_DOWNLOAD:
       $message = t('Fetching and downloading dependencies..');
