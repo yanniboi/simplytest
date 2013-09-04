@@ -141,7 +141,7 @@ function simplytest_sponsors_block_ad() {
   // Get all sponsor ads and randomize order.
   $sponsors = variable_get('simplytest_sponsors', array());
   foreach ($sponsors as $number => $sponsor) {
-    if (!$sponsor['active']) {
+    if (!$sponsor['active'] || empty($sponsor['ad_embed'])) {
       unset($sponsors[$number]);
     }
   }
@@ -152,9 +152,7 @@ function simplytest_sponsors_block_ad() {
   if (count($sponsors) > 1) {
     $output .= '<div class="sponsor-ad-slide">';
     foreach ($sponsors as $number => $sponsor) {
-      if (!empty($sponsor['ad_embed'])) {
         $output .= '<div class="sponsor-ad-embed slide-' . $number . '">' . $sponsor['ad_embed'] . '</div>';
-      }
     }
     $output .= '</div>';
   }
@@ -162,9 +160,7 @@ function simplytest_sponsors_block_ad() {
   // Single slide.
   else {
     foreach ($sponsors as $sponsor) {
-      if (!empty($sponsor['ad_embed'])) {
        $output .= '<div class="sponsor-ad-embed slide-single">' . $sponsor['ad_embed'] . '</div>';
-      }
     }
   }
 
