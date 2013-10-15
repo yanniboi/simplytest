@@ -1007,7 +1007,12 @@ button:hover,
 .link-button:hover,
 input[type="submit"]:hover,
 input[type="reset"]:hover,
-input[type="button"]:hover {
+input[type="button"]:hover,
+button:focus,
+.link-button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
 /* IE10 */ 
 background-image: -ms-linear-gradient(top, #DBDBDB 0%, #F2F2F2 100%);
 /* Mozilla Firefox */ 
