@@ -549,7 +549,7 @@ s_install_demo_modules() {
   local info_files=$(find . -regex '.*\.info\(\.yml\)?')
   for info_file in $info_files; do
     # Read out all simplytest_dependencies.
-    local demo_dependencies = $(s_info_file_get_all "$info_file" "simplytest_dependencies")
+    local demo_dependencies=$(s_info_file_get_all "$info_file" "simplytest_dependencies")
     # Iterate through all demo dependencies.
     for cur_dependency in $demo_dependencies; do
       lg "Trying to install demo dependency \"$cur_dependency\""
