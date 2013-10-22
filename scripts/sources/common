@@ -533,6 +533,48 @@ s_resolve_dependencies() {
 }
 
 ##
+# Installs all demo dependencies.
+#
+# Meaning, all modules that are specified in .info files
+# as "simplytest_dependencies" for demostrational purposes.
+#
+# @param $1
+#  Path to resolve dependencies for.
+# @param $2
+#  Drupal core version.
+#
+s_install_demo_modules() {
+  cd "$1"
+  # Find all info files within the path.
+  local info_files=$(find . -regex '.*\.info\(\.yml\)?')
+  for info_file in $info_files; do
+    # Read out all simplytest_dependencies.
+    local demo_dependencies=$(s_info_file_get_all "$info_file" "simplytest_dependencies")
+    # Iterate through all demo dependencies.
+    for cur_dependency in $demo_dependencies; do
+      lg "Trying to install demo dependency \"$cur_dependency\""
+      # Make sure it's not empty.
+      if [[ -n $cur_dependency ]]; then
+        # Install the demo dependency.
+        case "$2" in
+          '8')
+              :
+              ;;
+          '7')
+              timeout 350 sudo -u $S_ID drush en $cur_dependency -y
+              ;;
+          '6')
+              timeout 350 sudo -u $S_ID drush en $cur_dependency -y
+              ;;
+          *)
+              s_ste 301
+        esac
+      fi
+    done
+  done
+}
+
+##
 # Downloads the submissions additional projects.
 #
 s_project_dl_additionals() {
