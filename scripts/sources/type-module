@@ -88,4 +88,7 @@ s_project_install() {
   # Install the module.
   lg "Install the module project.."
   s_install_module "/home/$S_ID/$S_PROJECT" "$S_PROJECT_FILE" "$S_CORE"
+
+  # Install demo dependencies.
+  s_install_demo_modules "/home/$S_ID/www/sites/default" "$S_CORE"
 }

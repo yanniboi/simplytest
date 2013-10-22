@@ -78,4 +78,7 @@ s_project_install() {
   # Enable and set default the theme.
   lg "Install the theme project.."
   s_install_theme "/home/$S_ID/$S_PROJECT" "$S_PROJECT_FILE" "$S_CORE"
+
+  # Install demo dependencies.
+  s_install_demo_modules "/home/$S_ID/www/sites/default" "$S_CORE"
 }
