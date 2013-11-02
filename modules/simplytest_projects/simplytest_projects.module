@@ -422,7 +422,7 @@ function simplytest_projects_fetch_project($project) {
   }
 
   // Try to match out the project title.
-  preg_match_all('!<div class="block-inner">[^<]*<h2>Issues for ([^<]*)</h2>!', $result->data, $title);
+  preg_match_all('!<div class="block-inner">[^<]*<h2 class="">Issues for ([^<]*)</h2>!', $result->data, $title);
   if(!isset($title[1][0])) {
     watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch title).', array(
       '%project' => $project,
@@ -432,7 +432,7 @@ function simplytest_projects_fetch_project($project) {
   $title = $title[1][0];
 
   // Try to match out the project type by term.
-  preg_match_all('! active[^<]*"><a href="/project/[^<]*" class="[^<]*active">([^<]*)</a></li>!', $result->data, $type);
+  preg_match_all('!<div id="node-\d*" class="node node-project-([^ ]*) clearfix">!', $result->data, $type);
   if(isset($type[1][0])) {
     $term = $type[1][0];
   }
@@ -445,7 +445,7 @@ function simplytest_projects_fetch_project($project) {
 
   // Try to match out the creator name.
   if ($sandbox) {
-    preg_match_all('!<li class="active" ><a href="/sandbox/([^<]*)/' . $project . '" class="active">View</a></li>!', $result->data, $creator);
+    preg_match_all('!Posted by <a href="/user/\d*" title="View user profile." class="username">([^<]*)</a>!', $result->data, $creator);
     if(!isset($creator[1][0])) {
       watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch creator).', array(
         '%project' => $project,
@@ -455,14 +455,8 @@ function simplytest_projects_fetch_project($project) {
     $creator = $creator[1][0];
   }
   else {
-    preg_match_all('!<div class="submitted">Posted by <a href="[^<]*" title="View user profile.">([^<]*)</a> on <em>!', $result->data, $creator);
-    if(!isset($creator[1][0])) {
-      watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch creator).', array(
-        '%project' => $project,
-      ), WATCHDOG_WARNING);
-      return FALSE;
-    }
-    $creator = $creator[1][0];
+    // Creator is not relevant for full project webgit URLs.
+    $creator = NULL;
   }
 
   // Find out the type.
@@ -542,15 +536,19 @@ function simplytest_projects_xml_insert_project($xml) {
 function simplytest_projects_get_project_type($term) {
   switch (strtolower(trim($term))) {
     case 'drupal core':
+    case 'core':
       return SIMPLYTEST_PROJECTS_TYPE_CORE;
 
     case 'modules':
+    case 'module':
       return SIMPLYTEST_PROJECTS_TYPE_MODULE;
 
     case 'themes':
+    case 'theme':
       return SIMPLYTEST_PROJECTS_TYPE_THEME;
 
     case 'distributions':
+    case 'distribution':
       return SIMPLYTEST_PROJECTS_TYPE_DISTRO;
 
     default:
