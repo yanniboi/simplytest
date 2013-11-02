@@ -48,7 +48,8 @@ s_project_fetch_dependencies() {
   lg "Fetch core.."
   # We'll directly clone it into the www directory, so delete it for git.
   rm -rf "/home/$S_ID/www"
-  timeout 350 drush dl --destination="/home/$S_ID" --drupal-project-rename="www" "drupal-$S_CORE"
+  timeout 350 drush dl --destination="/home/$S_ID" "drupal-$S_CORE"
+  mv "/home/$S_ID/drupal" "/home/$S_ID/www"
   # Create a sites/all directory for drush 6 with drupal 8.
   mkdir "/home/$S_ID/www/sites/all"
 
