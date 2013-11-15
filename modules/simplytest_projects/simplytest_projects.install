@@ -36,7 +36,7 @@ function simplytest_projects_schema() {
         'description' => 'The creator of the project.',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
       ),
       'type' => array(
         'description' => 'The project type.',
