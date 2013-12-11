@@ -409,7 +409,7 @@ function simplytest_projects_fetch_project($project) {
   // Try as full project first.
   $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'project/' . $project);
   $sandbox = FALSE;
-  if ($result->code == 404 && is_numeric($project)) {
+  if ($result->code != 200 && is_numeric($project)) {
     // Fallback to sandbox project
     $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'node/' . $project);
     $sandbox = TRUE;
