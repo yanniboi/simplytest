@@ -144,8 +144,11 @@ function simplytest_projects_get_project($project) {
 
   // Build the git URL to clone the project from and the webgit URL.
   if ($data->sandbox) {
-    $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX . $data->creator . '/' . $project . '.git';
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $data->creator . '/' . $project . '.git';
+    // Remove special characters from the users name.
+    $escaped_creator = preg_replace('/[^a-zA-Z0-9-_\.+!*\(\)\']/s', '', $data->creator);
+
+    $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX . $escaped_creator . '/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $escaped_creator . '/' . $project . '.git';
   }
   else {
     $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT . $project . '.git';
