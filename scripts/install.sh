@@ -94,10 +94,13 @@ echo ">>>> Install php5."
 apt-get install -y php5-cgi
 apt-get install -y php5-suhosin
 apt-get install -y php5-gd
+apt-get install -y php5-curl
 apt-get install -y php5-mysql
 
 echo ">>>> Install python libraries"
-apt-get install python-setuptools
+apt-get install -y python-dev
+apt-get install -y python-setuptools
+apt-get install -y libyaml-dev
 easy_install pyyaml
 
 echo ">>>> Install MySQL."
@@ -120,7 +123,7 @@ pear upgrade --force Console_Getopt
 pear upgrade --force pear
 pear upgrade-all
 pear channel-discover pear.drush.org
-pear install drush/drush-6.9.0
+pear install drush/drush-6.2.0.0
 
 echo ">>>> Setup apache."
 a2enmod suexec
@@ -155,7 +158,8 @@ echo "S_DRUSHCACHE=\"/home/$SPAWNER_USER/.drush/cache/git\"" >> ~/simplytest/scr
 
 echo ">>>> Optimizing"
 # Make drush use git with caching for downloads.
-cp ~/simplytest/scripts/drushrc.php /usr/share/php/drush
+mkdir -p /etc/drush
+cp ~/simplytest/scripts/drushrc.php /etc/drush/drushrc.php
 # Install APC.
 apt-get install -y php-apc
 # Use MyISAM.
