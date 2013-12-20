@@ -20,6 +20,14 @@ s_project_download() {
   lg "Set project version.."
   s_set_version "/home/$S_ID/$S_PROJECT" $S_VERSION
 
+  # Try to find out "real" project filename (eg, sandbox: 1234 -> filename: commerce_kickstart).
+  lg "Finding out real project (file) name.."
+  S_PROJECT_NAME=$(s_get_project_filename "/home/$S_ID/$S_PROJECT")
+  if [[ -z $S_PROJECT_NAME ]]; then
+    S_PROJECT_NAME=$S_PROJECT
+  fi
+  lg "-> projectfile name: $S_PROJECT_NAME"
+
   # Try to discover the main info file.
   S_INFO_FILE=$(s_discover_info_file "/home/$S_ID/$S_PROJECT")
   lg "-> discovered info file: $S_INFO_FILE"
@@ -45,20 +53,20 @@ s_project_fetch_dependencies() {
   if [[ -e "/home/$S_ID/$S_PROJECT/simplytest.make" ]]; then
     lg "-> Chosen makefile: simplytest.make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/simplytest.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT_NAME" "/home/$S_ID/$S_PROJECT/simplytest.make" "/home/$S_ID/www" -y
     # Make sure the profile is available.
-    if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT" ]]; then
-      cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
+    if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT_NAME" ]]; then
+      rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     fi
 
   # build-*.make ?
   elif [[ -n $build_make ]]; then
     lg "-> Chosen makefile: $build_make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/$build_make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT_NAME" "/home/$S_ID/$S_PROJECT/$build_make" "/home/$S_ID/www" -y
     # Make sure the profile is available.
-    if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT" ]]; then
-      cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
+    if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT_NAME" ]]; then
+      rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     fi
 
   # drupal-org-core.make ?
@@ -69,13 +77,13 @@ s_project_fetch_dependencies() {
       echo "includes[] = drupal-org.make" >> "/home/$S_ID/$S_PROJECT/drupal-org-core.make"
     fi
     # Build site by makefile.
-    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/drupal-org-core.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT_NAME" "/home/$S_ID/$S_PROJECT/drupal-org-core.make" "/home/$S_ID/www" -y
     # Move files to profiles folder.
-    cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
+    rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     # If no drupal-org.make file is available resolve dependencies manually.
     if [[ ! -e "/home/$S_ID/$S_PROJECT/drupal-org.make" ]]; then
       # Resolve missing dependencies.
-      s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT"
+      s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT_NAME"
     fi
 
   # drupal-org.make ?
@@ -86,9 +94,9 @@ s_project_fetch_dependencies() {
       core = $S_CORE.x
       projects[drupal][type] = core" >> "/home/$S_ID/$S_PROJECT/drupal-org.make"
     # Build site by makefile.
-    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT" "/home/$S_ID/$S_PROJECT/drupal-org.make" "/home/$S_ID/www" -y
+    timeout 500 drush make --force-complete --contrib-destination="profiles/$S_PROJECT_NAME" "/home/$S_ID/$S_PROJECT/drupal-org.make" "/home/$S_ID/www" -y
     # Move files to profiles folder.
-    cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
+    rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
 
   # No matching makefile ?
   else
@@ -97,9 +105,9 @@ s_project_fetch_dependencies() {
     rm -rf "/home/$S_ID/www"
     timeout 500 drush dl --destination="/home/$S_ID" --drupal-project-rename="www" --default-major="$S_CORE" "drupal-$S_CORE"
     # Move files to profiles folder.
-    cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/profiles"
+    rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     # Resolve missing dependencies.
-    s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT"
+    s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT_NAME"
   fi
 
   # Make sure a site could be build properly.
