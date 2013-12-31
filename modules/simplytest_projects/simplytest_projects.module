@@ -425,7 +425,7 @@ function simplytest_projects_fetch_project($project) {
   }
 
   // Try to match out the project title.
-  preg_match_all('!<div class="block-inner">[^<]*<h2 class="">Issues for ([^<]*)</h2>!', $result->data, $title);
+  preg_match_all('!<div class="block-inner">[^<]*<h2 class="">Maintainers for ([^<]*)</h2>!', $result->data, $title);
   if(!isset($title[1][0])) {
     watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch title).', array(
       '%project' => $project,
