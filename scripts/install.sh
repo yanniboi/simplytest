@@ -51,7 +51,7 @@ else
   HOME_SERVER_URL="http://simplytest.me/"
   echo "Used url is: $HOME_SERVER_URL"
 fi
-HOME_CALLBACK_URL="${HOME_SERVER_URL}simplytest/state"
+HOME_CALLBACK_URL="${HOME_SERVER_URL}simplytest/submissions/state"
 echo "State callback URL is: $HOME_CALLBACK_URL"
 
 # Get mysql root password.
