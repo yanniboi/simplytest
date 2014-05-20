@@ -18,7 +18,7 @@ define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX', 'http://git.drupal.org/sandbox/
 /**
  * Drupal.org webgit URL.
  */
-define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://drupalcode.org/');
+define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://cgit.drupalcode.org/');
 
 /**
  * Drupal.org URL
@@ -148,11 +148,11 @@ function simplytest_projects_get_project($project) {
     $escaped_creator = preg_replace('/[^a-zA-Z0-9-_\.+!*\(\)\']/s', '', $data->creator);
 
     $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX . $escaped_creator . '/' . $project . '.git';
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox/' . $escaped_creator . '/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'sandbox-' . $escaped_creator . '-' . $project;
   }
   else {
     $giturl = SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT . $project . '.git';
-    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . 'project/' . $project . '.git';
+    $drupalcode_url = SIMPLYTEST_PROJECTS_DRUPALCODE_ORG . $project;
   }
 
   // Build the project data array to return.
@@ -324,7 +324,7 @@ function simplytest_projects_fetch_versions($project) {
   $project_data = simplytest_projects_get_project($project);
 
   // Fetch tags by request.
-  $result = drupal_http_request($project_data['drupalcode_url'] . '/tags');
+  $result = drupal_http_request($project_data['drupalcode_url'] . '/refs/tags');
   if (!isset($result->data) || $result->code != 200) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Requested tags).', array(
       '%project' => $project,
@@ -332,7 +332,7 @@ function simplytest_projects_fetch_versions($project) {
     return FALSE;
   }
   // Try to match out a list of tags of the raw HTML.
-  preg_match_all('!<a class="list name" href=".*">([^<]*)</a></td>!', $result->data, $tags);
+  preg_match_all('!<tr><td><a href=\'/.*/tag/[^\']*\'>([^<]*)</a></td>!', $result->data, $tags);
   if(!isset($tags[1])) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Fetched tags).', array(
       '%project' => $project,
@@ -341,7 +341,7 @@ function simplytest_projects_fetch_versions($project) {
   }
 
   // Fetch branches by request.
-  $result = drupal_http_request($project_data['drupalcode_url'] . '/heads');
+  $result = drupal_http_request($project_data['drupalcode_url'] . '/refs/heads');
   if (!isset($result->data) || $result->code != 200) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Requested heads).', array(
       '%project' => $project,
@@ -349,7 +349,7 @@ function simplytest_projects_fetch_versions($project) {
     return FALSE;
   }
   // Try to match out a list of tags of the raw HTML.
-  preg_match_all('!<a class="list name" href=".*">([^<]*)</a></td>!', $result->data, $heads);
+  preg_match_all('!<tr><td><a href=\'/.*/log/[^\']*\'>([^<]*)</a></td>!', $result->data, $heads);
   if(!isset($heads[1])) {
     watchdog('simplytest_projects', 'Failed to fetch version data for %project (Fetch heads).', array(
       '%project' => $project,
