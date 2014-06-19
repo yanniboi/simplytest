@@ -26,7 +26,7 @@ function simplytest_advanced_settings_form($form = array()) {
   $form['patch_settings']['simplytest_advanced_patch_source'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed patch source'),
-    '#default_value' => variable_get('simplytest_advanced_patch_source', 'http://drupal.org/files/'),
+    '#default_value' => variable_get('simplytest_advanced_patch_source', 'http://www.drupal.org/files/'),
   );
 
   // Settings for addtional projects

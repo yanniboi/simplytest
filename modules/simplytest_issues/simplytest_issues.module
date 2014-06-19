@@ -44,7 +44,7 @@ function simplytest_issues_block_view($delta = '') {
  */
 function simplytest_cron() {
   // Request fresh data.
-  $result = drupal_http_request('http://drupal.org/project/simplytest');
+  $result = drupal_http_request('http://www.drupal.org/project/simplytest');
   if ($result->code != 200 || !isset($result->data)) {
     watchdog('simplytest_issues', 'Failed to fetch issues from drupal.org. (HTTP Request failed)', array(), WATCHDOG_ERROR);
   }
@@ -55,11 +55,11 @@ function simplytest_cron() {
   }
 
   $text = t('Drupal.org issues') . $issues[1][0];
-  $text = str_replace('/project/issues/', 'http://drupal.org/project/issues/', $text);
+  $text = str_replace('/project/issues/', 'http://www.drupal.org/project/issues/', $text);
   $text .= '
     <div class="issue-nav">
-      <a href="http://drupal.org/node/add/project-issue/simplytest">' . t('Open a new issue') . '</a>
-      <a href="http://drupal.org/project/issues/search/simplytest">' . t('Search issues') . '</a>
+      <a href="http://www.drupal.org/node/add/project-issue/simplytest">' . t('Open a new issue') . '</a>
+      <a href="http://www.drupal.org/project/issues/search/simplytest">' . t('Search issues') . '</a>
     </div>';
   cache_set('simplytest_issues', array('time' => REQUEST_TIME, 'text' => $text));
 

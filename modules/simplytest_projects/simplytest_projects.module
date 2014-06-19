@@ -23,7 +23,7 @@ define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://cgit.drupalcode.org/');
 /**
  * Drupal.org URL
  */
-define('SIMPLYTEST_PROJECTS_DRUPAL_ORG', 'http://drupal.org/');
+define('SIMPLYTEST_PROJECTS_DRUPAL_ORG', 'http://www.drupal.org/');
 
 /**
  * Drupal.org project types.

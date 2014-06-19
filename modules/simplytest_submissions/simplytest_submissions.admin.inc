@@ -68,8 +68,8 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
     unset($submission['data']);
     // Create rows contents.
     $project_url = ($submission['sandbox']
-      ? 'http://drupal.org/sandbox/' . $submission['creator'] . '/' . $submission['project']
-      : 'http://drupal.org/project/' . $submission['project']
+      ? 'http://www.drupal.org/sandbox/' . $submission['creator'] . '/' . $submission['project']
+      : 'http://www.drupal.org/project/' . $submission['project']
     );
     $state_text = simplytest_submissions_state_to_string($submission['state']);
     $rows[] = array(
@@ -228,7 +228,7 @@ function simplytest_submissions_view($sid) {
         'data' => t('Project shortname'),
         'header' => TRUE,
       ),
-      l($submission->data['project'], 'http://drupal.org/project/' . $submission->data['project']),
+      l($submission->data['project'], 'http://www.drupal.org/project/' . $submission->data['project']),
     ),
     array(
       array(
@@ -267,7 +267,7 @@ function simplytest_submissions_view($sid) {
           'data' => t('Additional project #@n', array('@n' => $id)),
           'header' => TRUE,
         ),
-        l($additional, 'http://drupal.org/project/' . $additional),
+        l($additional, 'http://www.drupal.org/project/' . $additional),
       );
     }
   }
