@@ -219,8 +219,10 @@ s_install_drupal_8() {
   mkdir "/home/$S_ID/www/sites/default/files"
   mkdir "/home/$S_ID/www/sites/default/files/tmp"
   mkdir "/home/$S_ID/www/sites/default/files/translations"
+  mkdir "/home/$S_ID/www/sites/simpletest"
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
+  chmod 777 "/home/$S_ID/www/sites/simpletest"
   chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
