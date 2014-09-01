@@ -67,6 +67,11 @@ lg "Finalizing.."
 lg "Adding info snippet.."
 s_addsnippet
 
+# Create/Overwrite robots.txt to disallow any indexing.
+echo "User-agent: *
+Disallow: /
+" > "/home/$S_ID/www/robots.txt"
+
 # Make sure all files and directory have the correct group and user.
 s_reset_environment_files "$S_ID"
 
