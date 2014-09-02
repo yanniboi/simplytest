@@ -6,6 +6,11 @@
  */
 
 /**
+ * Drupal.org URL
+ */
+define('SIMPLYTEST_DRUPAL_ORG', 'https://www.drupal.org/');
+
+/**
  * Drupal.org full project GIT URL.
  */
 define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT', 'http://git.drupal.org/project/');
@@ -16,14 +21,14 @@ define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_PROJECT', 'http://git.drupal.org/project/
 define('SIMPLYTEST_PROJECTS_DRUPAL_ORG_SANDBOX', 'http://git.drupal.org/sandbox/');
 
 /**
- * Drupal.org webgit URL.
+ * Drupal.org git web interface URL.
  */
 define('SIMPLYTEST_PROJECTS_DRUPALCODE_ORG', 'http://cgit.drupalcode.org/');
 
 /**
- * Drupal.org URL
+ * Drupal.org JSON API URL
  */
-define('SIMPLYTEST_PROJECTS_DRUPAL_ORG', 'http://www.drupal.org/');
+define('SIMPLYTEST_DRUPAL_ORG_API', 'https://www.drupal.org/api-d7/');
 
 /**
  * Drupal.org project types.
@@ -408,15 +413,9 @@ function simplytest_projects_fetch_versions($project) {
  *   - creator: The projects creator.
  */
 function simplytest_projects_fetch_project($project) {
-  // To find out whether the project is a full one or not - we have to try.
-  // Try as full project first.
-  $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'project/' . $project);
-  $sandbox = FALSE;
-  if ($result->code != 200 && is_numeric($project)) {
-    // Fallback to sandbox project
-    $result = drupal_http_request(SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'node/' . $project);
-    $sandbox = TRUE;
-  }
+
+  // Try to fetch project data from drupal.org's JSON / RESTWS API.
+  $result = drupal_http_request(SIMPLYTEST_DRUPAL_ORG_API . 'node.json?field_project_machine_name=' . urlencode($project));
   if ($result->code != 200 || !isset($result->data)) {
     watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Request).', array(
       '%project' => $project,
@@ -424,52 +423,116 @@ function simplytest_projects_fetch_project($project) {
     return FALSE;
   }
 
-  // Try to match out the project title.
-  preg_match_all('!<div class="block-inner">[^<]*<h2 class="">Maintainers for ([^<]*)</h2>!', $result->data, $title);
-  if(!isset($title[1][0])) {
-    watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch title).', array(
+  // Try to parse the received JSON.
+  $data = drupal_json_decode($result->data);
+  if ($data === null) {
+    watchdog('simplytest_projects', 'Failed to parse initial data for %project (json decode).', array(
       '%project' => $project,
     ), WATCHDOG_WARNING);
     return FALSE;
   }
-  $title = $title[1][0];
 
-  // Try to match out the project type by term.
-  preg_match_all('!<div id="node-\d*" class="node node-project-([^ ]*) clearfix">!', $result->data, $type);
-  if(isset($type[1][0])) {
-    $term = $type[1][0];
-  }
-  else {
-    watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch type).', array(
+  // Did we find the project we searched for?
+  if (count($data['list']) === 0 || !isset($data['list'][0])) {
+    watchdog('simplytest_projects', 'Failed to get initial data for %project (empty search result).', array(
       '%project' => $project,
     ), WATCHDOG_WARNING);
-    $term = NULL;
+    return FALSE;
+  }
+  $project_data = $data['list'][0];
+
+  // Determine the type of this project.
+  $project_type = strtolower(trim($project_data['field_project_type']));
+  switch ($project_type) {
+
+    case 'full':
+      $sandbox = FALSE;
+      break;
+
+    case 'sandbox':
+      $sandbox = TRUE;
+      break;
+
+    default:
+      watchdog('simplytest_projects', 'Failed to get initial data for %project (invalid project type "@type").', array(
+        '%project' => $project,
+        '@type' => $project_type
+      ), WATCHDOG_WARNING);
+      return FALSE;
   }
 
-  // Try to match out the creator name.
+  // Determine project title.
+  if (!isset($project_data['title'])) {
+    watchdog('simplytest_projects', 'Failed to get initial data for %project (no project title).', array(
+      '%project' => $project
+    ), WATCHDOG_WARNING);
+    return FALSE;
+  }
+  $title = $project_data['title'];
+
+  // Determine the project type term.
+  if (!isset($project_data['type'])) {
+    watchdog('simplytest_projects', 'Failed to get initial data for %project (no project type).', array(
+      '%project' => $project
+    ), WATCHDOG_WARNING);
+    return FALSE;
+  }
+  $type_term = $project_data['type'];
+
+  // Find out the type by term.
+  $type = simplytest_projects_get_project_type($type_term);
+  if ($type === FALSE) {
+    // Unknown type, error.
+    watchdog('simplytest_projects', 'Failed to get initial data for %project (Determine type for term "@term").', array(
+      '%project' => $project,
+      '@term' => $type_term
+    ), WATCHDOG_WARNING);
+    return FALSE;
+  }
+
+  // Try to fetch the creator name.
   if ($sandbox) {
-    preg_match_all('!<a href="http://drupalcode.org/sandbox/([^/]*)/\d*.git">Repository viewer</a>!', $result->data, $creator);
-    if(!isset($creator[1][0])) {
-      watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Fetch creator).', array(
-        '%project' => $project,
+
+    // Determine the project creator user id.
+    if (!isset($project_data['author']) || !isset($project_data['author']['id'])) {
+      watchdog('simplytest_projects', 'Failed to get initial data for %project (no project type).', array(
+        '%project' => $project
       ), WATCHDOG_WARNING);
       return FALSE;
     }
-    $creator = $creator[1][0];
+    $creator_uid = $project_data['author']['id'];
+
+    // Fetch user data to find out the creator name.
+    $result = drupal_http_request(SIMPLYTEST_DRUPAL_ORG_API . 'user/' . $creator_uid . '.json');
+    if ($result->code != 200 || !isset($result->data)) {
+      watchdog('simplytest_projects', 'Failed to fetch user data for %user (Request).', array(
+        '%user' => $creator_uid,
+      ), WATCHDOG_WARNING);
+      return FALSE;
+    }
+
+    // Try to parse the received JSON.
+    $data = drupal_json_decode($result->data);
+    if ($data === null) {
+      watchdog('simplytest_projects', 'Failed to parse user data for %user.', array(
+        '%user' => $creator_uid,
+      ), WATCHDOG_WARNING);
+      return FALSE;
+    }
+
+    // Get author name.
+    if (!isset($data['name'])) {
+      watchdog('simplytest_projects', 'Failed to get user name for %user.', array(
+        '%user' => $creator_uid,
+      ), WATCHDOG_WARNING);
+      return FALSE;
+    }
+    $creator = $data['name'];
+
   }
   else {
     // Creator is not relevant for full project webgit URLs.
     $creator = NULL;
-  }
-
-  // Find out the type.
-  $type = simplytest_projects_get_project_type($term);
-  if ($type === FALSE) {
-    // Unknown type, error.
-    watchdog('simplytest_projects', 'Failed to fetch initial data for %project (Determine type).', array(
-      '%project' => $project,
-    ), WATCHDOG_WARNING);
-    return FALSE;
   }
 
   // Build an array of all the new project data.
@@ -514,7 +577,7 @@ function simplytest_projects_xml_insert_project($xml) {
     'title' => (string) $xml->title,
     'shortname' => (string) $xml->short_name,
     // Sandbox project?
-    'sandbox' => (int) (is_numeric((string) $xml->short_name) && substr($xml->link, 0, 26) === SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'sandbox/'),
+    'sandbox' => (int) (is_numeric((string) $xml->short_name) && substr($xml->link, 0, 26) === SIMPLYTEST_DRUPAL_ORG . 'sandbox/'),
     // Get project type, as it is referenced as tag.
     'type' => $type,
     // Git creator name (for sandbox projects).
@@ -540,18 +603,22 @@ function simplytest_projects_get_project_type($term) {
   switch (strtolower(trim($term))) {
     case 'drupal core':
     case 'core':
+    case 'project_core':
       return SIMPLYTEST_PROJECTS_TYPE_CORE;
 
     case 'modules':
     case 'module':
+    case 'project_module':
       return SIMPLYTEST_PROJECTS_TYPE_MODULE;
 
     case 'themes':
     case 'theme':
+    case 'project_theme':
       return SIMPLYTEST_PROJECTS_TYPE_THEME;
 
     case 'distributions':
     case 'distribution':
+    case 'project_distribution':
       return SIMPLYTEST_PROJECTS_TYPE_DISTRO;
 
     default:

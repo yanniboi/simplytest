@@ -146,8 +146,8 @@ function simplytest_projects_management_form($form = array(), $form_state) {
   foreach ($projects as &$project) {
     // Create rows contents.
     $project_url = ($project->sandbox
-      ? SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'sandbox/' . $project->creator . '/' . $project->shortname
-      : SIMPLYTEST_PROJECTS_DRUPAL_ORG . 'project/' . $project->shortname
+      ? SIMPLYTEST_DRUPAL_ORG . 'sandbox/' . $project->creator . '/' . $project->shortname
+      : SIMPLYTEST_DRUPAL_ORG . 'project/' . $project->shortname
     );
     $cache_link = ($project->timestamp
       ? l(format_date($project->timestamp), 'admin/simplytest/projects/' . $project->shortname . '/versions')
