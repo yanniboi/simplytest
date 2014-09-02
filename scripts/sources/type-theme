@@ -44,14 +44,24 @@ s_project_download() {
 ##
 # Fetch project dependecies.
 s_project_fetch_dependencies() {
+
   # Fetch drupal core.
   lg "Fetch core.."
   # We'll directly clone it into the www directory, so delete it for git.
   rm -rf "/home/$S_ID/www"
-  timeout 350 drush dl --destination="/home/$S_ID" "drupal-$S_CORE"
+
+  # Workaround: We need to manualy select 8.0.x until there's a stable release of it available.
+  # Using drupal-8 would lead to an interactive selection, --dev would lead to the usage of drupal-8.1.x.
+  if [ "$S_CORE" == "8" ]; then
+    timeout 350 drush dl --select=never --destination="/home/$S_ID" "drupal-8.0.x"
+  else
+    timeout 350 drush dl --select=never --destination="/home/$S_ID" --default-major="$S_CORE" "drupal-$S_CORE"
+  fi
+
   mv /home/$S_ID/drupal* "/home/$S_ID/www"
   # Create a sites/all directory for drush 6 with drupal 8.
   mkdir "/home/$S_ID/www/sites/all"
+
 
   # Prepare the themes directory and copy it in.
   lg "Prepare the theme project.."
