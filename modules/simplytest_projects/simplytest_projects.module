@@ -490,48 +490,19 @@ function simplytest_projects_fetch_project($project) {
     return FALSE;
   }
 
-  // Try to fetch the creator name.
+  // Get author name from project url.
   if ($sandbox) {
-
-    // Determine the project creator user id.
-    if (!isset($project_data['author']) || !isset($project_data['author']['id'])) {
-      watchdog('simplytest_projects', 'Failed to get initial data for %project (no project type).', array(
-        '%project' => $project
+    if (!isset($project_data['url'])) {
+      watchdog('simplytest_projects', 'Failed to scrap user name from "%url".', array(
+        '%url' => $url,
       ), WATCHDOG_WARNING);
       return FALSE;
     }
-    $creator_uid = $project_data['author']['id'];
-
-    // Fetch user data to find out the creator name.
-    $result = drupal_http_request(SIMPLYTEST_DRUPAL_ORG_API . 'user/' . $creator_uid . '.json');
-    if ($result->code != 200 || !isset($result->data)) {
-      watchdog('simplytest_projects', 'Failed to fetch user data for %user (Request).', array(
-        '%user' => $creator_uid,
-      ), WATCHDOG_WARNING);
-      return FALSE;
-    }
-
-    // Try to parse the received JSON.
-    $data = drupal_json_decode($result->data);
-    if ($data === null) {
-      watchdog('simplytest_projects', 'Failed to parse user data for %user.', array(
-        '%user' => $creator_uid,
-      ), WATCHDOG_WARNING);
-      return FALSE;
-    }
-
-    // Get author name.
-    if (!isset($data['name'])) {
-      watchdog('simplytest_projects', 'Failed to get user name for %user.', array(
-        '%user' => $creator_uid,
-      ), WATCHDOG_WARNING);
-      return FALSE;
-    }
-    $creator = $data['name'];
-
+    $url_parts = explode('/', $project_data['url']);
+    $creator = $url_parts[4];
   }
   else {
-    // Creator is not relevant for full project webgit URLs.
+    // Creator is irrelevat for full projects; also the username is not in the URL of them.
     $creator = NULL;
   }
 
