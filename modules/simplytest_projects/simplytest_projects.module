@@ -305,7 +305,7 @@ function simplytest_projects_check_commit_hash($project, $hash) {
   }
 
   // Now check whether the commit actually exists by looking it up.
-  $response_status = simplytest_projects_get_http_status_code($project_data['drupalcode_url'] . '/' . $hash);
+  $response_status = simplytest_projects_get_http_status_code($project_data['drupalcode_url'] . '/patch/?id=' . $hash);
   if ($response_status != 200 && $response_status != 301 && $response_status != 304) {
     return FALSE;
   }
