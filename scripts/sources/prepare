@@ -35,19 +35,6 @@ s_prepare() {
   </Directory>
   </VirtualHost>" > "/etc/apache2/sites-available/$S_ID"
 
-  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
-  mkdir /var/www/wrappers/$S_ID
-  chown $S_ID /var/www/wrappers/$S_ID
-  chgrp nogroup /var/www/wrappers/$S_ID
-  echo "#!/bin/bash
-    umask 022
-    PHPRC=/home/$S_ID
-    export PHPRC
-    exec /usr/lib/cgi-bin/php" > "/var/www/wrappers/$S_ID/php"
-  chmod +x "/var/www/wrappers/$S_ID/php"
-  chown $S_ID /var/www/wrappers/$S_ID/php
-  chgrp nogroup /var/www/wrappers/$S_ID/php
-
   # Write secured php.ini file.
   echo "[PHP]
     engine = On
@@ -108,11 +95,8 @@ s_prepare() {
     default_socket_timeout = 10
     upload_tmp_dir = /home/$S_ID/www/tmp
     sendmail_path = /bin/echo
+
+    pdo_mysql.default_socket = /var/run/mysqld/mysqld.sock
+
     " > "/home/$S_ID/php.ini"
-
-  # Enable vhost.
-  a2ensite $S_ID || s_ste 301
-
-  # Reload apache config.
-  service apache2 reload || s_ste 301
 }

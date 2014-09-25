@@ -142,4 +142,24 @@ s_project_install() {
   # Setup database.
   lg "Setup database.."
   s_db_setup $S_ID
+
+  # Decide the PHP version to use based on the core version.
+  if [ "$S_CORE" == "8" ]; then
+    S_PHP_VERSION="5.5"
+  else
+    S_PHP_VERSION="5.3"
+  fi
+
+  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
+  mkdir /var/www/wrappers/$S_ID
+  chown $S_ID /var/www/wrappers/$S_ID
+  chgrp nogroup /var/www/wrappers/$S_ID
+  echo "#!/bin/bash
+    umask 022
+    PHPRC=/home/$S_ID
+    export PHPRC
+    exec /home/spawner/binphp/php$S_PHP_VERSION" > "/var/www/wrappers/$S_ID/php"
+  chmod +x "/var/www/wrappers/$S_ID/php"
+  chown $S_ID /var/www/wrappers/$S_ID/php
+  chgrp nogroup /var/www/wrappers/$S_ID/php
 }
