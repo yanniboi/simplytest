@@ -128,27 +128,16 @@ function simplytest_servers_get_hostname($id) {
  *  An associative array of data of the chosen server.
  */
 function simplytest_servers_spawn($submission) {
-  $_servers = simplytest_servers_get();
-
-  $servers = array();
-  // Dirty hack server selection.
-  if (substr($submission['version'], 0, 2) == '8.') {
-    // Drupal 8.x or 8.0-x. choose server 2 with PHP 5.5.
-    $servers[] = $_servers['2'];
-  }
-  else {
-    // For any other drupal version server 3 with PHP 5.2.
-    $servers[] = $_servers['3'];
-  }
+  $servers = simplytest_servers_get();
 
   // Order the servers according to their free slots.
   // Don't make use of full or inactive servers.
-  /*uasort($servers, 'simplytest_servers_sort_by_free_slots_desc');
+  uasort($servers, 'simplytest_servers_sort_by_free_slots_desc');
   foreach ($servers as $id => $server) {
     if ($server['freeslots'] == 0 || !$server['active']) {
       unset($servers[$id]);
     }
-  }*/
+  }
 
   if (empty($servers)) {
     watchdog('simplytest_servers', 'Failed to choose servers. No active servers with free slots available.', array(), WATCHDOG_ERROR);
