@@ -112,7 +112,7 @@ function _simplytest_snippet_infobar($variables) {
       <div id="simplytest-snippet-container">
         <span id="simplytest-snippet-infobar">
           <span id="simplytest-snippet-countdown-time"></span>
-          <img id="simplytest-snippet-qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAM1BMVEUAAAD29vb+/v76+vr4+Pj09PT5+fnz8/Pw8PD4+Pj19fX29vbz8/P39/fy8vLu7u75+flIu1cCAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBQ4NAQBbiP8AAAAAaUlEQVQY02WNCQ6AIAwER0XAouD/X2vLZaJTGja7TQs/1luBC/tXNXxtNwQctZzrAsta3gWXgfddDJZlypT0pUIO7NIsEYSYCTvvXIGgkcnTUEMnEJsIrSNjR65V3h2x99yxFYWNz5XJAxK4A86fTNrwAAAAAElFTkSuQmCC" title="Generate QR code" />
+          <img id="simplytest-snippet-qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAM1BMVEUAAAD29vb+/v76+vr4+Pj09PT5+fnz8/Pw8PD4+Pj19fX29vbz8/P39/fy8vLu7u75+flIu1cCAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBQ4NAQBbiP8AAAAAaUlEQVQY02WNCQ6AIAwER0XAouD/X2vLZaJTGja7TQs/1luBC/tXNXxtNwQctZzrAsta3gWXgfddDJZlypT0pUIO7NIsEYSYCTvvXIGgkcnTUEMnEJsIrSNjR65V3h2x99yxFYWNz5XJAxK4A86fTNrwAAAAAElFTkSuQmCC" title="Generate QR code" alt="QR Code Image" />
           <a href="<? print 'http://simplytest.me/project/' . urlencode($project) . '/' . urlencode($version); ?>" id="simplytest-snippet-backlink" title="Back to simplytest.me"><?php print $save_project; ?> <?php print $save_version; ?></a>
           <span id="simplytest-snippet-close" title="Hide bar">&#x2718;</span>
         </span>
