@@ -114,7 +114,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
       '#parents' => array('submission', 'patches', $patch),
       '#default_value' => (is_string($preset)) ? $preset : '',
       '#attributes' => array(
-        'placeholder' => variable_get('simplytest_advanced_patch_source', 'http://www.drupal.org/files/'),
+        'placeholder' => 'http://www.drupal.org/files/',
       ),
     );
   }
@@ -192,14 +192,10 @@ function simplytest_advanced_simplytest_submission_form_validate(&$form, &$form_
       continue;
     }
 
-    // Get parts of the patch url and the allowed source url.
-    $patch_url = parse_url($patch);
-    $source_url = parse_url(variable_get('simplytest_advanced_patch_source', 'http://www.drupal.org/files/'));
-
     // Check if the patchs url is allowed.
-    if (@$patch_url['host'] != $source_url['host']) {
+    if (preg_match(variable_get('simplytest_advanced_patch_source', '/^https?:\/\/(www\.)?drupal\.org\/files\//'), $patch) !== 1) {
       form_set_error($form_element_id, t('The patch URL must be from %source.',
-        array('%source' => variable_get('simplytest_advanced_patch_source', 'http://www.drupal.org/files/'))));
+        array('%source' => 'http://www.drupal.org/files/')));
       continue;
     }
 

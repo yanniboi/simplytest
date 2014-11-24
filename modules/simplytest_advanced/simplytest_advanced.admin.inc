@@ -10,7 +10,7 @@
 /**
  * Flood settings configuration form.
  */
-function simplytest_advanced_settings_form($form = array()) { 
+function simplytest_advanced_settings_form($form = array()) {
 
   // Settings for applying patches.
   $form['patch_settings'] = array(
@@ -26,7 +26,7 @@ function simplytest_advanced_settings_form($form = array()) {
   $form['patch_settings']['simplytest_advanced_patch_source'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed patch source'),
-    '#default_value' => variable_get('simplytest_advanced_patch_source', 'http://www.drupal.org/files/'),
+    '#default_value' => variable_get('simplytest_advanced_patch_source', '/^https?:\/\/(www\.)?drupal\.org\/files\//'),
   );
 
   // Settings for addtional projects
