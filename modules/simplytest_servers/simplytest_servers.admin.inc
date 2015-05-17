@@ -61,8 +61,9 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
     $config = array(
       'id' => NULL,
       'active' => FALSE,
-      'name' => t('New server'),
-      'host' => '',
+      'name' => 'service.com',
+      'protocol' => 'http://',
+      'host' => 'node-01.service.com',
       'port' => 22,
       'user' => '',
       'password' => '',
@@ -84,6 +85,7 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
   $form['id'] = array(
     '#type' => 'textfield',
     '#title' => t('Id'),
+    '#description' => t('This is going to be used as prefix for submission ids. Should me a short or single letter and a valid first character of a unix username.'),
     '#disabled' => ($config['id']) ? TRUE : FALSE,
     '#required' => TRUE,
     '#default_value' => $config['id'],
@@ -95,13 +97,27 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
   );
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name'),
+    '#title' => t('Domain name suffix'),
+    '#description' => t('Will be used as domain suffix for the sandbox address. Structure: [server-id][submission-id].[domain-name]. Example: [a][001].[simplytest.me]'),
     '#required' => TRUE,
     '#default_value' => $config['name'],
   );
+  $form['protocol'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Protocol for sandbox URL'),
+    '#required' => TRUE,
+    '#default_value' => $config['protocol'],
+  );
+  $form['slots'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Slots'),
+    '#description' => t('How many sandboxes can be launched on this server simultaneously.'),
+    '#required' => TRUE,
+    '#default_value' => $config['slots'],
+  );
   $form['host'] = array(
     '#type' => 'textfield',
-    '#title' => t('Server hostname'),
+    '#title' => t('Server hostname to SSH into'),
     '#required' => TRUE,
     '#default_value' => $config['host'],
   );
@@ -123,15 +139,9 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
     '#required' => TRUE,
     '#default_value' => $config['password'],
   );
-  $form['slots'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Slots'),
-    '#required' => TRUE,
-    '#default_value' => $config['slots'],
-  );
   $form['spawn'] = array(
     '#type' => 'textfield',
-    '#title' => t('Spawn by script execution'),
+    '#title' => t('SSH command'),
     '#required' => TRUE,
     '#default_value' => $config['spawn'],
   );
@@ -166,11 +176,12 @@ function simplytest_servers_config_form_submit($form, &$form_state) {
     'id' => $form_state['values']['id'],
     'active' => $form_state['values']['active'],
     'name' => $form_state['values']['name'],
+    'protocol' => $form_state['values']['protocol'],
+    'slots' => $form_state['values']['slots'],
     'host' => $form_state['values']['host'],
     'port' => $form_state['values']['port'],
     'user' => $form_state['values']['user'],
     'password' => $form_state['values']['password'],
-    'slots' => $form_state['values']['slots'],
     'spawn' => $form_state['values']['spawn'],
   );
 

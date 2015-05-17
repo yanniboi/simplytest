@@ -11,6 +11,21 @@
  * Submissions configuration form.
  */
 function simplytest_submissions_config_form($form = array()) {
+  
+  $form['submissions_id'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Submission ID'),
+  );
+  $form['submissions_id']['simplytest_submissions_id_alphabet'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Alphabet to convert decimal submission IDs to'),
+    '#default_value' => variable_get('simplytest_submissions_id_alphabet', '0123456789abcdefghijklmnopqrstuvwxyz'),
+  );
+  $form['submissions_id']['simplytest_submissions_id_length'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum length of a submission id'),
+    '#default_value' => variable_get('simplytest_submissions_id_length', 3),
+  );
 
   $form['submissions_timeout'] = array(
     '#type' => 'fieldset',

@@ -225,10 +225,8 @@ function simplytest_submissions_goto($id) {
     ->fields('p', array('server'))
     ->condition('id', $id)
     ->execute()->fetchField();
-  // Get the servers hostname.
-  $host = simplytest_servers_get_hostname($server);
-  // Build the servers URL.
-  $url = 'http://' . $id . '.' . $host;
+  // Build the submission URL.
+  $url = simplytest_servers_build_url($id, $server);
   // Redirect.
   if (!empty($url)) {
     drupal_goto($url, array('external' => TRUE), 307);
@@ -272,17 +270,30 @@ function simplytest_submissions_set_state($id, $state) {
 }
 
 /**
- * Generates a random, unique submission id.
+ * Generates a unique submission id.
  *
  * @return string
- *  A 16 characters long random string, beginning with 's'
- *  containing characters of a-z 0-9. These specifications
- *  are because of unix and mysql username compatibility.
+ *  Submission id string with configured alphabet and minimal length.
  */
 function simplytest_submissions_generate_id() {
-  do {
-    $id = 's' . substr(md5(uniqid()), 0, 15);
-  } while (simplytest_submissions_get_state($id) !== FALSE);
+  // Get id-conversion alphabet.
+  $alphabet = variable_get('simplytest_submissions_id_alphabet', '0123456789abcdefghijklmnopqrstuvwxyz');
+  $length = strlen($alphabet);
+
+  // Determine minimum decimal id for minimum submission id length.
+  $minimal_id = base_convert(pow(10, variable_get('simplytest_submissions_id_length', 3) - 1), $length, 10);
+  
+  // Get unique sequence id from database.
+  $decimal_id = db_next_id($minimal_id);
+
+  // Convert decimal id to the base of the alphabet.
+  $id = '';
+  while ($decimal_id > $length - 1) {
+    $id = $alphabet[(int) fmod($decimal_id, $length)] . $id;
+    $decimal_id = (int) floor($decimal_id / $length);
+  }
+  $id = $alphabet[$decimal_id] . $id;
+
   return $id;
 }
 

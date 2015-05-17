@@ -105,17 +105,20 @@ function simplytest_servers_set($servers) {
 }
 
 /**
- * Returns the hostname for a specific server id.
+ * Returns the url for a submission on a server.
  *
- * @param string $id
+ * @param string $submission_id
+ *  The submission id.
+ * @param string $server_id
  *  The server id.
  *
  * @return string
  *  The servers host name.
  */
-function simplytest_servers_get_hostname($id) {
+function simplytest_servers_build_url($submission_id, $server_id) {
   $servers = simplytest_servers_get();
-  return isset($servers[$id]['host']) ? $servers[$id]['host'] : FALSE;
+  $url = $servers[$server_id]['protocol'] . $server_id . $submission_id . '.' . $servers[$server_id]['host'];
+  return $url;
 }
 
 /**
