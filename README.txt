@@ -81,10 +81,6 @@ Modules
   The list of sponsors, their order, logo and advertisement is configurable at:
     /admin/simplytest/sponsors
 
-## simplytest_issues
-  Provides the "simplytest issues" block that fetches the current state of
-  the issue queue from drupal.org/project/simplytest and caches it.
-
 
 Setup
 =====
