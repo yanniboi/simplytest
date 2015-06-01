@@ -37,6 +37,7 @@ s_prepare() {
   # Write secured php.ini file.
   echo "[PHP]
     engine = On
+    extension_dir=/home/$S_ID/php
     short_open_tag = On
     asp_tags = Off
     precision = 14
@@ -87,6 +88,8 @@ s_prepare() {
     user_dir = /home/$S_ID/www
     enable_dl = Off
     file_uploads = On
+    session.cache_limiter = nocache
+    session.auto_start = 0
     upload_max_filesize = 5M
     max_file_uploads = 5
     allow_url_fopen = On
