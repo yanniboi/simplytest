@@ -33,7 +33,7 @@ s_prepare() {
     Options Indexes FollowSymLinks +Includes +ExecCGI
     Order allow,deny
   </Directory>
-  </VirtualHost>" > "/etc/apache2/sites-available/$S_ID"
+  </VirtualHost>" > "/etc/apache2/sites-available/$S_ID.conf"
 
   # Write secured php.ini file.
   echo "[PHP]

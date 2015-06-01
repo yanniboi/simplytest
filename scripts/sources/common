@@ -615,7 +615,7 @@ s_destruct() {
 
   # Delete vhost.
   lg "Delete vhost.."
-  rm -f "/etc/apache2/sites-available/$S_ID"
+  rm -f "/etc/apache2/sites-available/$S_ID.conf"
 
   # Reload config.
   lg "Reload apache config.."
