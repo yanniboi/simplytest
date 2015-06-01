@@ -609,6 +609,11 @@ s_destruct() {
     :
   }
 
+  if [ -z "$S_ID" ]; then
+    echo "ABORTING - SUBMISSION ID IS NOT SET"
+    exit 1
+  fi
+
   # Disable vhost.
   lg "Disable vhost.."
   a2dissite $S_ID
@@ -621,9 +626,18 @@ s_destruct() {
   lg "Reload apache config.."
   service apache2 reload
 
+  # Ensure: Delete vhost.
+  rm -f "/etc/apache2/sites-enabled/$S_ID.conf"
+
+  # Kill all the users processes.
+  pkill -u $S_ID
+
   # Remove user.
   lg "Remove user.."
   userdel --force --remove $S_ID
+
+  # Ensure: Remove the users home directory if it's still there.
+  rm -Rf /home/$S_ID
 
   # Delete cgi wrapper.
   lg "Delete CGI wrapper.."
