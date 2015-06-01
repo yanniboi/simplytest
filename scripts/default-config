@@ -16,6 +16,12 @@ S_DMAIL_SUFFIX="@simplytest.me"
 # Drush cache path.
 S_DRUSHCACHE="/home/spawner/.drush/cache/git"
 
+# PHP binaries path
+declare -A __PHP_BINARIES
+S_PHP_BINARY_5_3="/home/spawner/php/php5.3"
+S_PHP_BINARY_5_5="/home/spawner/php/php5.5"
+S_PHP_BINARY_5_6="/home/spawner/php/php5.6"
+
 # List of project aliases.
 # [Dependency name]= Project name
 declare -A __PROJECT_ALIASES
@@ -28,4 +34,3 @@ __PROJECT_ALIASES[actions_permissions]=views_bulk_operations
 __PROJECT_ALIASES[node_reference]=references
 __PROJECT_ALIASES[user_reference]=references
 __PROJECT_ALIASES[oauth_common]=oauth
-
