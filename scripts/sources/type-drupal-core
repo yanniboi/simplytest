@@ -59,7 +59,7 @@ s_project_install() {
     umask 022
     PHPRC=/home/$S_ID
     export PHPRC
-    exec /home/$S_ID/php/php" > "/var/www/wrappers/$S_ID/php"
+    exec timeout 300 /home/$S_ID/php/php" > "/var/www/wrappers/$S_ID/php"
   chmod +x "/var/www/wrappers/$S_ID/php"
   chown $S_ID /var/www/wrappers/$S_ID/php
   chgrp nogroup /var/www/wrappers/$S_ID/php
