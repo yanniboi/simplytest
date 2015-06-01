@@ -29,9 +29,8 @@ s_prepare() {
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} ^/mysite/(.)$
     RewriteRule ^(.*)$ /mysite/index.php?q=\$1 [L,QSA]
-    Allow from all
-    Options Indexes FollowSymLinks +Includes +ExecCGI
-    Order allow,deny
+    Options +Indexes +FollowSymLinks +Includes +ExecCGI
+    Require all granted
   </Directory>
   </VirtualHost>" > "/etc/apache2/sites-available/$S_ID.conf"
 
