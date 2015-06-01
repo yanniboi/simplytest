@@ -66,6 +66,8 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
       'host' => 'node-01.service.com',
       'port' => 22,
       'user' => '',
+      'pubkey' => '',
+      'privkey' => '',
       'password' => '',
       'slots' => 0,
       'spawn' => '',
@@ -133,9 +135,21 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
     '#required' => TRUE,
     '#default_value' => $config['user'],
   );
+  $form['pubkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSH Public Key file'),
+    '#required' => FALSE,
+    '#default_value' => $config['pubkey'],
+  );
+  $form['privkey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSH Private Key file'),
+    '#required' => FALSE,
+    '#default_value' => $config['privkey'],
+  );
   $form['password'] = array(
     '#type' => 'textfield',
-    '#title' => t('SSH Password'),
+    '#title' => t('SSH / Private key password'),
     '#required' => FALSE,
     '#default_value' => $config['password'],
   );
@@ -181,6 +195,8 @@ function simplytest_servers_config_form_submit($form, &$form_state) {
     'host' => $form_state['values']['host'],
     'port' => $form_state['values']['port'],
     'user' => $form_state['values']['user'],
+    'pubkey' => $form_state['values']['pubkey'],
+    'privkey' => $form_state['values']['privkey'],
     'password' => $form_state['values']['password'],
     'spawn' => $form_state['values']['spawn'],
   );

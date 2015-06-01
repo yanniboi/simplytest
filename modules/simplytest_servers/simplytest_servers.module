@@ -283,8 +283,20 @@ function simplytest_servers_execute($server, $commands) {
     return FALSE;
   }
 
-  // Try to authenticate with password.
-  if (empty($server['password'])) {
+  // Try to authenticate.
+  if (!empty($server['privkey']) && !empty($server['pubkey'])) {
+    // With private/public key.
+    if(!ssh2_auth_pubkey_file($connection, $server['user'], $config['pubkey'], $server['privkey'], $server['password'])) {
+      watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user using private/public key (Server: %name).', array(
+        '%host' => $server['host'],
+        '%name' => $server['name'],
+        '%user' => $server['user'],
+      ), WATCHDOG_ERROR);
+      return FALSE;
+    }
+  }
+  else if (empty($server['password'])) {
+    // Using the SSH agent.
     if(!ssh2_auth_agent($connection, $server['user'])) {
       watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user using agent (Server: %name).', array(
         '%host' => $server['host'],
@@ -295,6 +307,7 @@ function simplytest_servers_execute($server, $commands) {
     }
   }
   else {
+    // Using a password.
     if(!ssh2_auth_password($connection, $server['user'], $server['password'])) {
       watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user and password (Server: %name).', array(
         '%host' => $server['host'],
