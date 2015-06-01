@@ -119,7 +119,7 @@ function simplytest_servers_set($servers) {
  */
 function simplytest_servers_build_url($submission_id, $server_id) {
   $servers = simplytest_servers_get();
-  $url = $servers[$server_id]['protocol'] . $server_id . $submission_id . '.' . $servers[$server_id]['host'];
+  $url = $servers[$server_id]['protocol'] . $server_id . $submission_id . '.' . $servers[$server_id]['name'];
   return $url;
 }
 
