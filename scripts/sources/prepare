@@ -98,13 +98,6 @@ s_prepare() {
     upload_tmp_dir = /home/$S_ID/www/tmp
     sendmail_path = /bin/echo
     pdo_mysql.default_socket = /var/run/mysqld/mysqld.sock
-    zend_extension=opcache.so
-    extension=json.so
-    extension=gd.so
-    extension=pdo.so
-    extension=mysql.so
-    extension=pdo_mysql.so
-    extension=mysqli.so
 
 [Date]
 ; Defines the default timezone used by the date functions
