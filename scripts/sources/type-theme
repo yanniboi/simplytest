@@ -84,9 +84,9 @@ s_project_install() {
 
   # Decide the PHP version to use based on the core version.
   if [ "$S_CORE" == "8" ]; then
-    ln -s $S_PHP_DIR_5_5 /home/$S_ID/php/php
+    ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
   else
-    ln -s $S_PHP_DIR_5_3 /home/$S_ID/php/php
+    ln -s $S_PHP_DIR_5_3 /home/$S_ID/php
   fi
 
   # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
