@@ -416,6 +416,7 @@ s_install_theme() {
 s_addsnippet() {
   S_TIMESTAMP=$(date +%s)
   echo "<?php
+    \$_SERVER['HTTPS'] = '$S_ENSURE_HTTPS';
     \$simplytest_snippet = array(
       'id' => \"$S_ID\",
       'created_timestamp' => $S_TIMESTAMP,

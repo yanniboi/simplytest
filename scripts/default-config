@@ -8,6 +8,9 @@ S_HOME="http://simplytest.me/"
 # State callback URL.
 S_CALLBACK="http://simplytest.me/simplytest/submissions/state"
 
+# Ensure HTTPS access?
+S_ENSURE_HTTPS=Off
+
 # Default login
 S_DUSR="admin"
 S_DPWD="admin"
