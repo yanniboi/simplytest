@@ -283,14 +283,26 @@ function simplytest_servers_execute($server, $commands) {
     return FALSE;
   }
 
-  // Try to  authenticate.
-  if(!ssh2_auth_password($connection, $server['user'], $server['password'])) {
-    watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user (Server: %name).', array(
-      '%host' => $server['host'],
-      '%name' => $server['name'],
-      '%user' => $server['user'],
-    ), WATCHDOG_ERROR);
-    return FALSE;
+  // Try to authenticate with password.
+  if (empty($server['password'])) {
+    if(!ssh2_auth_agent($connection, $server['user'])) {
+      watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user using agent (Server: %name).', array(
+        '%host' => $server['host'],
+        '%name' => $server['name'],
+        '%user' => $server['user'],
+      ), WATCHDOG_ERROR);
+      return FALSE;
+    }
+  }
+  else {
+    if(!ssh2_auth_password($connection, $server['user'], $server['password'])) {
+      watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user and password (Server: %name).', array(
+        '%host' => $server['host'],
+        '%name' => $server['name'],
+        '%user' => $server['user'],
+      ), WATCHDOG_ERROR);
+      return FALSE;
+    }
   }
 
   // Try to exec each command.

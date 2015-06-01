@@ -136,7 +136,7 @@ function simplytest_servers_config_form($form = array(), $form_state, $id) {
   $form['password'] = array(
     '#type' => 'textfield',
     '#title' => t('SSH Password'),
-    '#required' => TRUE,
+    '#required' => FALSE,
     '#default_value' => $config['password'],
   );
   $form['spawn'] = array(
