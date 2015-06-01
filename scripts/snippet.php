@@ -202,6 +202,9 @@ function _simplytest_snippet_infobar($variables) {
           barQrCode.onclick = displayQrCode;
 
           // Preset form fields (admin username / password, mysql credentials).
+          if (get('edit-site-name') !== null) {
+            get('edit-site-name').value = '<?php echo "$save_project $save_version" ?>';
+          }
           if (get('edit-name') !== null && get('edit-pass') !== null) {
             get('edit-name').value = '<?php echo $admin_user ?>';
             get('edit-pass').value = '<?php echo $admin_user ?>';
