@@ -4,7 +4,7 @@
 s_prepare() {
 
   # Add temporary user with minium rights as cage.
-  adduser --system --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 301
+  adduser --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 301
 
   # www directory and www/tmp will be re-created in chache_to_root().
   mkdir "/home/$S_ID/www"
