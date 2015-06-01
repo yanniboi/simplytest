@@ -286,7 +286,7 @@ function simplytest_servers_execute($server, $commands) {
   // Try to authenticate.
   if (!empty($server['privkey']) && !empty($server['pubkey'])) {
     // With private/public key.
-    if(!ssh2_auth_pubkey_file($connection, $server['user'], $config['pubkey'], $server['privkey'], $server['password'])) {
+    if(!ssh2_auth_pubkey_file($connection, $server['user'], $server['pubkey'], $server['privkey'], $server['password'])) {
       watchdog('simplytest_servers', 'Failed to authenticate to %host by SSH2 with user %user using private/public key (Server: %name).', array(
         '%host' => $server['host'],
         '%name' => $server['name'],
