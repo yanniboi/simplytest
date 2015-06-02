@@ -625,7 +625,7 @@ s_destruct() {
 
   # Reload config.
   lg "Reload apache config.."
-  service apache2 reload
+  service apache2 reload || service apache2 restart
 
   # Ensure: Delete vhost.
   rm -f "/etc/apache2/sites-enabled/$S_ID.conf"

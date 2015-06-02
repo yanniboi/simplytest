@@ -79,7 +79,7 @@ s_reset_environment_files "$S_ID"
 a2ensite $S_ID || s_ste 301
 
 # Reload apache config.
-service apache2 reload || s_ste 301
+service apache2 reload || service apache2 restart || s_ste 301
 
 # Set a timeout to destroy the environment.
 lg "Set timeout to destroy job.."
