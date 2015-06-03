@@ -600,6 +600,42 @@ s_discover_info_file() {
 }
 
 ##
+# Sets up PHP for the specified drupal version.
+#
+# @param $1
+#  Drupal version
+s_setup_php_for_drupal() {
+  case "$1" in
+    '8')
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+        ;;
+    '7')
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+        ;;
+    '6')
+        ln -s $S_PHP_DIR_5_3 /home/$S_ID/php
+        ;;
+    *)
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+  esac
+
+  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
+  mkdir /var/www/wrappers/$S_ID
+  chown $S_ID /var/www/wrappers/$S_ID
+  chgrp nogroup /var/www/wrappers/$S_ID
+  echo "#!/bin/bash
+    umask 022
+    PHPRC=/home/$S_ID
+    export PHPRC
+    PHP_INI_SCAN_DIR=/home/$S_ID/php/conf.d
+    export PHP_INI_SCAN_DIR
+    exec timeout 300 /home/$S_ID/php/php" > "/var/www/wrappers/$S_ID/php"
+  chmod +x "/var/www/wrappers/$S_ID/php"
+  chown $S_ID /var/www/wrappers/$S_ID/php
+  chgrp nogroup /var/www/wrappers/$S_ID/php
+}
+
+##
 # Destructs the specified sandbox.
 #
 # @param $1

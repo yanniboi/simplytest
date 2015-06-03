@@ -143,25 +143,6 @@ s_project_install() {
   lg "Setup database.."
   s_db_setup $S_ID
 
-  # Decide the PHP version to use based on the core version.
-  if [ "$S_CORE" == "8" ]; then
-    ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
-  else
-    ln -s $S_PHP_DIR_5_3 /home/$S_ID/php
-  fi
-
-  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
-  mkdir /var/www/wrappers/$S_ID
-  chown $S_ID /var/www/wrappers/$S_ID
-  chgrp nogroup /var/www/wrappers/$S_ID
-  echo "#!/bin/bash
-    umask 022
-    PHPRC=/home/$S_ID
-    export PHPRC
-    PHP_INI_SCAN_DIR=/home/$S_ID/php/conf.d
-    export PHP_INI_SCAN_DIR
-    exec timeout 300 /home/$S_ID/php/php" > "/var/www/wrappers/$S_ID/php"
-  chmod +x "/var/www/wrappers/$S_ID/php"
-  chown $S_ID /var/www/wrappers/$S_ID/php
-  chgrp nogroup /var/www/wrappers/$S_ID/php
+  # Setup a PHP version to use based on the core version.
+  s_setup_php_for_drupal $S_CORE
 }
