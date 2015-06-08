@@ -667,6 +667,7 @@ s_destruct() {
   rm -f "/etc/apache2/sites-enabled/$S_ID.conf"
 
   # Kill all the users processes.
+  lg "Kill user processes.."
   pkill -u $S_ID
 
   # Remove user.

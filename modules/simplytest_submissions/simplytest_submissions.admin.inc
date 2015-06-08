@@ -79,7 +79,7 @@ function simplytest_submissions_monitor_table($form, $form_state = array()) {
   $rows = array();
   foreach ($submissions as &$submission) {
     // Collect all data.
-    $submission = array_merge($submission, unserialize($submission['data']));
+    $submission = array_merge(unserialize($submission['data']), $submission);
     unset($submission['data']);
     // Create rows contents.
     $project_url = ($submission['sandbox']

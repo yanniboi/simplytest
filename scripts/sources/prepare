@@ -14,7 +14,7 @@ s_prepare() {
   # Add secured vHost for apache.
   echo "<VirtualHost *:80>
   ServerName $S_ID.$S_HOST
-  ServerAlias $S_SERVER_ID$S_ID.$S_DOMAIN
+  ServerAlias $S_ID.$S_DOMAIN
   DocumentRoot /home/$S_ID/www
   SuexecUserGroup $S_ID nogroup
   <IfModule mod_fcgid.c>

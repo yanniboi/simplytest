@@ -91,8 +91,15 @@ function simplytest_submissions_enqueue($submission) {
     return FALSE;
   }
 
+  // Select server.
+  $server = simplytest_servers_select();
+  if (!$server) {
+    return FALSE;
+  }
+  $submission['server'] = $server;
+
   // Generate unique submission id.
-  $submission['id'] = simplytest_submissions_generate_id();
+  $submission['id'] = simplytest_submissions_generate_id($server['id']);
 
   // Determine the submission timeout to use.
   $submission['timeout'] = variable_get('simplytest_submissions_timeout', 15);
@@ -112,6 +119,7 @@ function simplytest_submissions_enqueue($submission) {
       'data' => serialize($submission),
       'timestamp' => REQUEST_TIME,
       'state' => SIMPLYTEST_SUBMISSIONS_ENQUEUE,
+      'server' => $server['id'],
     ))
     ->execute();
 
@@ -191,24 +199,19 @@ function simplytest_submissions_process_submission($id) {
  *  The submission id.
  */
 function simplytest_submissions_send($id) {
-  $submission = db_select('simplytest_submissions', 's')
+  $submission_data = db_select('simplytest_submissions', 's')
     ->fields('s', array('data'))
     ->condition('id', $id)
     ->execute()->fetchField();
+  $submission_data = unserialize($submission_data);
   // Send submission and spawn worker.
-  $server = simplytest_servers_spawn(unserialize($submission));
-  if ($server === FALSE) {
+  if (!simplytest_servers_spawn($submission_data)) {
     // Something went very wrong, sending submission failed.
     return FALSE;
   }
   else {
     // Submission has been spawned, set submission state properly.
     simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED);
-    // Also save the servers id for the current submission.
-    db_update('simplytest_submissions')
-      ->fields(array('server' => $server['id']))
-      ->condition('id', $id)
-      ->execute();
     return TRUE;
   }
 }
@@ -272,10 +275,13 @@ function simplytest_submissions_set_state($id, $state) {
 /**
  * Generates a unique submission id.
  *
+ * @param string $prefix
+ *  Submission id prefix; eg. server id.
+ *
  * @return string
  *  Submission id string with configured alphabet and minimal length.
  */
-function simplytest_submissions_generate_id() {
+function simplytest_submissions_generate_id($prefix) {
   // Get id-conversion alphabet.
   $alphabet = variable_get('simplytest_submissions_id_alphabet', '0123456789abcdefghijklmnopqrstuvwxyz');
   $length = strlen($alphabet);
@@ -294,7 +300,7 @@ function simplytest_submissions_generate_id() {
   }
   $id = $alphabet[$decimal_id] . $id;
 
-  return $id;
+  return $prefix . $id;
 }
 
 /**

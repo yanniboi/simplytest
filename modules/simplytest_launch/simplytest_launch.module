@@ -232,6 +232,11 @@ function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_stat
   // Enqueue the submission.
   $submission_id = simplytest_submissions_enqueue($submission);
 
+  if (!$submission_id) {
+    drupal_set_message(t('Enqueuing the submission failed. No servers are currently available.'), 'error');
+    return;
+  }
+
   watchdog('simplytest_launch', 'Submitted "%project": %version for launching a sandbox: %sid', array(
     '%project' => $project,
     '%version' => $version,

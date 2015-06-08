@@ -19,17 +19,16 @@ define('SIMPLYTEST_SERVERS_CONFIG_FILE_PATH', '/tmp');
  */
 function simplytest_servers_config_data_map() {
   $map = array(
-    'S_ID'            => 'submission:id',
-    'S_SERVER_ID'     => 'server:id',
+    'S_ID'            => 'id',
     'S_HOST'          => 'server:host',
     'S_DOMAIN'        => 'server:name',
-    'S_PROJECT'       => 'submission:project',
-    'S_TYPE'          => 'submission:type',
-    'S_VERSION'       => 'submission:version',
-    'S_GITURL'        => 'submission:giturl',
-    'S_TIMEOUT'       => 'submission:timeout',
-    'S_ADDITIONALS'   => 'submission:additionals',
-    'S_PATCHES'       => 'submission:patches',
+    'S_PROJECT'       => 'project',
+    'S_TYPE'          => 'type',
+    'S_VERSION'       => 'version',
+    'S_GITURL'        => 'giturl',
+    'S_TIMEOUT'       => 'timeout',
+    'S_ADDITIONALS'   => 'additionals',
+    'S_PATCHES'       => 'patches',
   );
   // Let other modules alter the config map.
   drupal_alter('simplytest_servers_config_data_map', $map);
@@ -119,20 +118,17 @@ function simplytest_servers_set($servers) {
  */
 function simplytest_servers_build_url($submission_id, $server_id) {
   $servers = simplytest_servers_get();
-  $url = $servers[$server_id]['protocol'] . $server_id . $submission_id . '.' . $servers[$server_id]['name'];
+  $url = $servers[$server_id]['protocol'] . $submission_id . '.' . $servers[$server_id]['name'];
   return $url;
 }
 
 /**
- * Spawn a submission worker on one of the servers.
- *
- * @param array $submission
- *  An array of submission data.
+ * Selects a server for a submission.
  *
  * @return array
  *  An associative array of data of the chosen server.
  */
-function simplytest_servers_spawn($submission) {
+function simplytest_servers_select() {
   $servers = simplytest_servers_get();
 
   // Order the servers according to their free slots.
@@ -148,48 +144,53 @@ function simplytest_servers_spawn($submission) {
     watchdog('simplytest_servers', 'Failed to choose servers. No active servers with free slots available.', array(), WATCHDOG_ERROR);
     return FALSE;
   }
+  
+  return array_shift($servers);
+}
 
-  foreach ($servers as $server) {
-    // Generate submission config file contents.
-    $submission_config = simplytest_servers_submission_config_file_generate(array(
-      'submission' => $submission,
-      'server' => $server,
-    ));
+/**
+ * Spawn a submission worker on a server.
+ *
+ * @param array $submission
+ *  An array of submission data.
+ *
+ * @return bool
+ *  Whether spawning the submission succeeded.
+ */
+function simplytest_servers_spawn($submission) {
+  $server = $submission['server'];
 
-    // Target submission config filepath.
-    $config_path = SIMPLYTEST_SERVERS_CONFIG_FILE_PATH . '/' . $submission['id'] . '.submission';
+  // Generate submission config file contents.
+  $submission_config = simplytest_servers_submission_config_file_generate($submission);
 
-    // Shell script commands.
-    $commands = array(
-      // Save the submission configuration file.
-      array('echo %configuration_string > %configuration_path', array(
-        '%configuration_string' => $submission_config,
-        '%configuration_path' => $config_path,
-      )),
-      // Execute the spawn script.
-      array($server['spawn'] . ' %configuration_path', array(
-        '%configuration_path' => $config_path,
-      )),
-    );
+  // Target submission config filepath.
+  $config_path = SIMPLYTEST_SERVERS_CONFIG_FILE_PATH . '/' . $submission['id'] . '.submission';
 
-    // Execute spawn script.
-    if (!simplytest_servers_execute($server, $commands)) {
-      continue;
-    }
+  // Shell script commands.
+  $commands = array(
+    // Save the submission configuration file.
+    array('echo %configuration_string > %configuration_path', array(
+      '%configuration_string' => $submission_config,
+      '%configuration_path' => $config_path,
+    )),
+    // Execute the spawn script.
+    array($server['spawn'] . ' %configuration_path', array(
+      '%configuration_path' => $config_path,
+    )),
+  );
 
-    watchdog('simplytest_servers', 'Spawned %id on %host by SSH2 with user %user.', array(
-      '%id' => $submission['id'],
-      '%host' => $server['host'],
-      '%user' => $server['user'],
-    ), WATCHDOG_NOTICE);
-
-    return $server;
+  // Execute spawn script.
+  if (!simplytest_servers_execute($server, $commands)) {
+    return FALSE;
   }
 
-  watchdog('simplytest_servers', 'Failed to spawn %id on any servers.', array(
+  watchdog('simplytest_servers', 'Spawned %id on %host by SSH2 with user %user.', array(
     '%id' => $submission['id'],
-  ), WATCHDOG_ERROR);
-  return FALSE;
+    '%host' => $server['host'],
+    '%user' => $server['user'],
+  ), WATCHDOG_NOTICE);
+
+  return TRUE;
 }
 
 /**
@@ -267,7 +268,7 @@ function simplytest_server_submission_config_file_bashscript($config) {
  * Executes a command on a specific server.
  *
  * @param array $server
- *  A simplytest array object.
+ *  A server array object.
  * @param array $commands
  *  An array of command strings to execute.
  *
