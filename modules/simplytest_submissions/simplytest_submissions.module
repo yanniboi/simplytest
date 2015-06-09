@@ -158,7 +158,7 @@ function simplytest_submissions_get_position($id) {
     db_update('simplytest_submissions')
       ->fields(array('state' => SIMPLYTEST_SUBMISSIONS_ABORTED))
       ->condition('state', SIMPLYTEST_SUBMISSIONS_ENQUEUE)
-      ->condition('timestamp', REQUEST_TIME - 10, '<')
+      ->condition('timestamp', REQUEST_TIME - 15, '<')
       ->execute();
     // Figure out current position of this submission.
     $position = db_query('SELECT count(*) FROM {simplytest_submissions} WHERE '
