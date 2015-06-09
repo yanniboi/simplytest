@@ -137,12 +137,19 @@ function _simplytest_snippet_infobar($variables) {
               if (delta <= 60000) {
                 barContainer.className = 'st-warn';
               }
-              if (delta >=0){
+              if (delta >= 0){
                 var d = new Date(delta);
+                var days = d.getUTCDate() - 1;
+                if (days > 0) {
+                  days = formatNumber(days) + ':';
+                }
+                else {
+                  days = '';
+                }
                 var hh = formatNumber(d.getUTCHours());
                 var mm = formatNumber(d.getUTCMinutes());
                 var ss = formatNumber(d.getUTCSeconds());
-                counterElement.innerHTML = hh + ':' + mm + ':' + ss;
+                counterElement.innerHTML = days + hh + ':' + mm + ':' + ss;
               } else {
                 counterElement.innerHTML = 'Time over!';
                 window.location = 'http://simplytest.me/';
