@@ -222,12 +222,14 @@ s_install_drupal_8() {
   mkdir "/home/$S_ID/www/sites/simpletest"
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
+  chmod 777 "/home/$S_ID/www/modules"
+  chmod 777 "/home/$S_ID/www/themes"
   chmod 777 "/home/$S_ID/www/sites/simpletest"
   chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 303
-  # Drush's not ready for d8.
+  # Install D8 with Drush?
 }
 
 ##
