@@ -280,6 +280,9 @@ s_install_drupal_6() {
   chown --recursive $S_ID "/home/$S_ID/www"/*
   chgrp --recursive nogroup "/home/$S_ID/www"/*
 
+  # Enable SSL support for D6.
+  echo "\$base_url = 'https://$S_ID.$S_DOMAIN';" >> "/home/$S_ID/www/sites/default/settings.php"
+
   # Set mysql default settings for installation.
   echo "\$db_url = 'mysql://$S_ID:$S_ID@localhost/$S_ID';" >> "/home/$S_ID/www/sites/default/settings.php"
   # Start drupal installation.
