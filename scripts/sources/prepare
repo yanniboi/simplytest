@@ -21,6 +21,7 @@ s_prepare() {
     FcgidInitialEnv PHPRC /home/$S_ID
     FcgidWrapper /var/www/wrappers/$S_ID/php .php
     FcgidMaxRequestLen 2000000
+    FcgidOutputBufferSize 0
   </IfModule>
   <Directory /home/$S_ID/www>
     AllowOverride all
@@ -42,7 +43,7 @@ s_prepare() {
     asp_tags = Off
     precision = 14
     y2k_compliance = On
-    output_buffering = 4096
+    output_buffering = Off
     zlib.output_compression = Off
     implicit_flush = Off
     unserialize_callback_func =
@@ -82,7 +83,7 @@ s_prepare() {
     magic_quotes_runtime = Off
     magic_quotes_sybase = Off
     auto_prepend_file = /home/$S_ID/www/snippet.php
-    auto_append_file = 
+    auto_append_file =
     default_mimetype = text/html
     doc_root =
     user_dir = /home/$S_ID/www
