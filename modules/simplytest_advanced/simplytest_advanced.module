@@ -113,6 +113,7 @@ function simplytest_advanced_simplytest_submission_form($form, $form_state) {
       '#title_display' => 'invisible',
       '#parents' => array('submission', 'patches', $patch),
       '#default_value' => (is_string($preset)) ? $preset : '',
+      '#maxlength' => 512,
       '#attributes' => array(
         'placeholder' => 'http://www.drupal.org/files/',
       ),
