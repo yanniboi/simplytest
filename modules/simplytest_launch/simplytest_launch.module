@@ -196,7 +196,7 @@ function simplytest_launch_simplytest_submission_form_validate(&$form, &$form_st
 
   // Check whether the selected has any available releases.
   elseif (empty($versions['heads']) && empty($versions['tags'])) {
-    form_set_error('project', t('The selected project %project has no available releases.',
+    form_set_error('project', t('The selected project %project has no available releases. (Release cache is cleared once an hour)',
       array('%project' => $project)
     ));
     drupal_goto('project/' . $project);
