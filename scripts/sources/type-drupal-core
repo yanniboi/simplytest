@@ -29,7 +29,11 @@ s_project_download() {
 ##
 # Fetch project dependecies.
 s_project_fetch_dependencies() {
-  : # No dependencies to fetch for a core project.
+  cd "/home/$S_ID/www"
+
+  # Composer install.
+  lg "Try to install composer dependencies for drupal core.."
+  timeout 350 composer install || s_ste 303
 }
 
 ##

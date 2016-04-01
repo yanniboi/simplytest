@@ -61,6 +61,15 @@ s_project_fetch_dependencies() {
   rm -rf "/home/$S_ID/www"
   mv /home/$S_ID/drupal-* "/home/$S_ID/www"
 
+  # Composer install.
+  lg "Try to install composer dependencies for drupal core.."
+  cd "/home/$S_ID/www"
+  timeout 350 composer install || s_ste 303
+  lg "Try to install composer dependencies for the module.."
+  cd "/home/$S_ID/$S_PROJECT"
+  timeout 350 composer install || s_ste 303
+  cd "/home/$S_ID"
+
   # Create a sites/all directory for drush 6 with drupal 8.
   mkdir "/home/$S_ID/www/sites/all"
 
