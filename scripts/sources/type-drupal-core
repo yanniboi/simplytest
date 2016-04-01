@@ -33,7 +33,9 @@ s_project_fetch_dependencies() {
 
   # Composer install.
   lg "Try to install composer dependencies for drupal core.."
-  timeout 350 composer install || s_ste 303
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
+  fi
 }
 
 ##

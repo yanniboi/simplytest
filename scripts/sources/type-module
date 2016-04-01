@@ -64,10 +64,14 @@ s_project_fetch_dependencies() {
   # Composer install.
   lg "Try to install composer dependencies for drupal core.."
   cd "/home/$S_ID/www"
-  timeout 350 composer install || s_ste 303
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
+  fi
   lg "Try to install composer dependencies for the module.."
   cd "/home/$S_ID/$S_PROJECT"
-  timeout 350 composer install || s_ste 303
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
+  fi
   cd "/home/$S_ID"
 
   # Create a sites/all directory for drush 6 with drupal 8.
