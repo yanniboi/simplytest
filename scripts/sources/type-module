@@ -49,10 +49,10 @@ s_project_fetch_dependencies() {
   # Fetch drupal core.
   lg "Fetch core.."
 
-  # Workaround: We need to manualy select 8.0.x until there's a stable release of it available.
-  # Using drupal-8 would lead to an interactive selection, --dev would lead to the usage of drupal-8.1.x.
+  # Workaround: We need to manualy select 8.1.x until there's a stable release of it available.
+  # Using drupal-8 would lead to an interactive selection, --dev would lead to the usage of drupal-8.2.x.
   if [ "$S_CORE" == "8" ]; then
-    timeout 350 drush dl --select=never --destination="/home/$S_ID" "drupal-8.0.x"
+    timeout 350 drush dl --select=never --destination="/home/$S_ID" "drupal-8.1.x"
   else
     timeout 350 drush dl --select=never --destination="/home/$S_ID" --default-major="$S_CORE" "drupal-$S_CORE"
   fi
