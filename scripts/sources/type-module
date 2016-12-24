@@ -67,11 +67,6 @@ s_project_fetch_dependencies() {
   if [[ -e "composer.json" ]]; then
     timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
   fi
-  lg "Try to install composer dependencies for the module.."
-  cd "/home/$S_ID/$S_PROJECT"
-  if [[ -e "composer.json" ]]; then
-    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
-  fi
   cd "/home/$S_ID"
 
   # Create a sites/all directory for drush 6 with drupal 8.
@@ -81,6 +76,17 @@ s_project_fetch_dependencies() {
   lg "Prepare the module project.."
   mkdir "/home/$S_ID/www/sites/default/modules"
   cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/modules" || s_ste 303
+
+  # Check for project composer dependencies.
+  lg "Try to install composer dependencies for the module.."
+  cd "/home/$S_ID/www/sites/default/modules/$S_PROJECT"
+  if [[ -e "composer.json" ]]; then
+    cd "/home/$S_ID/www"
+    timeout 350 drush dl composer_manager
+    timeout 350 php modules/composer_manager/scripts/init.php
+    timeout 350 composer drupal-update
+  fi
+  cd "/home/$S_ID"
 
   # Resolve dependencies.
   lg "Resolve dependencies"
