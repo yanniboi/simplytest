@@ -222,12 +222,14 @@ s_install_drupal_8() {
   mkdir "/home/$S_ID/www/sites/simpletest"
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
+  chmod 777 "/home/$S_ID/www/modules"
+  chmod 777 "/home/$S_ID/www/themes"
   chmod 777 "/home/$S_ID/www/sites/simpletest"
   chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www/.htaccess" || s_ste 303
-  # Drush's not ready for d8.
+  # Install D8 with Drush?
 }
 
 ##
@@ -255,6 +257,8 @@ s_install_drupal_7() {
 
   chmod --recursive 555 "/home/$S_ID/www"
   chmod --recursive 777 "/home/$S_ID/www/sites/default/files"
+  chmod 777 "/home/$S_ID/www/sites/all/modules"
+  chmod 777 "/home/$S_ID/www/sites/all/themes"
   chown --recursive $S_ID "/home/$S_ID/www"/* || s_ste 303
   chgrp --recursive nogroup "/home/$S_ID/www"/* || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www/.htaccess" || s_ste 303
@@ -275,6 +279,9 @@ s_install_drupal_6() {
   cd "/home/$S_ID/www" || s_ste 303
   chown --recursive $S_ID "/home/$S_ID/www"/*
   chgrp --recursive nogroup "/home/$S_ID/www"/*
+
+  # Enable SSL support for D6.
+  echo "\$base_url = 'https://$S_ID.$S_DOMAIN';" >> "/home/$S_ID/www/sites/default/settings.php"
 
   # Set mysql default settings for installation.
   echo "\$db_url = 'mysql://$S_ID:$S_ID@localhost/$S_ID';" >> "/home/$S_ID/www/sites/default/settings.php"
@@ -416,6 +423,7 @@ s_install_theme() {
 s_addsnippet() {
   S_TIMESTAMP=$(date +%s)
   echo "<?php
+    \$_SERVER['HTTPS'] = '$S_ENSURE_HTTPS';
     \$simplytest_snippet = array(
       'id' => \"$S_ID\",
       'created_timestamp' => $S_TIMESTAMP,
@@ -599,6 +607,42 @@ s_discover_info_file() {
 }
 
 ##
+# Sets up PHP for the specified drupal version.
+#
+# @param $1
+#  Drupal version
+s_setup_php_for_drupal() {
+  case "$1" in
+    '8')
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+        ;;
+    '7')
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+        ;;
+    '6')
+        ln -s $S_PHP_DIR_5_3 /home/$S_ID/php
+        ;;
+    *)
+        ln -s $S_PHP_DIR_5_5 /home/$S_ID/php
+  esac
+
+  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
+  mkdir /var/www/wrappers/$S_ID
+  chown $S_ID /var/www/wrappers/$S_ID
+  chgrp nogroup /var/www/wrappers/$S_ID
+  echo "#!/bin/bash
+    umask 022
+    PHPRC=/home/$S_ID
+    export PHPRC
+    PHP_INI_SCAN_DIR=/home/$S_ID/php/conf.d
+    export PHP_INI_SCAN_DIR
+    exec timeout 300 /home/$S_ID/php/php" > "/var/www/wrappers/$S_ID/php"
+  chmod +x "/var/www/wrappers/$S_ID/php"
+  chown $S_ID /var/www/wrappers/$S_ID/php
+  chgrp nogroup /var/www/wrappers/$S_ID/php
+}
+
+##
 # Destructs the specified sandbox.
 #
 # @param $1
@@ -609,21 +653,36 @@ s_destruct() {
     :
   }
 
+  if [ -z "$S_ID" ]; then
+    echo "ABORTING - SUBMISSION ID IS NOT SET"
+    exit 1
+  fi
+
   # Disable vhost.
   lg "Disable vhost.."
   a2dissite $S_ID
 
   # Delete vhost.
   lg "Delete vhost.."
-  rm -f "/etc/apache2/sites-available/$S_ID"
+  rm -f "/etc/apache2/sites-available/$S_ID.conf"
 
   # Reload config.
   lg "Reload apache config.."
-  service apache2 reload
+  service apache2 reload || service apache2 restart
+
+  # Ensure: Delete vhost.
+  rm -f "/etc/apache2/sites-enabled/$S_ID.conf"
+
+  # Kill all the users processes.
+  lg "Kill user processes.."
+  pkill -u $S_ID
 
   # Remove user.
   lg "Remove user.."
   userdel --force --remove $S_ID
+
+  # Ensure: Remove the users home directory if it's still there.
+  rm -Rf /home/$S_ID
 
   # Delete cgi wrapper.
   lg "Delete CGI wrapper.."

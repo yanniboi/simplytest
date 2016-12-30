@@ -8,6 +8,9 @@ S_HOME="http://simplytest.me/"
 # State callback URL.
 S_CALLBACK="http://simplytest.me/simplytest/submissions/state"
 
+# Ensure HTTPS access?
+S_ENSURE_HTTPS=Off
+
 # Default login
 S_DUSR="admin"
 S_DPWD="admin"
@@ -15,6 +18,11 @@ S_DMAIL_SUFFIX="@simplytest.me"
 
 # Drush cache path.
 S_DRUSHCACHE="/home/spawner/.drush/cache/git"
+
+# PHP binaries path
+S_PHP_DIR_5_3="/home/spawner/php/5.3"
+S_PHP_DIR_5_5="/home/spawner/php/5.5"
+S_PHP_DIR_5_6="/home/spawner/php/5.6"
 
 # List of project aliases.
 # [Dependency name]= Project name
@@ -28,4 +36,3 @@ __PROJECT_ALIASES[actions_permissions]=views_bulk_operations
 __PROJECT_ALIASES[node_reference]=references
 __PROJECT_ALIASES[user_reference]=references
 __PROJECT_ALIASES[oauth_common]=oauth
-

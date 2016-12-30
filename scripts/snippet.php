@@ -88,21 +88,12 @@ function _simplytest_snippet_infobar($variables) {
           text-decoration: none;
         }
 
-        #simplytest-snippet-qr-code {
-          position: relative;
-          top: 2px;
-          margin-left: 10px;
-          vertical-align: top !important;
-        }
-
-        #simplytest-snippet-close,
-        #simplytest-snippet-qr-code {
+        #simplytest-snippet-close {
           cursor: pointer;
         }
 
         @media only screen and (max-width: 18.125em) {
-          #simplytest-snippet-backlink,
-          #simplytest-snippet-qr-code {
+          #simplytest-snippet-backlink {
             display: none;
           }
         }
@@ -112,7 +103,6 @@ function _simplytest_snippet_infobar($variables) {
       <div id="simplytest-snippet-container">
         <span id="simplytest-snippet-infobar">
           <span id="simplytest-snippet-countdown-time"></span>
-          <img id="simplytest-snippet-qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAM1BMVEUAAAD29vb+/v76+vr4+Pj09PT5+fnz8/Pw8PD4+Pj19fX29vbz8/P39/fy8vLu7u75+flIu1cCAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBQ4NAQBbiP8AAAAAaUlEQVQY02WNCQ6AIAwER0XAouD/X2vLZaJTGja7TQs/1luBC/tXNXxtNwQctZzrAsta3gWXgfddDJZlypT0pUIO7NIsEYSYCTvvXIGgkcnTUEMnEJsIrSNjR65V3h2x99yxFYWNz5XJAxK4A86fTNrwAAAAAElFTkSuQmCC" title="Generate QR code" alt="QR Code Image" />
           <a href="<? print 'http://simplytest.me/project/' . urlencode($project) . '/' . urlencode($version); ?>" id="simplytest-snippet-backlink" title="Back to simplytest.me"><?php print $save_project; ?> <?php print $save_version; ?></a>
           <span id="simplytest-snippet-close" title="Hide bar">&#x2718;</span>
         </span>
@@ -147,12 +137,19 @@ function _simplytest_snippet_infobar($variables) {
               if (delta <= 60000) {
                 barContainer.className = 'st-warn';
               }
-              if (delta >=0){
+              if (delta >= 0){
                 var d = new Date(delta);
+                var days = d.getUTCDate() - 1;
+                if (days > 0) {
+                  days = formatNumber(days) + ':';
+                }
+                else {
+                  days = '';
+                }
                 var hh = formatNumber(d.getUTCHours());
                 var mm = formatNumber(d.getUTCMinutes());
                 var ss = formatNumber(d.getUTCSeconds());
-                counterElement.innerHTML = hh + ':' + mm + ':' + ss;
+                counterElement.innerHTML = days + hh + ':' + mm + ':' + ss;
               } else {
                 counterElement.innerHTML = 'Time over!';
                 window.location = 'http://simplytest.me/';
@@ -170,7 +167,6 @@ function _simplytest_snippet_infobar($variables) {
 
           var barContainer = get('simplytest-snippet-container');
           var barElement = get('simplytest-snippet-infobar');
-          var barQrCode = get('simplytest-snippet-qr-code');
           var barClose = get('simplytest-snippet-close');
           var barOpen = get('simplytest-snippet-open');
           var toggle = false;
@@ -188,20 +184,10 @@ function _simplytest_snippet_infobar($variables) {
           barClose.onclick = toggleSimplytestInfobar;
           barOpen.onclick = toggleSimplytestInfobar;
 
-          // QR code functionality.
-          var displayQrCode = function (e) {
-            if (e) { e.preventDefault(); }
-            var currentURL = window.location.hostname + window.location.pathname;
-            var width = 200;
-            var height = 200;
-            var wx = (screen.width - width) >> 1;
-            var wy = (screen.height - height) >> 1;
-            var url = 'http://chart.googleapis.com/chart?cht=qr&chl=http://' + currentURL + '&chs=200x200';
-            window.open(url, '', 'top=' + wy + ',left=' + wx + ',width=' + width + ',height=' + height);
-          };
-          barQrCode.onclick = displayQrCode;
-
           // Preset form fields (admin username / password, mysql credentials).
+          if (get('edit-site-name') !== null) {
+            get('edit-site-name').value = '<?php echo "$save_project $save_version" ?>';
+          }
           if (get('edit-name') !== null && get('edit-pass') !== null) {
             get('edit-name').value = '<?php echo $admin_user ?>';
             get('edit-pass').value = '<?php echo $admin_user ?>';

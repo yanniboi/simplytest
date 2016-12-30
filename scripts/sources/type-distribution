@@ -142,4 +142,7 @@ s_project_install() {
   # Setup database.
   lg "Setup database.."
   s_db_setup $S_ID
+
+  # Setup a PHP version to use based on the core version.
+  s_setup_php_for_drupal $S_CORE
 }

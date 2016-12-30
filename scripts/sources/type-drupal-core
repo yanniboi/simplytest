@@ -29,7 +29,13 @@ s_project_download() {
 ##
 # Fetch project dependecies.
 s_project_fetch_dependencies() {
-  : # No dependencies to fetch for a core project.
+  cd "/home/$S_ID/www"
+
+  # Composer install.
+  lg "Try to install composer dependencies for drupal core.."
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
+  fi
 }
 
 ##
@@ -43,6 +49,9 @@ s_project_install() {
   lg "Find out coreversion.."
   S_COREVERSION=$(s_get_coreversion)
   lg "-> coreversion: $S_COREVERSION"
+
+  # Setup a PHP version to use based on the core version.
+  s_setup_php_for_drupal $S_COREVERSION
 
   # Install drupal in docroot.
   lg "Install drupal core.."

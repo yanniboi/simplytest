@@ -4,7 +4,7 @@
 s_prepare() {
 
   # Add temporary user with minium rights as cage.
-  adduser --system --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 301
+  adduser --home "/home/$S_ID/" --disabled-login --gecos "/dev/null" --shell "/dev/null" $S_ID || s_ste 301
 
   # www directory and www/tmp will be re-created in chache_to_root().
   mkdir "/home/$S_ID/www"
@@ -14,13 +14,14 @@ s_prepare() {
   # Add secured vHost for apache.
   echo "<VirtualHost *:80>
   ServerName $S_ID.$S_HOST
-  ServerAlias *.$S_ID.$S_HOST
+  ServerAlias $S_ID.$S_DOMAIN
   DocumentRoot /home/$S_ID/www
   SuexecUserGroup $S_ID nogroup
   <IfModule mod_fcgid.c>
     FcgidInitialEnv PHPRC /home/$S_ID
     FcgidWrapper /var/www/wrappers/$S_ID/php .php
     FcgidMaxRequestLen 2000000
+    FcgidOutputBufferSize 0
   </IfModule>
   <Directory /home/$S_ID/www>
     AllowOverride all
@@ -29,33 +30,20 @@ s_prepare() {
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} ^/mysite/(.)$
     RewriteRule ^(.*)$ /mysite/index.php?q=\$1 [L,QSA]
-    Allow from all
-    Options Indexes FollowSymLinks +Includes +ExecCGI
-    Order allow,deny
+    Options +Indexes +FollowSymLinks +Includes +ExecCGI
+    Require all granted
   </Directory>
-  </VirtualHost>" > "/etc/apache2/sites-available/$S_ID"
-
-  # Write CGI wrapper (necessary for secure apache/cgi user change by suExec).
-  mkdir /var/www/wrappers/$S_ID
-  chown $S_ID /var/www/wrappers/$S_ID
-  chgrp nogroup /var/www/wrappers/$S_ID
-  echo "#!/bin/bash
-    umask 022
-    PHPRC=/home/$S_ID
-    export PHPRC
-    exec /usr/lib/cgi-bin/php" > "/var/www/wrappers/$S_ID/php"
-  chmod +x "/var/www/wrappers/$S_ID/php"
-  chown $S_ID /var/www/wrappers/$S_ID/php
-  chgrp nogroup /var/www/wrappers/$S_ID/php
+  </VirtualHost>" > "/etc/apache2/sites-available/$S_ID.conf"
 
   # Write secured php.ini file.
   echo "[PHP]
     engine = On
+    extension_dir=/home/$S_ID/php
     short_open_tag = On
     asp_tags = Off
     precision = 14
     y2k_compliance = On
-    output_buffering = 4096
+    output_buffering = Off
     zlib.output_compression = Off
     implicit_flush = Off
     unserialize_callback_func =
@@ -95,12 +83,14 @@ s_prepare() {
     magic_quotes_runtime = Off
     magic_quotes_sybase = Off
     auto_prepend_file = /home/$S_ID/www/snippet.php
-    auto_append_file = 
+    auto_append_file =
     default_mimetype = text/html
     doc_root =
     user_dir = /home/$S_ID/www
     enable_dl = Off
     file_uploads = On
+    session.cache_limiter = nocache
+    session.auto_start = 0
     upload_max_filesize = 5M
     max_file_uploads = 5
     allow_url_fopen = On
@@ -108,11 +98,13 @@ s_prepare() {
     default_socket_timeout = 10
     upload_tmp_dir = /home/$S_ID/www/tmp
     sendmail_path = /bin/echo
+    pdo_mysql.default_socket = /var/run/mysqld/mysqld.sock
+    opcache.memory_consumption = 96
+
+[Date]
+; Defines the default timezone used by the date functions
+; http://php.net/date.timezone
+date.timezone = Europe/Berlin
+
     " > "/home/$S_ID/php.ini"
-
-  # Enable vhost.
-  a2ensite $S_ID || s_ste 301
-
-  # Reload apache config.
-  service apache2 reload || s_ste 301
 }

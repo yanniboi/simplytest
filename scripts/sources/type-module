@@ -48,26 +48,38 @@ s_project_fetch_dependencies() {
 
   # Fetch drupal core.
   lg "Fetch core.."
-  # We'll directly clone it into the www directory, so delete it for git.
+  timeout 350 drush dl --select=never --destination="/home/$S_ID" --default-major="$S_CORE" "drupal-$S_CORE"
+
+  # Move core into position.
   rm -rf "/home/$S_ID/www"
+  mv /home/$S_ID/drupal-* "/home/$S_ID/www"
 
-  # Workaround: We need to manualy select 8.0.x until there's a stable release of it available.
-  # Using drupal-8 would lead to an interactive selection, --dev would lead to the usage of drupal-8.1.x.
-  if [ "$S_CORE" == "8" ]; then
-    timeout 350 drush dl --select=never --destination="/home/$S_ID" "drupal-8.0.x"
-  else
-    timeout 350 drush dl --select=never --destination="/home/$S_ID" --default-major="$S_CORE" "drupal-$S_CORE"
+  # Composer install.
+  lg "Try to install composer dependencies for drupal core.."
+  cd "/home/$S_ID/www"
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
   fi
+  cd "/home/$S_ID"
 
-  mv /home/$S_ID/drupal* "/home/$S_ID/www"
   # Create a sites/all directory for drush 6 with drupal 8.
   mkdir "/home/$S_ID/www/sites/all"
-
 
   # Prepare the modules directory and copy it in.
   lg "Prepare the module project.."
   mkdir "/home/$S_ID/www/sites/default/modules"
   cp -rf "/home/$S_ID/$S_PROJECT" "/home/$S_ID/www/sites/default/modules" || s_ste 303
+
+  # Check for project composer dependencies.
+  lg "Try to install composer dependencies for the module.."
+  cd "/home/$S_ID/www/sites/default/modules/$S_PROJECT"
+  if [[ -e "composer.json" ]]; then
+    cd "/home/$S_ID/www"
+    timeout 350 drush dl composer_manager
+    timeout 350 php modules/composer_manager/scripts/init.php
+    timeout 350 composer drupal-update
+  fi
+  cd "/home/$S_ID"
 
   # Resolve dependencies.
   lg "Resolve dependencies"
@@ -90,6 +102,9 @@ s_project_install() {
   # Setup database.
   lg "Setup database.."
   s_db_setup $S_ID
+
+  # Setup a PHP version to use based on the core version.
+  s_setup_php_for_drupal $S_CORE
 
   # Install drupal in docroot.
   lg "Install drupal core.."

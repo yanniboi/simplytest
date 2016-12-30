@@ -87,15 +87,23 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
     }
   }
 
+  // Permission check.
+  $permission = user_access('submit simplytest requests');
+  if (!$permission) {
+    drupal_set_message(t('Unfortunately you do not have the necessary permission to do this right now.'), 'error');
+  }
+
   // Flood protection check.
-  $enabled = _simplytest_launch_flood_check();
-  if (!$enabled) {
+  $quota = _simplytest_launch_flood_check();
+  if (!$quota) {
     drupal_set_message(
       t('Unfortunately your IP hit the maximum usage quota. Please try again in about %interval.', array(
         '%interval' => format_interval(variable_get('simplytest_launch_flood_window', 900)),
       )),
     'error');
   }
+
+  $submission_enabled = $permission && $quota;
 
   // Parent for grouping submission values.
   $form['submission']['title'] = array(
@@ -117,7 +125,7 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
       'placeholder' => t('Start typing the name of a module, theme or distribution..'),
     ),
     '#default_value' => $project,
-    '#disabled' => !$enabled,
+    '#disabled' => !$submission_enabled,
   );
 
   // Version select box.
@@ -130,13 +138,13 @@ function simplytest_launch_simplytest_submission_form($form, $form_state, $proje
     '#default_value' => $version,
     // Override illegal choice validation.
     '#validated' => TRUE,
-    '#disabled' => !$enabled,
+    '#disabled' => !$submission_enabled,
   );
 
   $form['submission']['launch'] = array(
     '#type' => 'submit',
     '#default_value' => t('Launch sandbox'),
-    '#disabled' => !$enabled,
+    '#disabled' => !$submission_enabled,
   );
   $form['#validate'][] = 'simplytest_launch_simplytest_submission_form_validate';
   $form['#submit'][] = 'simplytest_launch_simplytest_submission_form_submit';
@@ -188,7 +196,7 @@ function simplytest_launch_simplytest_submission_form_validate(&$form, &$form_st
 
   // Check whether the selected has any available releases.
   elseif (empty($versions['heads']) && empty($versions['tags'])) {
-    form_set_error('project', t('The selected project %project has no available releases.',
+    form_set_error('project', t('The selected project %project has no available releases. (Release cache is cleared once an hour)',
       array('%project' => $project)
     ));
     drupal_goto('project/' . $project);
@@ -223,6 +231,11 @@ function simplytest_launch_simplytest_submission_form_submit(&$form, &$form_stat
 
   // Enqueue the submission.
   $submission_id = simplytest_submissions_enqueue($submission);
+
+  if (!$submission_id) {
+    drupal_set_message(t('Enqueuing the submission failed. No servers are currently available.'), 'error');
+    return;
+  }
 
   watchdog('simplytest_launch', 'Submitted "%project": %version for launching a sandbox: %sid', array(
     '%project' => $project,

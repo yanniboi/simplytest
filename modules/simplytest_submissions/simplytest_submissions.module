@@ -91,8 +91,15 @@ function simplytest_submissions_enqueue($submission) {
     return FALSE;
   }
 
+  // Select server.
+  $server = simplytest_servers_select();
+  if (!$server) {
+    return FALSE;
+  }
+  $submission['server'] = $server;
+
   // Generate unique submission id.
-  $submission['id'] = simplytest_submissions_generate_id();
+  $submission['id'] = simplytest_submissions_generate_id($server['id']);
 
   // Determine the submission timeout to use.
   $submission['timeout'] = variable_get('simplytest_submissions_timeout', 15);
@@ -112,6 +119,7 @@ function simplytest_submissions_enqueue($submission) {
       'data' => serialize($submission),
       'timestamp' => REQUEST_TIME,
       'state' => SIMPLYTEST_SUBMISSIONS_ENQUEUE,
+      'server' => $server['id'],
     ))
     ->execute();
 
@@ -150,7 +158,7 @@ function simplytest_submissions_get_position($id) {
     db_update('simplytest_submissions')
       ->fields(array('state' => SIMPLYTEST_SUBMISSIONS_ABORTED))
       ->condition('state', SIMPLYTEST_SUBMISSIONS_ENQUEUE)
-      ->condition('timestamp', REQUEST_TIME - 10, '<')
+      ->condition('timestamp', REQUEST_TIME - 15, '<')
       ->execute();
     // Figure out current position of this submission.
     $position = db_query('SELECT count(*) FROM {simplytest_submissions} WHERE '
@@ -191,24 +199,19 @@ function simplytest_submissions_process_submission($id) {
  *  The submission id.
  */
 function simplytest_submissions_send($id) {
-  $submission = db_select('simplytest_submissions', 's')
+  $submission_data = db_select('simplytest_submissions', 's')
     ->fields('s', array('data'))
     ->condition('id', $id)
     ->execute()->fetchField();
+  $submission_data = unserialize($submission_data);
   // Send submission and spawn worker.
-  $server = simplytest_servers_spawn(unserialize($submission));
-  if ($server === FALSE) {
+  if (!simplytest_servers_spawn($submission_data)) {
     // Something went very wrong, sending submission failed.
     return FALSE;
   }
   else {
     // Submission has been spawned, set submission state properly.
     simplytest_submissions_set_state($id, SIMPLYTEST_SUBMISSIONS_SPAWNED);
-    // Also save the servers id for the current submission.
-    db_update('simplytest_submissions')
-      ->fields(array('server' => $server['id']))
-      ->condition('id', $id)
-      ->execute();
     return TRUE;
   }
 }
@@ -225,10 +228,8 @@ function simplytest_submissions_goto($id) {
     ->fields('p', array('server'))
     ->condition('id', $id)
     ->execute()->fetchField();
-  // Get the servers hostname.
-  $host = simplytest_servers_get_hostname($server);
-  // Build the servers URL.
-  $url = 'http://' . $id . '.' . $host;
+  // Build the submission URL.
+  $url = simplytest_servers_build_url($id, $server);
   // Redirect.
   if (!empty($url)) {
     drupal_goto($url, array('external' => TRUE), 307);
@@ -272,18 +273,34 @@ function simplytest_submissions_set_state($id, $state) {
 }
 
 /**
- * Generates a random, unique submission id.
+ * Generates a unique submission id.
+ *
+ * @param string $prefix
+ *  Submission id prefix; eg. server id.
  *
  * @return string
- *  A 16 characters long random string, beginning with 's'
- *  containing characters of a-z 0-9. These specifications
- *  are because of unix and mysql username compatibility.
+ *  Submission id string with configured alphabet and minimal length.
  */
-function simplytest_submissions_generate_id() {
-  do {
-    $id = 's' . substr(md5(uniqid()), 0, 15);
-  } while (simplytest_submissions_get_state($id) !== FALSE);
-  return $id;
+function simplytest_submissions_generate_id($prefix) {
+  // Get id-conversion alphabet.
+  $alphabet = variable_get('simplytest_submissions_id_alphabet', '0123456789abcdefghijklmnopqrstuvwxyz');
+  $length = strlen($alphabet);
+
+  // Determine minimum decimal id for minimum submission id length.
+  $minimal_id = base_convert(pow(10, variable_get('simplytest_submissions_id_length', 3) - 1), $length, 10);
+  
+  // Get unique sequence id from database.
+  $decimal_id = db_next_id($minimal_id);
+
+  // Convert decimal id to the base of the alphabet.
+  $id = '';
+  while ($decimal_id > $length - 1) {
+    $id = $alphabet[(int) fmod($decimal_id, $length)] . $id;
+    $decimal_id = (int) floor($decimal_id / $length);
+  }
+  $id = $alphabet[$decimal_id] . $id;
+
+  return $prefix . $id;
 }
 
 /**
