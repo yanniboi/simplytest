@@ -68,6 +68,11 @@ s_project_fetch_dependencies() {
     if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT_NAME" ]]; then
       rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     fi
+    if [[ "8" -eq "$S_CORE" ]]; then
+      if [[ ! -d "/home/$S_ID/www/profiles/$S_PROJECT_NAME/$S_PROJECT_NAME.info.yml" ]]; then
+        rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
+      fi
+    fi
 
   # drupal-org-core.make ?
   elif [[ -e "/home/$S_ID/$S_PROJECT/drupal-org-core.make" ]]; then
@@ -108,6 +113,20 @@ s_project_fetch_dependencies() {
     rsync -r "/home/$S_ID/$S_PROJECT/" "/home/$S_ID/www/profiles/$S_PROJECT_NAME/"
     # Resolve missing dependencies.
     s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT_NAME"
+  fi
+
+  # Check for project composer dependencies.
+  lg "Try to install composer dependencies for the distribution.."
+  cd "/home/$S_ID/www/profiles/$S_PROJECT"
+  if [[ -e "composer.json" ]]; then
+    cd "/home/$S_ID/www"
+    timeout 350 drush dl composer_manager
+    timeout 350 php modules/composer_manager/scripts/init.php
+    timeout 350 composer drupal-rebuild
+    timeout 350 composer config repositories.0 composer https://packages.drupal.org/$S_CORE
+    timeout 350 composer config extra.enable-patching true
+    timeout 350 composer config extra.merge-plugin.merge-extra true
+    timeout 350 composer update --with-dependencies
   fi
 
   # Make sure a site could be build properly.
