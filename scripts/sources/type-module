@@ -79,6 +79,8 @@ s_project_fetch_dependencies() {
     timeout 350 php modules/composer_manager/scripts/init.php
     timeout 350 composer drupal-rebuild
     timeout 350 composer config repositories.0 composer https://packages.drupal.org/$S_CORE
+    timeout 350 composer config extra.enable-patching true
+    timeout 350 composer config extra.merge-plugin.merge-extra true
     timeout 350 composer update --with-dependencies
   fi
   cd "/home/$S_ID"
