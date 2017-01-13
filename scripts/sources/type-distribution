@@ -115,6 +115,13 @@ s_project_fetch_dependencies() {
     s_resolve_dependencies "/home/$S_ID/www" "/home/$S_ID/www/profiles/$S_PROJECT_NAME"
   fi
 
+  # Composer install.
+  lg "Try to install composer dependencies for drupal core.."
+  cd "/home/$S_ID/www"
+  if [[ -e "composer.json" ]]; then
+    timeout 350 composer install -n --no-progress --no-ansi || s_ste 303
+  fi
+
   # Check for project composer dependencies.
   lg "Try to install composer dependencies for the distribution.."
   cd "/home/$S_ID/www/profiles/$S_PROJECT"
