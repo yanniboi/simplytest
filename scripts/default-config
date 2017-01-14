@@ -36,3 +36,4 @@ __PROJECT_ALIASES[actions_permissions]=views_bulk_operations
 __PROJECT_ALIASES[node_reference]=references
 __PROJECT_ALIASES[user_reference]=references
 __PROJECT_ALIASES[oauth_common]=oauth
+__PROJECT_ALIASES[gplib]=grammar_parser_lib
