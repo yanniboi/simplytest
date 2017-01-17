@@ -1,9 +1,0 @@
-name = simplytest advanced
-description = Advanced submission launcher.
-package = simplytest
-core = 7.x
-
-dependencies[] = simplytest_launch
-
-scripts[] = simplytest_advanced.js
-stylesheets[all][] = simplytest_advanced.css

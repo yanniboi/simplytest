@@ -1,0 +1,8 @@
+progress:
+  version: 0.x
+  js:
+    js/progress.js: {}
+  dependencies:
+    - core/drupal
+    - core/domready
+    - core/drupalSettings

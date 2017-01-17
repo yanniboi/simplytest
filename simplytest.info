@@ -1,5 +1,0 @@
-name = simplytest
-description = Sets up the simplytest.me site.
-core = 7.x
-dependencies[] = block
-dependencies[] = simplytest_launch

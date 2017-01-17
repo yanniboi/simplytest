@@ -1,0 +1,201 @@
+<?php
+
+/**
+ * @file
+ * Simplytest.me submission management.
+ */
+
+use \Drupal\Core\Form\FormStateInterface;
+use \Drupal\Core\Entity\EntityInterface;
+
+const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
+
+/**
+* Implements hook_form_FORM_ID_alter().
+*/
+function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Disable some stuff for now.
+  $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
+  $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
+  $form['field_instance_snapshot_cache']['#disabled'] = TRUE; // @todo implement on spawn.sh
+
+  // Redirect to progress page.
+  foreach (array_keys($form['actions']) as $action) {
+    if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+      $form['actions'][$action]['#submit'][] = 'simplytest_submission_submit_goto_progress';
+    }
+  }
+}
+
+/**
+ * Form submit callback.
+ *
+ * Redirects to submission progress page after submission node creation.
+ */
+function simplytest_submission_submit_goto_progress($form, FormStateInterface $form_state) {
+  $form_state->setRedirect('entity.node.simplytest_submission_progress', [
+    'node' => $form_state->getFormObject()->getEntity()->id(),
+  ]);
+}
+
+/**
+* Implements hook_ENTITY_TYPE_presave().
+*
+* @todo use own entity type instead of nodes (?)
+*/
+function simplytest_submission_node_presave(EntityInterface $entity) {
+  //kint($entity->field_drupal_projects->value);
+  //throw new Error();
+
+  if ($entity->getType() !== 'submission') { // @todo simplytest_ prefix
+    return;
+  }
+
+  // Request preparation.
+  $url = SIMPLYTEST_SUBMISSION_SERVICE_URL;
+  $url .= '/?' . http_build_query(array(
+    // use $ drush sset simplytest_submission.service_token TOKEN
+    // @todo provide config interface for this / or do it within rules UI
+    'token' => \Drupal::state()->get('simplytest_submission.service_token'),
+    'ttl' => $entity->field_instance_runtime->value,
+    'image' => $entity->field_instance_image->value,
+  ));
+
+  // Build script.
+  $script = simplytest_submission_build_script($entity);
+
+  // Send request.
+  $client = \Drupal::httpClient();
+  $response = $client->request('POST', $url, [
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/octet-stream; charset=utf-8',
+    ),
+    'body' => $script,
+  ]);
+
+  // Check response.
+  if ($response->getStatusCode() !== 201) {
+    throw new Error('Invalid status code returned from spawn.sh api');
+  }
+  $data = json_decode($response->getBody(), true);
+  if (!isset($data['id'])) {
+    throw new Error('No id in spawn.sh response data');
+  }
+
+  // Save container ID as title.
+  $entity->title->value = $data['id'];
+  $entity->field_container_url->value = $data['url'];
+  $entity->field_container_token->value = $data['token'];
+}
+
+/**
+ * Generates the script to build the submission with.
+ *
+ * @todo move script building into rules (?)
+ */
+function simplytest_submission_build_script(EntityInterface $entity) {
+  $script = [];
+  $script[] = '#!/bin/bash';
+  $script[] = 'set -x';
+  $script[] = 'apt-get update';
+  $script[] = 'apt-get upgrade;';
+
+  $packages = [];
+  $packages_script = [];
+
+  // PHP.
+  switch ($entity->field_webspace_interpreter->value) {
+    case 'php7-fpm':
+      $packages[] = 'php7.0-fpm';
+      break;
+    case 'mod-php7':
+      $packages[] = 'php7.0';
+      break;
+    case 'php7-cgi':
+      $packages[] = 'php7.0-cgi';
+      break;
+  }
+  $packages[] = 'php7.0-curl';
+  $packages[] = 'php7.0-gd';
+  $packages[] = 'php7.0-json';
+  $packages[] = 'php7.0-mbstring';
+
+  // DB.
+  switch ($entity->field_webspace_database->value) {
+    case 'mariadb':
+      $packages[] = 'mariadb-server';
+      $packages[] = 'php7.0-mysql';
+      break;
+    case 'mysql':
+      $packages[] = 'mysql-server';
+      $packages[] = 'php7.0-mysql';
+      break;
+    case 'sqllite':
+      $packages[] = 'php7.0-sqlite3';
+      break;
+    case 'postgresql':
+      $packages[] = 'postgresql';
+      $packages[] = 'php7.0-pgsql';
+      break;
+  }
+
+  // Webserver.
+  switch ($entity->field_webspace_webserver->value) {
+    case 'nginx':
+      $packages[] = "nginx";
+      switch ($entity->field_webspace_interpreter->value) {
+        case 'php7-fpm':
+          $packages_script[] = 'echo "server {
+              listen 80;
+              server_name *.ply.st;
+              root /var/www/html;
+              index index.php;
+              location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+              }
+            }" > /etc/nginx/sites-enabled/default';
+          break;
+        case 'mod-php7':
+          throw new Error('Cannot use mod-php7 with nginx');
+          break;
+        case 'php7-cgi':
+          // @todo
+          $packages_script .= 'echo "server {
+              listen 80;
+              server_name *.ply.st;
+              root /var/www/html;
+              index index.php;
+              location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass 127.0.0.1:9000;
+              }
+            }" > /etc/nginx/sites-enabled/default';
+          break;
+      }
+      $packages_script[] = 'service nginx reload';
+      break;
+    case 'apache2':
+      $packages[] = "apache2";
+      switch ($entity->field_webspace_interpreter->value) {
+        case 'php7-fpm':
+          // @todo
+          break;
+        case 'mod-php7':
+          $packages[] = 'libapache2-mod-php7.0';
+          break;
+        case 'php7-cgi':
+          // @todo
+          break;
+      }
+      $packages_script[] = 'rm /var/www/html/index.html';
+      $packages_script[] = 'service apache2 reload';
+      break;
+  }
+
+  $script[] = 'apt-get install -y ' . implode(' ', $packages);
+  $script = array_merge($script, $packages_script);
+
+  return implode("\n", $script);
+}
