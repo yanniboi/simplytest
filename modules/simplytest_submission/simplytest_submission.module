@@ -33,6 +33,9 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
  * Redirects to submission progress page after submission node creation.
  */
 function simplytest_submission_submit_goto_progress($form, FormStateInterface $form_state) {
+  // Remove node creation status message.
+  drupal_get_messages('status');
+  // Redirect.
   $form_state->setRedirect('entity.node.simplytest_submission_progress', [
     'node' => $form_state->getFormObject()->getEntity()->id(),
   ]);
