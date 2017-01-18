@@ -3,6 +3,7 @@ progress:
   js:
     js/progress.js: {}
   dependencies:
+    - core/jquery
     - core/drupal
     - core/domready
     - core/drupalSettings

@@ -2,7 +2,7 @@ simplytest.me
 =============
 
 An online service that provides on-demand sandbox environments for
-evaluating drupal.org project like modules, themes and distributions.
+evaluating drupal.org projects like modules, themes and distributions.
 
 Simple, fast and for free!
 
