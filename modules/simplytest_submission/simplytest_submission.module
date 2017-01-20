@@ -15,6 +15,14 @@ const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
 */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Disable some stuff for now.
+  for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {
+    $widget = &$form['field_drupal_projects']['widget'][(string) $delta];
+    //kint($widget);
+    $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
+    $widget['field_project_source']['widget']['#disabled'] = TRUE; // @todo support more sources than d.o
+    $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions...
+  }
+  //kint($form['field_drupal_projects']['widget']);
   $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
   $form['field_instance_snapshot_cache']['#disabled'] = TRUE; // @todo implement on spawn.sh
@@ -103,10 +111,12 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script = [];
   $script[] = '#!/bin/bash';
   $script[] = 'set -x';
+  $script[] = 'export DEBIAN_FRONTEND=noninteractive';
   $script[] = 'apt-get update';
   $script[] = 'apt-get upgrade -y';
 
   $packages = [];
+  $packages[] = 'zip';
   $packages_script = [];
 
   // PHP.
@@ -121,6 +131,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       $packages[] = 'php7.0-cgi';
       break;
   }
+  $packages[] = 'php7.0-xml';
   $packages[] = 'php7.0-curl';
   $packages[] = 'php7.0-gd';
   $packages[] = 'php7.0-json';
@@ -131,6 +142,11 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     case 'mariadb':
       $packages[] = 'mariadb-server';
       $packages[] = 'php7.0-mysql';
+      $packages_script[] = 'mysql -u root -e "
+        CREATE USER \'drupal\'@\'localhost\' IDENTIFIED BY \'drupal\';
+        GRANT USAGE ON *.* TO \'drupal\'@\'localhost\' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+        CREATE DATABASE IF NOT EXISTS \`drupal\`;
+        GRANT ALL PRIVILEGES ON \`drupal\`.* TO \'drupal\'@\'localhost\'"';
       break;
     case 'mysql':
       $packages[] = 'mysql-server';
@@ -151,7 +167,8 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       $packages[] = "nginx";
       switch ($entity->field_webspace_interpreter->value) {
         case 'php7-fpm':
-          $packages_script[] = 'echo "server {
+          $packages_script[] = 'echo "
+            server {
               listen 80;
               server_name *.ply.st;
               root /var/www/html;
@@ -167,7 +184,8 @@ function simplytest_submission_build_script(EntityInterface $entity) {
           break;
         case 'php7-cgi':
           // @todo
-          $packages_script .= 'echo "server {
+          $packages_script[] = 'echo "
+            server {
               listen 80;
               server_name *.ply.st;
               root /var/www/html;
@@ -183,6 +201,14 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       break;
     case 'apache2':
       $packages[] = "apache2";
+      $packages_script[] = 'a2enmod rewrite';
+      $packages_script[] = 'echo "
+        <Directory /var/www/html>
+          Options FollowSymLinks
+          AllowOverride All
+        </Directory>" >> /etc/apache2/sites-enabled/000-default.conf';
+      $packages_script[] = 'service apache2 restart';
+
       switch ($entity->field_webspace_interpreter->value) {
         case 'php7-fpm':
           // @todo
@@ -195,12 +221,32 @@ function simplytest_submission_build_script(EntityInterface $entity) {
           break;
       }
       $packages_script[] = 'rm /var/www/html/index.html';
-      $packages_script[] = 'service apache2 reload';
       break;
   }
 
   $script[] = 'apt-get install -y ' . implode(' ', $packages);
   $script = array_merge($script, $packages_script);
+
+  // Install composer.
+  $script[] = 'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"';
+  $script[] = 'php composer-setup.php --quiet --install-dir=/usr/bin --filename=composer';
+  $script[] = 'rm composer-setup.php';
+
+  // Switch user.
+  $script[] = 'chown ubuntu -R /var/www';
+  $script[] = 'su ubuntu';
+
+  // Snapshot; Start fetching drupal projects.
+  //$script[] = '#!/bin/bash';
+  // @todo actually install more than drupal core
+  $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
+  $script[] = 'rm -rf /var/www/html';
+  $script[] = 'ln -s /var/www/drupal/web /var/www/html';
+
+  // Snapshot; Start installing drupal projects.
+  // @todo if project is dev version we shouldn't snapshot cache (for too long).
+  //$script[] = '#!/bin/bash';
+  // @todo if skipping drupal core installation, prefill database credentials and etc
 
   return implode("\n", $script);
 }
