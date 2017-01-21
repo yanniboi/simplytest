@@ -11,8 +11,12 @@ use \Drupal\Core\Entity\EntityInterface;
 const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
 
 /**
-* Implements hook_form_FORM_ID_alter().
-*/
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * @todo prefill fields as before
+ *       simplytest.me/project/$project/$version?patch[]=$patch&add[]=$project
+ * @todo support commit hashs as $versions
+ */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Disable some stuff for now.
   for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {
