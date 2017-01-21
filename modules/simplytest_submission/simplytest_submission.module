@@ -116,8 +116,10 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'apt-get upgrade -y';
 
   $packages = [];
-  $packages[] = 'zip';
   $packages_script = [];
+
+  // General purpose packages.
+  $packages[] = 'zip';
 
   // PHP.
   switch ($entity->field_webspace_interpreter->value) {
@@ -131,6 +133,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       $packages[] = 'php7.0-cgi';
       break;
   }
+  // General PHP modules that are required by drupal, drush or composer.
   $packages[] = 'php7.0-xml';
   $packages[] = 'php7.0-curl';
   $packages[] = 'php7.0-gd';
@@ -142,11 +145,14 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     case 'mariadb':
       $packages[] = 'mariadb-server';
       $packages[] = 'php7.0-mysql';
+      // Prepare db mysql://drupal:drupal@localhost/drupal.
       $packages_script[] = 'mysql -u root -e "
         CREATE USER \'drupal\'@\'localhost\' IDENTIFIED BY \'drupal\';
         GRANT USAGE ON *.* TO \'drupal\'@\'localhost\' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
         CREATE DATABASE IF NOT EXISTS \`drupal\`;
         GRANT ALL PRIVILEGES ON \`drupal\`.* TO \'drupal\'@\'localhost\'"';
+      // Stop for safe snapshotting. (otherwise starting from snapshit might be recognized as crash).
+      $packages_script[] = 'service mysql stop';
       break;
     case 'mysql':
       $packages[] = 'mysql-server';
@@ -201,6 +207,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       break;
     case 'apache2':
       $packages[] = "apache2";
+      // Modules and config for clean url.
       $packages_script[] = 'a2enmod rewrite';
       $packages_script[] = 'echo "
         <Directory /var/www/html>
@@ -253,6 +260,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = '#!/bin/bash';
   $script[] = 'export DEBIAN_FRONTEND=noninteractive';
   $script[] = 'set -x';
+  $script[] = 'service mysql start';
   // Use webroot as cwd.
   $script[] = 'cd /var/www/drupal/web';
   // @todo if skipping drupal core installation, prefill database credentials and etc
