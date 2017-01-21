@@ -110,8 +110,8 @@ function simplytest_submission_node_presave(EntityInterface $entity) {
 function simplytest_submission_build_script(EntityInterface $entity) {
   $script = [];
   $script[] = '#!/bin/bash';
-  $script[] = 'set -x';
   $script[] = 'export DEBIAN_FRONTEND=noninteractive';
+  $script[] = 'set -x';
   $script[] = 'apt-get update';
   $script[] = 'apt-get upgrade -y';
 
@@ -125,7 +125,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       $packages[] = 'php7.0-fpm';
       break;
     case 'mod-php7':
-      $packages[] = 'php7.0';
+      // Installed in the apache2 part.
       break;
     case 'php7-cgi':
       $packages[] = 'php7.0-cgi';
@@ -229,24 +229,36 @@ function simplytest_submission_build_script(EntityInterface $entity) {
 
   // Install composer.
   $script[] = 'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"';
-  $script[] = 'php composer-setup.php --quiet --install-dir=/usr/bin --filename=composer';
+  $script[] = 'php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer';
   $script[] = 'rm composer-setup.php';
 
-  // Switch user.
-  $script[] = 'chown ubuntu -R /var/www';
-  $script[] = 'su ubuntu';
+  // Install drush.
+  $script[] = 'php -r "readfile(\'https://s3.amazonaws.com/files.drush.org/drush.phar\');" > drush';
+  $script[] = 'chmod +x drush';
+  $script[] = 'mv drush /usr/local/bin';
 
   // Snapshot; Start fetching drupal projects.
-  //$script[] = '#!/bin/bash';
+  // @todo need snapshot cache invalidation to keep packages up to date
+  $script[] = '#!/bin/bash';
+  $script[] = 'export DEBIAN_FRONTEND=noninteractive';
+  $script[] = 'set -x';
   // @todo actually install more than drupal core
+  // @todo do this with non root user
   $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
   $script[] = 'rm -rf /var/www/html';
   $script[] = 'ln -s /var/www/drupal/web /var/www/html';
 
   // Snapshot; Start installing drupal projects.
   // @todo if project is dev version we shouldn't snapshot cache (for too long).
-  //$script[] = '#!/bin/bash';
+  $script[] = '#!/bin/bash';
+  $script[] = 'export DEBIAN_FRONTEND=noninteractive';
+  $script[] = 'set -x';
+  // Use webroot as cwd.
+  $script[] = 'cd /var/www/drupal/web';
   // @todo if skipping drupal core installation, prefill database credentials and etc
+  // @todo dynamic site name? one of the projects?
+  // @todo do this with non root user
+  $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
 
   return implode("\n", $script);
 }
