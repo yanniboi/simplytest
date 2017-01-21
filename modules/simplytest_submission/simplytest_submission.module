@@ -115,6 +115,7 @@ function simplytest_submission_node_presave(EntityInterface $entity) {
  * Generates the script to build the submission with.
  *
  * @todo move script building into rules (?)
+ * @todo add timer/count down until disposal
  */
 function simplytest_submission_build_script(EntityInterface $entity) {
   $script = [];
