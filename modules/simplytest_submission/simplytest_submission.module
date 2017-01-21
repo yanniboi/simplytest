@@ -19,14 +19,19 @@ const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
  */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Disable some stuff for now.
+  $form['field_drupal_projects']['widget']['add_more']['#disabled'] = TRUE; // @todo support multiple projects
   for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {
     $widget = &$form['field_drupal_projects']['widget'][(string) $delta];
     //kint($widget);
     $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
     $widget['field_project_source']['widget']['#disabled'] = TRUE; // @todo support more sources than d.o
     $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions...
+    $widget['field_project_patches']['widget']['#disabled'] = TRUE; // @todo fetch versions...
   }
   //kint($form['field_drupal_projects']['widget']);
+  $form['field_webspace_webserver']['#disabled'] = TRUE; // @todo
+  $form['field_webspace_interpreter']['#disabled'] = TRUE; // @todo
+  $form['field_webspace_database']['#disabled'] = TRUE; // @todo
   $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
   $form['field_instance_snapshot_cache']['#disabled'] = TRUE; // @todo implement on spawn.sh
