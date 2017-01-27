@@ -270,7 +270,14 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = '#!/bin/bash';
   $script[] = 'export DEBIAN_FRONTEND=noninteractive';
   $script[] = 'set -x';
+  // Skip mysql recovery for faster startup.
+  $script[] = 'truncate -s 0 /etc/mysql/debian-start';
   $script[] = 'service mysql start';
+  // Wait for it to finish restarting.
+  // @todo why the fuck does mysql start and then restart?
+  $script[] = 'until nc -z localhost 3306; do sleep 1; done';
+  $script[] = 'while nc -z localhost 3306; do sleep 1; done';
+  $script[] = 'until nc -z localhost 3306; do sleep 1; done';
   // Use webroot as cwd.
   $script[] = 'cd /var/www/drupal/web';
   // @todo if skipping drupal core installation, prefill database credentials and etc
