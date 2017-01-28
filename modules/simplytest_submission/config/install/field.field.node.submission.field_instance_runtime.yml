@@ -1,0 +1,23 @@
+uuid: 9c7702d8-4663-4f7a-8977-28fe15036662
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_instance_runtime
+    - node.type.submission
+  module:
+    - options
+id: node.submission.field_instance_runtime
+field_name: field_instance_runtime
+entity_type: node
+bundle: submission
+label: Runtime
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 1h
+default_value_callback: ''
+settings: {  }
+field_type: list_string

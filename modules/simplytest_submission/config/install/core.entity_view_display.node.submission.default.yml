@@ -1,0 +1,100 @@
+uuid: ddfe8a4c-71d7-4021-9815-1325655d4430
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.submission.field_container_token
+    - field.field.node.submission.field_container_url
+    - field.field.node.submission.field_drupal_projects
+    - field.field.node.submission.field_instance_image
+    - field.field.node.submission.field_instance_runtime
+    - field.field.node.submission.field_instance_snapshot_cache
+    - field.field.node.submission.field_webspace_database
+    - field.field.node.submission.field_webspace_interpreter
+    - field.field.node.submission.field_webspace_secondary_dbs
+    - field.field.node.submission.field_webspace_webserver
+    - node.type.submission
+  module:
+    - field_collection
+    - link
+    - options
+    - user
+id: node.submission.default
+targetEntityType: node
+bundle: submission
+mode: default
+content:
+  field_container_token:
+    weight: 115
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+  field_container_url:
+    weight: 114
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+  field_drupal_projects:
+    weight: 113
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: field_collection_items
+  field_instance_image:
+    weight: 109
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_instance_runtime:
+    weight: 111
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_instance_snapshot_cache:
+    weight: 110
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+  field_webspace_database:
+    weight: 112
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_webspace_interpreter:
+    weight: 106
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_webspace_secondary_dbs:
+    weight: 107
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  field_webspace_webserver:
+    weight: 108
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

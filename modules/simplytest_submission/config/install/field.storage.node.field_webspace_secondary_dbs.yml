@@ -1,0 +1,30 @@
+uuid: c59a0080-fbe9-4de8-aa92-c4b199f2ae21
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_webspace_secondary_dbs
+field_name: field_webspace_secondary_dbs
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: mongodb
+      label: mongodb
+    -
+      value: elasticsearch
+      label: elasticsearch
+    -
+      value: redis
+      label: redis
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

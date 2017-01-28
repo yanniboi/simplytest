@@ -1,0 +1,17 @@
+uuid: fca02165-6d7b-4a74-b425-8f1c7f6f54ae
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - node.type.submission
+  module:
+    - user
+id: node.submission.teaser
+targetEntityType: node
+bundle: submission
+mode: teaser
+content:
+  links:
+    weight: 100
+hidden: {  }

@@ -1,0 +1,120 @@
+uuid: 00a9c563-e284-40d4-a8e6-42390799d423
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.submission.field_container_token
+    - field.field.node.submission.field_container_url
+    - field.field.node.submission.field_drupal_projects
+    - field.field.node.submission.field_instance_image
+    - field.field.node.submission.field_instance_runtime
+    - field.field.node.submission.field_instance_snapshot_cache
+    - field.field.node.submission.field_webspace_database
+    - field.field.node.submission.field_webspace_interpreter
+    - field.field.node.submission.field_webspace_secondary_dbs
+    - field.field.node.submission.field_webspace_webserver
+    - node.type.submission
+  module:
+    - field_collection
+    - field_group
+third_party_settings:
+  field_group:
+    group_drupal:
+      children:
+        - field_drupal_projects
+      parent_name: ''
+      weight: 0
+      label: Drupal
+      format_type: details
+      format_settings:
+        label: Drupal
+        open: true
+        id: ''
+        classes: ''
+        required_fields: false
+    group_webspace:
+      children:
+        - field_webspace_webserver
+        - field_webspace_interpreter
+        - field_webspace_database
+        - field_webspace_secondary_dbs
+      parent_name: ''
+      weight: 1
+      label: Webspace
+      format_type: details
+      format_settings:
+        label: Webspace
+        id: ''
+        classes: ''
+        open: false
+        required_fields: false
+    group_instance:
+      children:
+        - field_instance_runtime
+        - field_instance_image
+        - field_instance_snapshot_cache
+      parent_name: ''
+      weight: 2
+      label: Instance
+      format_type: details
+      format_settings:
+        label: Instance
+        id: ''
+        classes: ''
+        open: false
+        required_fields: false
+id: node.submission.default
+targetEntityType: node
+bundle: submission
+mode: default
+content:
+  field_drupal_projects:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: field_collection_embed
+  field_instance_image:
+    weight: 35
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+  field_instance_runtime:
+    weight: 34
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+  field_instance_snapshot_cache:
+    weight: 36
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+  field_webspace_database:
+    weight: 30
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+  field_webspace_interpreter:
+    weight: 29
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+  field_webspace_secondary_dbs:
+    weight: 31
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+  field_webspace_webserver:
+    weight: 28
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+hidden:
+  created: true
+  field_container_token: true
+  field_container_url: true
+  path: true
+  promote: true
+  sticky: true
+  title: true
+  uid: true

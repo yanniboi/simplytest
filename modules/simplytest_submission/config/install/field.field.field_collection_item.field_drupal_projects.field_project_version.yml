@@ -1,0 +1,21 @@
+uuid: ffef9cf4-f8a8-4324-9780-e4736619102f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.field_collection_item.field_project_version
+    - field_collection.field_collection.field_drupal_projects
+id: field_collection_item.field_drupal_projects.field_project_version
+field_name: field_project_version
+entity_type: field_collection_item
+bundle: field_drupal_projects
+label: Version
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 8.x-dev
+default_value_callback: ''
+settings: {  }
+field_type: string

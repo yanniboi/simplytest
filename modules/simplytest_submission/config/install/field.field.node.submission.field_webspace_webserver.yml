@@ -1,0 +1,23 @@
+uuid: b07e9c18-dded-4a11-af05-e142bc3f75c3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_webspace_webserver
+    - node.type.submission
+  module:
+    - options
+id: node.submission.field_webspace_webserver
+field_name: field_webspace_webserver
+entity_type: node
+bundle: submission
+label: Webserver
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: apache2
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,27 @@
+uuid: 3cac0941-9bbf-449b-8c50-cfe68183507a
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_instance_runtime
+field_name: field_instance_runtime
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 1h
+      label: '1 hour'
+    -
+      value: 24h
+      label: '1 day'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,27 @@
+uuid: 05436cea-58a4-4362-9cb4-add1c6ddae47
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_webspace_webserver
+field_name: field_webspace_webserver
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: apache2
+      label: apache2
+    -
+      value: nginx
+      label: nginx
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

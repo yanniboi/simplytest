@@ -1,0 +1,18 @@
+uuid: cc6b05ed-7c14-4db7-a67b-975cf8abd05b
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.submission
+id: node.submission.title
+field_name: title
+entity_type: node
+bundle: submission
+label: 'Container ID'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,27 @@
+uuid: 20ea3d48-7427-4c95-b1af-57b6a72b7c44
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_instance_image
+field_name: field_instance_image
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'ubuntu:16.04/amd64'
+      label: 'ubuntu:16.04/amd64'
+    -
+      value: 'ubuntu:16.04/i386'
+      label: 'ubuntu:16.04/i386'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

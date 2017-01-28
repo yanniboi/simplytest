@@ -1,0 +1,23 @@
+uuid: 94aab0a1-3a25-4655-ac01-717f5d4cd255
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.field_collection_item.field_project_install
+    - field_collection.field_collection.field_drupal_projects
+id: field_collection_item.field_drupal_projects.field_project_install
+field_name: field_project_install
+entity_type: field_collection_item
+bundle: field_drupal_projects
+label: 'Install project'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean
