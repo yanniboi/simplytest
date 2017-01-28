@@ -280,10 +280,13 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'until nc -z localhost 3306; do sleep 1; done';
   // Use webroot as cwd.
   $script[] = 'cd /var/www/drupal/web';
+  // Whether we install depends of the form selection.
   // @todo if skipping drupal core installation, prefill database credentials and etc
-  // @todo dynamic site name? one of the projects?
-  // @todo do this with non root user
-  $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
+  if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_install->value) {
+    // @todo dynamic site name? one of the projects?
+    // @todo do this with non root user
+    $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
+  }
 
   return implode("\n", $script);
 }
