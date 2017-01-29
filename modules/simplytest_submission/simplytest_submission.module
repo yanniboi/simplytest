@@ -114,6 +114,9 @@ function simplytest_submission_node_presave(EntityInterface $entity) {
 /**
  * Generates the script to build the submission with.
  *
+ * Scripting is standard bash script with snapshot caching from spawn.sh.
+ *
+ * @todo dynamic config file generator routes? eg. /node/:id/nginx
  * @todo move script building into rules (?)
  * @todo add timer/count down until disposal
  */
@@ -124,6 +127,8 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'set -x';
   $script[] = 'apt-get update';
   $script[] = 'apt-get upgrade -y';
+  // For some reason service startup is a lot faster without cloud-init.
+  $script[] = 'sudo apt-get remove -y --auto-remove cloud-init';
 
   $packages = [];
   $packages_script = [];
@@ -163,6 +168,8 @@ function simplytest_submission_build_script(EntityInterface $entity) {
         GRANT ALL PRIVILEGES ON \`drupal\`.* TO \'drupal\'@\'localhost\'"';
       // Stop for safe snapshotting. (otherwise starting from snapshit might be recognized as crash).
       $packages_script[] = 'service mysql stop';
+      // Skip mysql recovery for faster startup.
+      $packages_script[] = 'truncate -s 0 /etc/mysql/debian-start';
       break;
     case 'mysql':
       $packages[] = 'mysql-server';
@@ -270,11 +277,19 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = '#!/bin/bash';
   $script[] = 'export DEBIAN_FRONTEND=noninteractive';
   $script[] = 'set -x';
-  // For some reason mysql startup is a lot faster without cloud-init.
-  $script[] = 'sudo apt-get remove -y --auto-remove cloud-init';
-  // Skip mysql recovery for faster startup.
-  $script[] = 'truncate -s 0 /etc/mysql/debian-start';
-  $script[] = 'service mysql start';
+
+  // Start up database.
+  switch ($entity->field_webspace_database->value) {
+    case 'mariadb':
+    case 'mysql':
+      $script[] = 'service mysql start';
+      break;
+    case 'sqllite':
+      break;
+    case 'postgresql':
+      break;
+  }
+
   // Use webroot as cwd.
   $script[] = 'cd /var/www/drupal/web';
   // Whether we install depends of the form selection.
