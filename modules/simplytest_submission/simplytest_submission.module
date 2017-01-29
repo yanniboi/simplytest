@@ -166,7 +166,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
         GRANT USAGE ON *.* TO \'drupal\'@\'localhost\' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
         CREATE DATABASE IF NOT EXISTS \`drupal\`;
         GRANT ALL PRIVILEGES ON \`drupal\`.* TO \'drupal\'@\'localhost\'"';
-      // Stop for safe snapshotting. (otherwise starting from snapshit might be recognized as crash).
+      // Gracefully shut down database before snapshotting.
       $packages_script[] = 'service mysql stop';
       // Skip mysql recovery for faster startup.
       $packages_script[] = 'truncate -s 0 /etc/mysql/debian-start';
@@ -284,8 +284,6 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     case 'mysql':
       $script[] = 'service mysql start';
       break;
-    case 'sqllite':
-      break;
     case 'postgresql':
       break;
   }
@@ -298,6 +296,29 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     // @todo dynamic site name? one of the projects?
     // @todo do this with non root user
     $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
+
+    // Gracefully shut down database before snapshotting.
+    switch ($entity->field_webspace_database->value) {
+      case 'mariadb':
+      case 'mysql':
+        $script[] = 'service mysql stop';
+        break;
+      case 'postgresql':
+        break;
+    }
+    $script[] = '#!/bin/bash';
+    // Snapshot; Snapshot installed state.
+    $script[] = 'export DEBIAN_FRONTEND=noninteractive';
+    $script[] = 'set -x';
+    // Start up database.
+    switch ($entity->field_webspace_database->value) {
+      case 'mariadb':
+      case 'mysql':
+        $script[] = 'service mysql start';
+        break;
+      case 'postgresql':
+        break;
+    }
   }
 
   return implode("\n", $script);
