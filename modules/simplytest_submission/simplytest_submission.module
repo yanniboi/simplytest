@@ -34,7 +34,6 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
   $form['field_webspace_database']['#disabled'] = TRUE; // @todo
   $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
-  $form['field_instance_snapshot_cache']['#disabled'] = TRUE; // @todo implement on spawn.sh
 
   // Redirect to progress page.
   foreach (array_keys($form['actions']) as $action) {
@@ -81,6 +80,7 @@ function simplytest_submission_node_presave(EntityInterface $entity) {
     'token' => \Drupal::state()->get('simplytest_submission.service_token'),
     'ttl' => $entity->field_instance_runtime->value,
     'image' => $entity->field_instance_image->value,
+    'cache' => ($entity->field_instance_snapshot_cache->value) ? 'true' : 'false'
   ));
 
   // Build script.
