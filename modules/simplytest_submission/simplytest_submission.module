@@ -13,25 +13,26 @@ const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * @todo prefill fields as before
+ * @todo prefill fields as before from URL
  *       simplytest.me/project/$project/$version?patch[]=$patch&add[]=$project
- * @todo support commit hashs as $versions
+ * @todo support commit hashs as $versions from URL
  */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Disable some stuff for now.
   $form['field_drupal_projects']['widget']['add_more']['#disabled'] = TRUE; // @todo support multiple projects
   for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {
     $widget = &$form['field_drupal_projects']['widget'][(string) $delta];
-    //kint($widget);
+    // @todo setup project database with elasticsearch that has drupal.org and backdrop modules indexed
     $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
     $widget['field_project_source']['widget']['#disabled'] = TRUE; // @todo support more sources than d.o
-    $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions...
-    $widget['field_project_patches']['widget']['#disabled'] = TRUE; // @todo fetch versions...
+    $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions
+    $widget['field_project_patches']['widget']['#disabled'] = TRUE; // @todo apply patches
   }
   //kint($form['field_drupal_projects']['widget']);
-  $form['field_webspace_webserver']['#disabled'] = TRUE; // @todo
-  $form['field_webspace_interpreter']['#disabled'] = TRUE; // @todo
-  $form['field_webspace_database']['#disabled'] = TRUE; // @todo
+  $form['field_webspace_webserver']['#disabled'] = TRUE; // @todo write alternative webserver scripts
+  $form['field_webspace_interpreter']['#disabled'] = TRUE; // @todo write alternative interpreter scripts
+  unset($form['field_webspace_database']['widget']['#options']['mysql']); // @todo mysql script
+  unset($form['field_webspace_database']['widget']['#options']['postgresql']); // @todo postgresql script
   $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
 
@@ -266,7 +267,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = '#!/bin/bash';
   $script[] = 'export DEBIAN_FRONTEND=noninteractive';
   $script[] = 'set -x';
-  // @todo actually install more than drupal core
+  // @todo actually download more than drupal core
   // @todo do this with non root user
   $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
   $script[] = 'rm -rf /var/www/html';
@@ -292,18 +293,22 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'cd /var/www/drupal/web';
   // Whether we install depends of the form selection.
   // @todo if skipping drupal core installation, prefill database credentials and etc
+  //       can we use $settings in settings.php for that?
+  // @todo install with dynamic site name? one of the project names?
+  // @todo run drush with non root user
   if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_install->value) {
-    // @todo dynamic site name? one of the projects?
-    // @todo do this with non root user
-    $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
-
-    // Gracefully shut down database before snapshotting.
     switch ($entity->field_webspace_database->value) {
       case 'mariadb':
       case 'mysql':
+        $script[] = 'drush si -y --db-url=mysql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
+        // Gracefully shut down database before snapshotting.
         $script[] = 'service mysql stop';
         break;
       case 'postgresql':
+        break;
+      case 'sqllite':
+        $script[] = 'drush si -y --db-url=sqlite://sites/default/files/.ht.sqlite --account-pass=admin --site-name=drupal';
+        $script[] = 'chmod 666 sites/default/files/.ht.sqlite';
         break;
     }
     $script[] = '#!/bin/bash';
