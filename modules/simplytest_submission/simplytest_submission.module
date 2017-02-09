@@ -31,8 +31,6 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
   //kint($form['field_drupal_projects']['widget']);
   $form['field_webspace_webserver']['#disabled'] = TRUE; // @todo write alternative webserver scripts
   $form['field_webspace_interpreter']['#disabled'] = TRUE; // @todo write alternative interpreter scripts
-  unset($form['field_webspace_database']['widget']['#options']['mysql']); // @todo mysql script
-  unset($form['field_webspace_database']['widget']['#options']['postgresql']); // @todo postgresql script
   $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
 
@@ -190,6 +188,12 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     case 'postgresql':
       $packages[] = 'postgresql';
       $packages[] = 'php7.0-pgsql';
+      // Prepare db pgsql://drupal:drupal@localhost/drupal.
+      $packages_script[] = 'sudo -u postgres createuser --no-replication drupal';
+      $packages_script[] = 'sudo -u postgres createdb --owner=drupal drupal';
+      $packages_script[] = 'sudo -u postgres psql -c "ALTER USER drupal WITH PASSWORD \'drupal\';"';
+      // Gracefully shut down database before snapshotting.
+      $packages_script[] = 'service postgresql stop';
       break;
   }
 
@@ -294,6 +298,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
       $script[] = 'service mysql start';
       break;
     case 'postgresql':
+      $script[] = 'service postgresql start';
       break;
   }
 
@@ -313,6 +318,9 @@ function simplytest_submission_build_script(EntityInterface $entity) {
         $script[] = 'service mysql stop';
         break;
       case 'postgresql':
+        $script[] = 'drush si -y --db-url=pgsql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
+        // Gracefully shut down database before snapshotting.
+        $script[] = 'service postgresql stop';
         break;
       case 'sqllite':
         $script[] = 'drush si -y --db-url=sqlite://sites/default/files/.ht.sqlite --account-pass=admin --site-name=drupal';
@@ -330,6 +338,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
         $script[] = 'service mysql start';
         break;
       case 'postgresql':
+        $script[] = 'service postgresql start';
         break;
     }
   }
