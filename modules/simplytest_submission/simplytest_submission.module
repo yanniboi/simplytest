@@ -175,6 +175,14 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     case 'mysql':
       $packages[] = 'mysql-server';
       $packages[] = 'php7.0-mysql';
+      // Prepare db mysql://drupal:drupal@localhost/drupal.
+      $packages_script[] = 'mysql -u root -e "
+        CREATE USER \'drupal\'@\'localhost\' IDENTIFIED BY \'drupal\';
+        GRANT USAGE ON *.* TO \'drupal\'@\'localhost\' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+        CREATE DATABASE IF NOT EXISTS \`drupal\`;
+        GRANT ALL PRIVILEGES ON \`drupal\`.* TO \'drupal\'@\'localhost\'"';
+      // Gracefully shut down database before snapshotting.
+      $packages_script[] = 'service mysql stop';
       break;
     case 'sqllite':
       $packages[] = 'php7.0-sqlite3';
