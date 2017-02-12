@@ -18,6 +18,7 @@ const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
  * @todo support commit hashs as $versions from URL
  */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['#attached']['library'][] = 'simplytest_submission/submission';
   // Disable some stuff for now.
   $form['field_drupal_projects']['widget']['add_more']['#disabled'] = TRUE; // @todo support multiple projects
   for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {

@@ -1,3 +1,9 @@
+submission:
+  version: 0
+  css:
+    theme:
+      css/submission.css: {}
+
 progress:
   version: 0.x
   js:
