@@ -7,6 +7,9 @@
 
 use \Drupal\Core\Form\FormStateInterface;
 use \Drupal\Core\Entity\EntityInterface;
+use Drupal\simplytest_submission\Entity\Submission;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 
 const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
 
@@ -372,4 +375,13 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   }
 
   return implode("\n", $script);
+}
+
+/**
+ * Allowed value callback for submission statuses.
+ *
+ * @return array
+ */
+function simplytest_submission_status_options(FieldStorageDefinitionInterface $definition, FieldableEntityInterface $entity = NULL, &$cacheable = TRUE) {
+  return Submission::getStatusOptions();
 }

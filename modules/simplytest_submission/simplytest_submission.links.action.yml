@@ -1,0 +1,16 @@
+entity.simplytest_submission.add_form:
+  route_name: 'entity.simplytest_submission.add_form'
+  title: 'Add Submission'
+  appears_on:
+    - entity.simplytest_submission.collection
+#entity.simplytest_submission.add_form_passenger:
+#  route_name: 'entity.simplytest_submission.add_form_passenger'
+#  title: 'Add Submission - Passenger'
+#  appears_on:
+#    - entity.simplytest_submission.collection
+#entity.simplytest_submission.add_form_staff:
+#  route_name: 'entity.simplytest_submission.add_form_staff'
+#  title: 'Add Submission - Staff'
+#  appears_on:
+#    - entity.simplytest_submission.collection
+
