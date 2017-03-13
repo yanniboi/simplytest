@@ -35,7 +35,6 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
   //kint($form['field_drupal_projects']['widget']);
   $form['field_webspace_webserver']['#disabled'] = TRUE; // @todo write alternative webserver scripts
   $form['field_webspace_interpreter']['#disabled'] = TRUE; // @todo write alternative interpreter scripts
-  $form['field_instance_runtime']['#disabled'] = TRUE; // @todo longer runtime disabled until more stable
   $form['field_webspace_secondary_dbs']['#disabled'] = TRUE; // @todo implement secondary db scripts
 
   // Redirect to progress page.
