@@ -25,6 +25,9 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
     $widget = &$form['field_drupal_projects']['widget'][(string) $delta];
     // @todo setup project database with elasticsearch that has drupal.org and backdrop modules indexed
     $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
+    if ($_GET['project'] === 'social') {
+      $widget['field_project_identifier']['widget']['0']['value']['#default_value'] = 'OpenSocial';
+    }
     $widget['field_project_source']['widget']['#disabled'] = TRUE; // @todo support more sources than d.o
     $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions
     $widget['field_project_patches']['widget']['#disabled'] = TRUE; // @todo apply patches
@@ -282,7 +285,12 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'set -x';
   // @todo actually download more than drupal core
   // @todo do this with non root user
-  $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
+  if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_identifier->value === 'OpenSocial') {
+    $script[] = 'composer create-project goalgorilla/social_template:dev-master /var/www/drupal --no-interaction';
+  }
+  else {
+    $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
+  }
   $script[] = 'rm -rf /var/www/html';
   $script[] = 'ln -s /var/www/drupal/web /var/www/html';
 
