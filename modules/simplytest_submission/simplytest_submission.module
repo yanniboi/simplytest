@@ -27,6 +27,8 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
     $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
     if ($_GET['project'] === 'social') {
       $widget['field_project_identifier']['widget']['0']['value']['#default_value'] = 'OpenSocial';
+      $widget['field_project_install']['widget']['value']['#default_value'] = FALSE;
+      $widget['field_project_install']['widget']['#disabled'] = TRUE;
     }
     $widget['field_project_source']['widget']['#disabled'] = TRUE; // @todo support more sources than d.o
     $widget['field_project_version']['widget']['#disabled'] = TRUE; // @todo fetch versions
