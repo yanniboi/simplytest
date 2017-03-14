@@ -287,6 +287,10 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_identifier->value === 'OpenSocial') {
     $script[] = 'composer create-project goalgorilla/social_template:dev-master /var/www/drupal --no-interaction';
     $script[] = 'ln -s /var/www/drupal/html /var/www/drupal/web';
+    $script[] = 'mkdir /var/www/drupal/html/sites/default/files';
+    $script[] = 'chmod 777 /var/www/drupal/html/sites/default/files';
+    $script[] = 'cp /var/www/drupal/html/sites/default/default.settings.php /var/www/drupal/html/sites/default/settings.php';
+    $script[] = 'chmod 777 /var/www/drupal/html/sites/default/settings.php';
   }
   else {
     $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
