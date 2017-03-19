@@ -19,6 +19,7 @@ const SIMPLYTEST_SUBMISSION_SERVICE_URL = 'https://spawn.sh';
  */
 function simplytest_submission_form_node_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['#attached']['library'][] = 'simplytest_submission/submission';
+  $form['actions']['submit']['#value'] = 'Launch Sandbox';
   // Disable some stuff for now.
   $form['field_drupal_projects']['widget']['add_more']['#disabled'] = TRUE; // @todo support multiple projects
   for ($delta = 0; $delta <= $form['field_drupal_projects']['widget']['#max_delta']; $delta++) {
@@ -26,7 +27,7 @@ function simplytest_submission_form_node_submission_form_alter(&$form, FormState
     // @todo setup project database with elasticsearch that has drupal.org and backdrop modules indexed
     $widget['field_project_identifier']['widget']['#disabled'] = TRUE; // @todo needs autocomplete
     if ($_GET['project'] === 'social') {
-      $widget['field_project_identifier']['widget']['0']['value']['#default_value'] = 'OpenSocial';
+      $widget['field_project_identifier']['widget']['0']['value']['#default_value'] = 'social';
       $widget['field_project_install']['widget']['value']['#default_value'] = FALSE;
       $widget['field_project_install']['widget']['#disabled'] = TRUE;
     }
@@ -286,7 +287,7 @@ function simplytest_submission_build_script(EntityInterface $entity) {
   $script[] = 'set -x';
   // @todo actually download more than drupal core
   // @todo do this with non root user
-  if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_identifier->value === 'OpenSocial') {
+  if ($entity->field_drupal_projects[0]->getFieldCollectionItem()->field_project_identifier->value === 'social') {
     $script[] = 'composer create-project goalgorilla/social_template:dev-master /var/www/drupal --no-interaction';
     $script[] = 'ln -s /var/www/drupal/html /var/www/drupal/web';
     $script[] = 'mkdir /var/www/drupal/html/sites/default/files';
