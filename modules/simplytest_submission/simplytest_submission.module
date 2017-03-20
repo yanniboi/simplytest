@@ -294,6 +294,18 @@ function simplytest_submission_build_script(EntityInterface $entity) {
     $script[] = 'chmod 777 /var/www/drupal/html/sites/default/files';
     $script[] = 'cp /var/www/drupal/html/sites/default/default.settings.php /var/www/drupal/html/sites/default/settings.php';
     $script[] = 'chmod 777 /var/www/drupal/html/sites/default/settings.php';
+    $script[] = 'echo "
+      \$settings[\'hash_salt\'] = \'notasecret\';
+      \$databases[\'default\'][\'default\'] = array (
+        \'database\' => \'drupal\',
+        \'username\' => \'drupal\',
+        \'password\' => \'drupal\',
+        \'prefix\' => \'\',
+        \'host\' => \'localhost\',
+        \'port\' => \'\',
+        \'namespace\' => \'Drupal\\Core\\Database\\Driver\\mysql\',
+        \'driver\' => \'mysql\',
+      );" >> /var/www/drupal/html/sites/default/settings.php';
   }
   else {
     $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
