@@ -1,12 +1,11 @@
-uuid: a47c0871-3531-41ae-933c-f0105622f047
 langcode: en
 status: true
 dependencies:
   module:
-    - node
-id: node.field_instance_snapshot_cache
-field_name: field_instance_snapshot_cache
-entity_type: node
+    - field_collection
+id: field_collection_item.project_install
+field_name: project_install
+entity_type: field_collection_item
 type: boolean
 settings: {  }
 module: core

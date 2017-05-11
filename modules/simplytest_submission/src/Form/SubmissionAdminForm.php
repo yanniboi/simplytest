@@ -10,7 +10,7 @@ use Drupal\Core\Render\Element;
  *
  * @ingroup simplytest_submission
  */
-class SubmissionForm extends SubmissionFormBase {
+class SubmissionAdminForm extends SubmissionFormBase {
 
   /**
    * {@inheritdoc}
@@ -20,16 +20,26 @@ class SubmissionForm extends SubmissionFormBase {
     return $form;
   }
 
+
   /**
    * {@inheritdoc}
    */
-  public function getDisabledFields() {
-    return [
-      'webspace_webserver',
-      'webspace_interpreter',
-      'webspace_secondary_dbs',
-      'drupal_projects',
+  public function buildFieldGroups() {
+    $fieldgroups = parent::buildFieldGroups();
+    
+    $fieldgroups['group_admin'] = [
+      'title' => $this->t('Admin'),
+      'attributes' => ['class' => ['submission-admin']],
+      'weight' => 4,
+      'fields' => [
+        "status",
+        "container_token",
+        "container_url",
+      ],
     ];
+
+    return $fieldgroups;
   }
+
 
 }

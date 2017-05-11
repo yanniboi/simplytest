@@ -1,12 +1,11 @@
-uuid: 1706519e-3ad1-45cf-857d-4203104e5253
 langcode: en
 status: true
 dependencies:
   module:
     - field_collection
     - options
-id: field_collection_item.field_project_source
-field_name: field_project_source
+id: field_collection_item.project_source
+field_name: project_source
 entity_type: field_collection_item
 type: list_string
 settings:

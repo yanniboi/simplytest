@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.field_collection_item.project_identifier
+    - field_collection.field_collection.drupal_projects
+id: field_collection_item.drupal_projects.project_identifier
+field_name: project_identifier
+entity_type: field_collection_item
+bundle: drupal_projects
+label: 'Project Identifier'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: drupal
+default_value_callback: ''
+settings: {  }
+field_type: string

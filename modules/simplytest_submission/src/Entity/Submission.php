@@ -7,6 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\simplytest_submission\Plugin\Action\DeleteSubmission;
 use Drupal\simplytest_submission\SubmissionInterface;
 use Drupal\user\UserInterface;
 
@@ -27,7 +28,7 @@ use Drupal\user\UserInterface;
  *       "default" = "Drupal\simplytest_submission\Form\SubmissionForm",
  *       "add" = "Drupal\simplytest_submission\Form\SubmissionForm",
  *       "edit" = "Drupal\simplytest_submission\Form\SubmissionForm",
- *       "delete" = "Drupal\simplytest_submission\Form\SubmissionDeleteForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "access" = "Drupal\simplytest_submission\SubmissionAccessControlHandler",
  *     "route_provider" = {
@@ -39,13 +40,11 @@ use Drupal\user\UserInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "id",
- *     "uid" = "user_id",
  *   },
  *   links = {
  *     "canonical" = "/admin/submission/{simplytest_submission}",
- *     "add-form" = "/admin/submission/add",
+ *     "add-form" = "/submission/add",
  *     "edit-form" = "/admin/submission/{simplytest_submission}/edit",
- *     "manage-form" = "/admin/submission/{simplytest_submission}/manage",
  *     "delete-form" = "/admin/submission/{simplytest_submission}/delete",
  *     "collection" = "/admin/submission",
  *   },
@@ -91,36 +90,6 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getOwner() {
-    return $this->get('user_id')->entity;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getOwnerId() {
-    return $this->get('user_id')->target_id;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setOwnerId($uid) {
-    $this->set('user_id', $uid);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setOwner(UserInterface $account) {
-    $this->set('user_id', $account->id());
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getStatus() {
     return $this->get('status')->value;
   }
@@ -135,10 +104,17 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * Delete server instances if submission is deleted.
    */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    parent::postSave($storage, $update);
+  public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    parent::preDelete($storage, $entities);
+
+    /* @var $action DeleteSubmission */
+    $action = \Drupal::service('plugin.manager.action')->createInstance('simplytest_submission_delete_submission_action');
+    $action->executeMultiple($entities);
   }
+
 
   /**
    * {@inheritdoc}
@@ -163,33 +139,91 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
       ))
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE)
-      ->setDefaultValue('received');
+      ->setDefaultValue('');
 
     $fields['container_token'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Container Token'))
       ->setDescription(t(''))
-      ->setReadOnly(TRUE);
+      ->setDisplayOptions('form', array(
+        'type' => 'string_textfield',
+        'weight' => 0,
+      ))
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['container_url'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Container Url'))
       ->setDescription(t(''))
-      ->setReadOnly(TRUE);
-    
-//    $fields['drupal_projects'] = BaseFieldDefinition::create('field_collection')
-//      ->setLabel(t('Drupal Projects'))
-//      ->setDescription(t(''));
-//
-//    $fields['instance_image'] = BaseFieldDefinition::create('string')
-//      ->setLabel(t('Instance Image'))
-//      ->setDescription(t(''));
-//
-//    $fields['instance_runtime'] = BaseFieldDefinition::create('string')
-//      ->setLabel(t('Runtime'))
-//      ->setDescription(t(''));
-//
-//    $fields['instance_snapshot_cache'] = BaseFieldDefinition::create('string')
-//      ->setLabel(t('Use snapshot cache'))
-//      ->setDescription(t(''));
+      ->setDisplayOptions('form', array(
+        'type' => 'string_textfield',
+        'weight' => 0,
+      ))
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['container_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Container ID'))
+      ->setDescription(t(''))
+      ->setDisplayOptions('form', array(
+        'type' => 'string_textfield',
+        'weight' => 0,
+      ))
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['instance_image'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Instance Image'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 50,
+        'text_processing' => 0,
+        'allowed_values' => [
+          'ubuntu:16.04/amd64' => 'ubuntu:16.04/amd64',
+          'ubuntu:16.04/i386' => 'ubuntu:16.04/i386',
+        ]
+      ])
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 0,
+      ))
+      ->setDefaultValue('ubuntu:16.04/amd64')
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['instance_runtime'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Runtime'))
+      ->setDescription(t(''))
+      ->setSettings([
+        'max_length' => 50,
+        'text_processing' => 0,
+        'allowed_values' => [
+          '1h' => '1 hour',
+          '24h' => '1 day',
+        ]
+      ])
+      ->setDisplayOptions('form', array(
+        'type' => 'options_select',
+        'weight' => 0,
+      ))
+      ->setDefaultValue('1h')
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+
+    $fields['instance_snapshot_cache'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Use snapshot cache'))
+      ->setDefaultValue(TRUE)
+      ->setDisplayOptions('form', array(
+        'type' => 'boolean_checkbox',
+        'weight' => 0,
+      ))
+      ->setDescription(t(''))
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
 
     $fields['webspace_dbs'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Database'))
@@ -204,8 +238,10 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'postgresql' => 'postgresql',
         ]
       ])
+      ->setDefaultValue('mysql')
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
+        'settings' => [],
         'weight' => 0,
       ))
       ->setDisplayConfigurable('view', TRUE)
@@ -224,6 +260,7 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'php7-cgi' => 'php7-cgi',
         ]
       ])
+      ->setDefaultValue('mod-php7')
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 0,
@@ -262,6 +299,7 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'apache2' => 'apache2',
         ]
       ])
+      ->setDefaultValue('apache2')
       ->setDisplayOptions('form', array(
         'type' => 'options_select',
         'weight' => 0,

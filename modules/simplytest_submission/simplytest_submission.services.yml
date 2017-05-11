@@ -1,0 +1,7 @@
+services:
+  logger.channel.simplytest_submission:
+     parent: logger.channel_base
+     arguments: ['simplytest_submission']
+  simplytest_submission.submission_service:
+    class: Drupal\simplytest_submission\SubmissionService
+    arguments: ["@logger.channel.simplytest_submission", "@settings"]

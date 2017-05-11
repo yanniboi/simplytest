@@ -21,16 +21,16 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
     $collection = parent::getRoutes($entity_type);
     $entity_type_id = $entity_type->id();
 
-    if ($confirmation_page_route = $this->getConfirmationPageRoute($entity_type)) {
-      $collection->add("$entity_type_id.confirmation_page", $confirmation_page_route);
+    if ($progress_route = $this->getProgressRoute($entity_type)) {
+      $collection->add("entity.$entity_type_id.progress", $progress_route);
     }
 
-    if ($manage_form_route = $this->getManageFormRoute($entity_type)) {
-      $collection->add("entity.$entity_type_id.manage_form", $manage_form_route);
+    if ($status_route = $this->getStatusRoute($entity_type)) {
+      $collection->add("entity.$entity_type_id.status", $status_route);
     }
 
-    if ($autocomplete_route = $this->getAutocompleteRoute($entity_type)) {
-      $collection->add("entity.$entity_type_id.ttd_autocomplete", $autocomplete_route);
+    if ($delete_instance_route = $this->getDeleteInstanceRoute($entity_type)) {
+      $collection->add("entity.$entity_type_id.delete_instance", $delete_instance_route);
     }
 
     return $collection;
@@ -88,7 +88,7 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
 
       $route
         ->setOption('parameters', $parameters)
-        ->setOption('_admin_route', TRUE);
+        ->setOption('_admin_route', FALSE);
 
       return $route;
     }
@@ -124,58 +124,57 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
    * @return \Symfony\Component\Routing\Route|null
    *   The generated route, if available.
    */
-  protected function getConfirmationPageRoute(EntityTypeInterface $entity_type) {
-    return;
-    $route = new Route("/submission/{simplytest_submission}/confirm");
+  protected function getProgressRoute(EntityTypeInterface $entity_type) {
+    $entity_type_id = $entity_type->id();
+    $parameters = [
+      $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+    ];
+    $route = new Route("/submission/{simplytest_submission}/progress");
     $route
       ->setDefaults([
-        '_controller' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::confirmationPage',
+        '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::submissionProgress',
         '_title' => "Thank your for your submission",
       ])
-      ->setRequirement('_entity_create_access', $entity_type->id());
+      ->setRequirement('_permission', 'create submission content');
 
+    $route->setOption('parameters', $parameters);
     return $route;
   }
 
-  /**
-   * Gets the manage form route.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type.
-   *
-   * @return \Symfony\Component\Routing\Route
-   *   The generated route.
-   */
-  protected function getManageFormRoute(EntityTypeInterface $entity_type) {
-    $route = new Route("/admin/delay-check/submission/{simplytest_submission}/manage");
+  protected function getStatusRoute(EntityTypeInterface $entity_type) {
+    $entity_type_id = $entity_type->id();
+    $parameters = [
+      $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+    ];
+    $route = new Route("/admin/submission/{simplytest_submission}/status");
     $route
       ->setDefaults([
-        '_entity_form' => 'simplytest_submission.processing',
-        '_title' => "Manage Submission - Staff",
+        '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::submissionStatus',
+        '_title' => "View Submission status",
       ])
-      ->setRequirement('_permission', 'manage submission entities')
+      ->setRequirement('_permission', 'create submission content');
+
+    $route->setOption('parameters', $parameters)
       ->setOption('_admin_route', TRUE);
 
     return $route;
   }
-  
-  /**
-   * Gets the manage form route.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type.
-   *
-   * @return \Symfony\Component\Routing\Route
-   *   The generated route.
-   */
-  protected function getAutocompleteRoute(EntityTypeInterface $entity_type) {
-    return;
-    $route = new Route("ttd_autocomplete/{target_type}");
+
+  protected function getDeleteInstanceRoute(EntityTypeInterface $entity_type) {
+    $entity_type_id = $entity_type->id();
+    $parameters = [
+      $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+    ];
+    $route = new Route("/admin/submission/{simplytest_submission}/delete-instance");
     $route
       ->setDefaults([
-        '_controller' => '\Drupal\simplytest_submission\Controller\TtdAutocompleteController::handleAutocomplete',
+        '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::deleteSubmissionInstance',
+        '_title' => "Delete Instance",
       ])
-      ->setRequirement('_access', 'TRUE');
+      ->setRequirement('_permission', 'delete submission content');
+
+    $route->setOption('parameters', $parameters)
+      ->setOption('_admin_route', TRUE);
 
     return $route;
   }

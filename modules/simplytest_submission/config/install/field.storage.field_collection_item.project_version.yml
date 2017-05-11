@@ -1,12 +1,11 @@
-uuid: dcc0b1e6-8ae6-41bb-81ac-bc3d9635cdbb
 langcode: en
 status: true
 dependencies:
   module:
-    - node
-id: node.field_container_token
-field_name: field_container_token
-entity_type: node
+    - field_collection
+id: field_collection_item.project_version
+field_name: project_version
+entity_type: field_collection_item
 type: string
 settings:
   max_length: 255

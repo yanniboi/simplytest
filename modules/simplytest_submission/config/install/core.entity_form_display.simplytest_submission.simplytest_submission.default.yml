@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.simplytest_submission.simplytest_submission.drupal_projects
+  module:
+    - field_collection
+    - simplytest_submission
+id: simplytest_submission.simplytest_submission.default
+targetEntityType: simplytest_submission
+bundle: simplytest_submission
+mode: default
+content:
+  drupal_projects:
+    type: field_collection_embed
+    weight: 11
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

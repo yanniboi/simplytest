@@ -4,14 +4,18 @@ namespace Drupal\simplytest_submission;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
-use Drupal\user\EntityOwnerInterface;
 
 /**
  * Provides an interface for defining Submission entities.
  *
  * @ingroup simplytest
  */
-interface SubmissionInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
+interface SubmissionInterface extends ContentEntityInterface, EntityChangedInterface {
+
+  /**
+   * Base url for service requests.
+   */
+  const SERVICE_URL = 'https://spawn.sh';
   
   /**
    * Bit flag for open statuses.

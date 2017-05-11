@@ -47,21 +47,38 @@ class SubmissionListBuilder extends EntityListBuilder {
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
-    // Add manage operation.
-    if ($entity->access('manage') && $entity->hasLinkTemplate('manage-form')) {
-      $operations['manage'] = [
-        'title' => t('Manage'),
-        'weight' => 10,
-        'url' => $entity->toUrl('manage-form'),
-      ];
-    }
-
     // Add view operation.
     if ($entity->access('view') && $entity->hasLinkTemplate('canonical')) {
       $operations['view'] = [
         'title' => t('View'),
         'weight' => 1,
         'url' => $entity->toUrl('canonical'),
+      ];
+    }
+
+    // Add status operation.
+    if ($entity->access('view')) {
+      $operations['status'] = [
+        'title' => t('Status'),
+        'weight' => 0,
+        'url' => new Url(
+          'entity.simplytest_submission.status', array(
+            'simplytest_submission' => $entity->id(),
+          )
+        ),
+      ];
+    }
+
+    // Add delete_instance operation.
+    if ($entity->access('delete')) {
+      $operations['delete_instance'] = [
+        'title' => t('Delete Instance'),
+        'weight' => 100,
+        'url' => new Url(
+          'entity.simplytest_submission.delete_instance', array(
+            'simplytest_submission' => $entity->id(),
+          )
+        ),
       ];
     }
 

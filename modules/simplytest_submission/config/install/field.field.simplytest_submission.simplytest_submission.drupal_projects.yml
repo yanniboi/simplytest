@@ -1,16 +1,14 @@
-uuid: cbb467c6-32d8-40e0-94a8-30135d82812c
 langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_drupal_projects
-    - node.type.submission
+    - field.storage.simplytest_submission.drupal_projects
   module:
     - field_collection
-id: node.submission.field_drupal_projects
-field_name: field_drupal_projects
-entity_type: node
-bundle: submission
+id: simplytest_submission.simplytest_submission.drupal_projects
+field_name: drupal_projects
+entity_type: simplytest_submission
+bundle: simplytest_submission
 label: Projects
 description: ''
 required: false

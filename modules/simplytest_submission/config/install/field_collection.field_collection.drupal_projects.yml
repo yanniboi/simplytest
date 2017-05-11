@@ -2,5 +2,5 @@ uuid: null
 langcode: en
 status: true
 dependencies: {  }
-id: field_drupal_projects
-label: field_drupal_projects
+id: drupal_projects
+label: drupal_projects
