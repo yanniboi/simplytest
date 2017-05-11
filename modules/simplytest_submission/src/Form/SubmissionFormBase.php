@@ -25,9 +25,6 @@ abstract class SubmissionFormBase extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
-   *
-   * @param \Drupal\simplytest_submission\SubmissionService $submission_service
-   *   The submission service.
    */
   public function __construct(EntityManagerInterface $entity_manager, SubmissionService $submission_service) {
     parent::__construct($entity_manager);
@@ -57,9 +54,9 @@ abstract class SubmissionFormBase extends ContentEntityForm {
         $settings = [];
       }
       $form[$field] = $this->entity->{$field}->view($settings + [
-          'label' => 'inline',
-          'weight' => isset($form[$field]['#weight']) ? $form[$field]['#weight'] :  NULL,
-        ]);
+        'label' => 'inline',
+        'weight' => isset($form[$field]['#weight']) ? $form[$field]['#weight'] : NULL,
+      ]);
     }
 
     // Allow sub-forms to make fields disabled.
@@ -88,7 +85,7 @@ abstract class SubmissionFormBase extends ContentEntityForm {
   public function alterForm(array &$form, FormStateInterface $form_state) {
   }
 
-    /**
+  /**
    * Gets a list of the fields that should be rendered as view rather than form.
    *
    * @return array
@@ -107,7 +104,16 @@ abstract class SubmissionFormBase extends ContentEntityForm {
     ];
   }
 
-
+  /**
+   * Gets a list of the fields that should be disabled in the form.
+   *
+   * @return array
+   *   An array of field names. If the values are strings, they are treated as
+   *   the field name. If arrays, the key is the field name and the array is
+   *   passed in as the options for EntityViewBuilderInterface::viewField().
+   *
+   * @see \Drupal\Core\Entity\EntityViewBuilderInterface::viewField()
+   */
   public function getDisabledFields() {
     return [];
   }
@@ -164,7 +170,7 @@ abstract class SubmissionFormBase extends ContentEntityForm {
    * @param string $default_tab
    *   Field group tab id for the tab that should be expanded by default.
    */
-  public function applyFieldGroups(array &$form, FormStateInterface $form_state, $fieldgroups, $default_tab = NULL) {
+  public function applyFieldGroups(array &$form, FormStateInterface $form_state, array $fieldgroups, $default_tab = NULL) {
     $form['submission_tabs'] = [
       '#type' => 'vertical_tabs',
       '#default_tab' => 'edit-group-drupal',
@@ -210,11 +216,11 @@ abstract class SubmissionFormBase extends ContentEntityForm {
     $actions = parent::actions($form, $form_state);
 
     if (empty($this->entity->container_id->value)) {
-      $actions['deploy'] = array(
+      $actions['deploy'] = [
         '#type' => 'submit',
         '#value' => $this->t('Deploy Sandbox'),
-        '#submit' => array('::submitForm', '::save', '::submitDeploy'),
-      );
+        '#submit' => ['::submitForm', '::save', '::submitDeploy'],
+      ];
       unset($actions['submit']);
     }
 
@@ -261,10 +267,4 @@ abstract class SubmissionFormBase extends ContentEntityForm {
     return $entity;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
-  }
 }

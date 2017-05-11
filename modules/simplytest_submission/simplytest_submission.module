@@ -13,6 +13,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
  * Allowed value callback for submission statuses.
  *
  * @return array
+ *   Array of options keyed by status machine name.
  */
 function simplytest_submission_status_options(FieldStorageDefinitionInterface $definition, FieldableEntityInterface $entity = NULL, &$cacheable = TRUE) {
   return Submission::getStatusOptions();

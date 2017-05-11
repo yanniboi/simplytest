@@ -69,32 +69,32 @@ class SubmissionService {
    *   Entity being used to make request.
    * @param string $script
    *   Bash script to be used in deployment.
-   * 
+   *
    * @return array
    *   Data response from service server.
-   * 
+   *
    * @throws \Exception
    *   Throws an exception if server returns error.
    */
   public function buildInstance(SubmissionInterface $entity, $script) {
     // Request preparation.
     $url = SubmissionInterface::SERVICE_URL;
-    $url .= '/?' . http_build_query(array(
-        // use $ drush sset simplytest_submission.service_token TOKEN
-        // @todo provide config interface for this / or do it within rules UI
-        'token' => $this->settings['service_token'],
-        'ttl' => $entity->instance_runtime->value,
-        'image' => $entity->instance_image->value,
-        'cache' => ($entity->instance_snapshot_cache->value) ? 'true' : 'false'
-      ));
+    $url .= '/?' . http_build_query([
+      // Use $ drush sset simplytest_submission.service_token TOKEN.
+      // @todo provide config interface for this / or do it within rules UI
+      'token' => $this->settings['service_token'],
+      'ttl' => $entity->instance_runtime->value,
+      'image' => $entity->instance_image->value,
+      'cache' => ($entity->instance_snapshot_cache->value) ? 'true' : 'false',
+    ]);
 
     // Send request.
     $client = \Drupal::httpClient();
     $response = $client->request('POST', $url, [
-      'headers' => array(
+      'headers' => [
         'Accept' => 'application/json',
         'Content-Type' => 'application/octet-stream; charset=utf-8',
-      ),
+      ],
       'body' => $script,
     ]);
 
@@ -102,26 +102,26 @@ class SubmissionService {
     if ($response->getStatusCode() !== 201) {
       throw new \Exception('Invalid status code returned from spawn.sh api');
     }
-    
-    $data = json_decode($response->getBody(), true);
-    
+
+    $data = json_decode($response->getBody(), TRUE);
+
     if (!isset($data['id'])) {
       throw new \Exception('No id in spawn.sh response data');
     }
-    
+
     return $data;
   }
 
   /**
    * Builds a deploy script for a submission.
    *
-   * @param EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity that the script is being build for.
    *
    * @return bool|array
    *   Deploy script for building submission instance.
    */
-  public function buildScript($entity) {
+  public function buildScript(EntityInterface $entity) {
     $this->buildEntity = $entity;
     $this->debug('No results from spawn.sh.');
     $this->debug($entity, 'Entity object.');
@@ -175,9 +175,11 @@ class SubmissionService {
       case 'php7-fpm':
         $packages[] = 'php7.0-fpm';
         break;
+
       case 'mod-php7':
         // Installed in the apache2 part.
         break;
+
       case 'php7-cgi':
         $packages[] = 'php7.0-cgi';
         break;
@@ -205,6 +207,7 @@ class SubmissionService {
         // Skip mysql recovery for faster startup.
         $packages_script[] = 'truncate -s 0 /etc/mysql/debian-start';
         break;
+
       case 'mysql':
         $packages[] = 'mysql-server';
         $packages[] = 'php7.0-mysql';
@@ -217,9 +220,11 @@ class SubmissionService {
         // Gracefully shut down database before snapshotting.
         $packages_script[] = 'service mysql stop';
         break;
+
       case 'sqllite':
         $packages[] = 'php7.0-sqlite3';
         break;
+
       case 'postgresql':
         $packages[] = 'postgresql';
         $packages[] = 'php7.0-pgsql';
@@ -250,9 +255,10 @@ class SubmissionService {
               }
             }" > /etc/nginx/sites-enabled/default';
             break;
+
           case 'mod-php7':
             throw new \Exception('Cannot use mod-php7 with nginx');
-            break;
+
           case 'php7-cgi':
             // @todo
             $packages_script[] = 'echo "
@@ -270,6 +276,7 @@ class SubmissionService {
         }
         $packages_script[] = 'service nginx reload';
         break;
+
       case 'apache2':
         $packages[] = "apache2";
         // Modules and config for clean url.
@@ -285,9 +292,11 @@ class SubmissionService {
           case 'php7-fpm':
             // @todo
             break;
+
           case 'mod-php7':
             $packages[] = 'libapache2-mod-php7.0';
             break;
+
           case 'php7-cgi':
             // @todo
             break;
@@ -375,6 +384,7 @@ class SubmissionService {
       case 'mysql':
         $script[] = 'service mysql start';
         break;
+
       case 'postgresql':
         $script[] = 'service postgresql start';
         break;
@@ -384,7 +394,7 @@ class SubmissionService {
     $script[] = 'cd /var/www/drupal/web';
     // Whether we install depends of the form selection.
     // @todo if skipping drupal core installation, prefill database credentials and etc
-    //       can we use $settings in settings.php for that?
+    // can we use $settings in settings.php for that?
     // @todo install with dynamic site name? one of the project names?
     // @todo run drush with non root user
     if ($this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_install->value) {
@@ -395,11 +405,13 @@ class SubmissionService {
           // Gracefully shut down database before snapshotting.
           $script[] = 'service mysql stop';
           break;
+
         case 'postgresql':
           $script[] = 'drush si -y --db-url=pgsql://drupal:drupal@localhost/drupal --account-pass=admin --site-name=drupal';
           // Gracefully shut down database before snapshotting.
           $script[] = 'service postgresql stop';
           break;
+
         case 'sqllite':
           $script[] = 'drush si -y --db-url=sqlite://sites/default/files/.ht.sqlite --account-pass=admin --site-name=drupal';
           $script[] = 'chmod 666 sites/default/files/.ht.sqlite';
@@ -428,6 +440,7 @@ class SubmissionService {
       case 'mysql':
         $script[] = 'service mysql start';
         break;
+
       case 'postgresql':
         $script[] = 'service postgresql start';
         break;
@@ -436,7 +449,16 @@ class SubmissionService {
     return implode("\n", $script);
   }
 
-  public function deleteBuild($simplytest_submission) {
+  /**
+   * Makes a request to service server to destroy a build instance.
+   *
+   * @param SubmissionInterface $simplytest_submission
+   *   Submission whose instance should be destroyed.
+   *
+   * @return string
+   *   Response or error message to display
+   */
+  public function deleteBuild(SubmissionInterface $simplytest_submission) {
     $url = SubmissionInterface::SERVICE_URL;
     $url .= '/' . $simplytest_submission->container_id->value;
     $url .= '?token=' . $simplytest_submission->container_token->value;

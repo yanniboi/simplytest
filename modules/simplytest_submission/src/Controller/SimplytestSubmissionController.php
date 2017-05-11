@@ -5,7 +5,6 @@ namespace Drupal\simplytest_submission\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\simplytest_submission\Plugin\Action\DeleteSubmission;
 use Drupal\simplytest_submission\SubmissionInterface;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -43,10 +42,10 @@ class SimplytestSubmissionController extends ControllerBase implements Container
 
   /**
    * Displays deployment progress.
-   * 
+   *
    * @param \Drupal\simplytest_submission\SubmissionInterface $simplytest_submission
    *   The submission being deployed.
-   * 
+   *
    * @return array
    *   Drupal render array.
    */
@@ -54,14 +53,15 @@ class SimplytestSubmissionController extends ControllerBase implements Container
     $page = [];
     $page['progress'] = [
       '#theme' => 'progress_bar',
-      '#percent' => 30, // @todo actual progress
+      // @todo actual progress
+      '#percent' => 30,
       '#label' => t('Launching @name', ['@name' => $simplytest_submission->getName()]),
       '#attached' => [
-        'library' => [ 'simplytest_submission/progress' ],
+        'library' => ['simplytest_submission/progress'],
         'html_head' => [
           [
             [
-              // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
+              // Redirect through a 'Refresh' meta tag if JS is disabled.
               // @todo necessary?
               '#tag' => 'meta',
               '#noscript' => TRUE,
@@ -73,7 +73,7 @@ class SimplytestSubmissionController extends ControllerBase implements Container
             'batch_progress_meta_refresh',
           ],
         ],
-        // Adds JavaScript code and settings for clients where JavaScript is enabled.
+        // Adds code and settings for clients where JavaScript is enabled.
         'drupalSettings' => [
           'simplytest_submission' => [
             'container_id' => $simplytest_submission->container_id->value,
@@ -98,26 +98,34 @@ class SimplytestSubmissionController extends ControllerBase implements Container
         '#tag' => 'pre',
         '#attributes' => ['id' => ['simplytest_submission_progress']],
         '#value' => '',
-      ]
+      ],
     ];
 
     return $page;
   }
 
+  /**
+   * Page callback for a submission instance status.
+   *
+   * @param \Drupal\simplytest_submission\SubmissionInterface $simplytest_submission
+   *   Submission entity to get instance data from.
+   *
+   * @return array
+   *   Render array.
+   */
   public function submissionStatus(SubmissionInterface $simplytest_submission) {
     $page = [];
 
     if (!$simplytest_submission->container_id->value || !$simplytest_submission->container_token->value) {
       return ['#markup' => 'Missing data'];
     }
-    
+
     $url = SubmissionInterface::SERVICE_URL;
     $url .= '/' . $simplytest_submission->container_id->value;
     $url .= '?token=' . $simplytest_submission->container_token->value;
     $client = \Drupal::httpClient();
 
     try {
-//      $request = $client->delete($url);
       $request = $client->get($url);
       $response = $request->getBody();
       $contents = $response->getContents();
@@ -126,8 +134,6 @@ class SimplytestSubmissionController extends ControllerBase implements Container
       watchdog_exception('my_module', $e);
       return ['#markup' => $e->getMessage()];
     }
-
-
 
     $page['debug'] = [
       '#type' => 'details',
@@ -141,14 +147,23 @@ class SimplytestSubmissionController extends ControllerBase implements Container
         '#type' => 'html_tag',
         '#tag' => 'pre',
         '#value' => $contents,
-      ]
+      ],
     ];
 
     return $page;
   }
 
+  /**
+   * Page callback for a page to delete submission instance.
+   *
+   * @param \Drupal\simplytest_submission\SubmissionInterface $simplytest_submission
+   *   Submission entity to get instance from.
+   *
+   * @return array
+   *   Render array.
+   */
   public function deleteSubmissionInstance(SubmissionInterface $simplytest_submission) {
-    /* @var $action  DeleteSubmission */
+    /* @var $action \Drupal\simplytest_submission\Plugin\Action\DeleteSubmission */
     $action = \Drupal::service('plugin.manager.action')->createInstance('simplytest_submission_delete_submission_action');
     $response = $action->execute($simplytest_submission);
 
@@ -158,4 +173,5 @@ class SimplytestSubmissionController extends ControllerBase implements Container
 
     return ['#markup' => 'Something went wrong.'];
   }
+
 }

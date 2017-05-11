@@ -3,7 +3,6 @@
 namespace Drupal\simplytest_submission\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 
 /**
  * Form controller for Submission edit forms.
@@ -20,13 +19,12 @@ class SubmissionAdminForm extends SubmissionFormBase {
     return $form;
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function buildFieldGroups() {
     $fieldgroups = parent::buildFieldGroups();
-    
+
     $fieldgroups['group_admin'] = [
       'title' => $this->t('Admin'),
       'attributes' => ['class' => ['submission-admin']],
@@ -40,6 +38,5 @@ class SubmissionAdminForm extends SubmissionFormBase {
 
     return $fieldgroups;
   }
-
 
 }

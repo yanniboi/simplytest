@@ -16,7 +16,7 @@ interface SubmissionInterface extends ContentEntityInterface, EntityChangedInter
    * Base url for service requests.
    */
   const SERVICE_URL = 'https://spawn.sh';
-  
+
   /**
    * Bit flag for open statuses.
    */
@@ -56,7 +56,7 @@ interface SubmissionInterface extends ContentEntityInterface, EntityChangedInter
    * Bit flag for statuses where the submissions should be ignored.
    */
   const STATUS_IGNORED = 0x80;
-  
+
   /**
    * Gets the Submission name.
    *

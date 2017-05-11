@@ -3,9 +3,7 @@
 namespace Drupal\simplytest_submission\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,7 +21,6 @@ class SubmissionAddController extends ControllerBase {
    */
   protected $storage;
 
-
   /**
    * {@inheritdoc}
    */
@@ -35,7 +32,7 @@ class SubmissionAddController extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /** @var EntityTypeManagerInterface $entity_type_manager */
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
     $entity_type_manager = $container->get('entity_type.manager');
     return new static(
       $entity_type_manager->getStorage('simplytest_submission')
@@ -43,7 +40,7 @@ class SubmissionAddController extends ControllerBase {
   }
 
   /**
-   * Displays add links for available bundles/types for entity simplytest_submission.
+   * Displays add links for available bundles for entity simplytest_submission.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The current request object.
@@ -51,9 +48,9 @@ class SubmissionAddController extends ControllerBase {
    *   The requested form mode.
    *
    * @return array
-   *   A render array for a list of the simplytest_submission types that can be added
-   *   or if there is only one type defined for the site, the function returns
-   *   the add page for that type.
+   *   A render array for a list of the simplytest_submission types that can be
+   *   added or if there is only one type defined for the site, the function
+   *   returns the add page for that type.
    */
   public function add(Request $request, $mode = 'default') {
     return $this->addForm($mode);
@@ -66,9 +63,9 @@ class SubmissionAddController extends ControllerBase {
    *   The current request object.
    *
    * @return array
-   *   A render array for a list of the simplytest_submission types that can be added
-   *   or if there is only one type defined for the site, the function returns
-   *   the add page for that type.
+   *   A render array for a list of the simplytest_submission types that can be
+   *   added or if there is only one type defined for the site, the function
+   *   returns the add page for that type.
    */
   public function addPassenger(Request $request) {
     return $this->add($request, 'data_collection');
@@ -81,16 +78,16 @@ class SubmissionAddController extends ControllerBase {
    *   The current request object.
    *
    * @return array
-   *   A render array for a list of the simplytest_submission types that can be added
-   *   or if there is only one type defined for the site, the function returns
-   *   the add page for that type.
+   *   A render array for a list of the simplytest_submission types that can be
+   *   added or if there is only one type defined for the site, the function
+   *   returns the add page for that type.
    */
   public function addStaff(Request $request) {
     return $this->add($request, 'processing');
   }
 
   /**
-   * Presents the creation form for simplytest_submission entities of given type.
+   * Presents the add form for simplytest_submission entities of given type.
    *
    * @param string $mode
    *   The requested form mode.
@@ -111,29 +108,6 @@ class SubmissionAddController extends ControllerBase {
    */
   public function getAddFormTitle() {
     return t('Create Submission');
-  }
-
-  /**
-   * Show a confirmation page after a submission.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $submission
-   *   The submission that has just been submitted.
-   *
-   * @return array
-   *   A render array for the confirmation page.
-   */
-  public function confirmationPage(EntityInterface $submission) {
-    $content = [];
-
-//    $content['#attached'] = [
-//      'library' => [
-//        'simplytest_submission/confirmation-page',
-//      ],
-//    ];
-
-    $content['text'] = ['#markup' => 'All done!!'];
-
-    return $content;
   }
 
 }

@@ -7,9 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\simplytest_submission\Plugin\Action\DeleteSubmission;
 use Drupal\simplytest_submission\SubmissionInterface;
-use Drupal\user\UserInterface;
 
 /**
  * Defines the Submission entity.
@@ -60,9 +58,9 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
    */
   public static function preCreate(EntityStorageInterface $storage_controller, array &$values) {
     parent::preCreate($storage_controller, $values);
-    $values += array(
+    $values += [
       'user_id' => \Drupal::currentUser()->id(),
-    );
+    ];
   }
 
   /**
@@ -110,11 +108,10 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     parent::preDelete($storage, $entities);
 
-    /* @var $action DeleteSubmission */
+    /* @var $action \Drupal\simplytest_submission\Plugin\Action\DeleteSubmission */
     $action = \Drupal::service('plugin.manager.action')->createInstance('simplytest_submission_delete_submission_action');
     $action->executeMultiple($entities);
   }
-
 
   /**
    * {@inheritdoc}
@@ -128,106 +125,97 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
     $fields['status'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Submission status'))
       ->setDescription(t('The current status of the Submission entity.'))
-      ->setSettings(array(
+      ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
         'allowed_values_function' => 'simplytest_submission_status_options',
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDefaultValue('');
 
     $fields['container_token'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Container Token'))
-      ->setDescription(t(''))
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setReadOnly(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['container_url'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Container Url'))
-      ->setDescription(t(''))
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setReadOnly(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['container_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Container ID'))
-      ->setDescription(t(''))
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setReadOnly(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['instance_image'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Instance Image'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
         'allowed_values' => [
           'ubuntu:16.04/amd64' => 'ubuntu:16.04/amd64',
           'ubuntu:16.04/i386' => 'ubuntu:16.04/i386',
-        ]
+        ],
       ])
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDefaultValue('ubuntu:16.04/amd64')
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['instance_runtime'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Runtime'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
         'allowed_values' => [
           '1h' => '1 hour',
           '24h' => '1 day',
-        ]
+        ],
       ])
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDefaultValue('1h')
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-
     $fields['instance_snapshot_cache'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Use snapshot cache'))
       ->setDefaultValue(TRUE)
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => 0,
-      ))
-      ->setDescription(t(''))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-
     $fields['webspace_dbs'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Database'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -236,21 +224,19 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'mariadb' => 'mariadb',
           'sqllite' => 'sqllite',
           'postgresql' => 'postgresql',
-        ]
+        ],
       ])
       ->setDefaultValue('mysql')
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'settings' => [],
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-
     $fields['webspace_interpreter'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Interpreter'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -258,20 +244,18 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'mod-php7' => 'mod-php7',
           'php7-fpm' => 'php7-fpm',
           'php7-cgi' => 'php7-cgi',
-        ]
+        ],
       ])
       ->setDefaultValue('mod-php7')
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
-
     $fields['webspace_secondary_dbs'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Secondary Database'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -279,31 +263,30 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
           'mongodb' => 'mongodb',
           'elasticsearch' => 'elasticsearch',
           'redis' => 'redis',
-        ]
+        ],
       ])
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['webspace_webserver'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Webserver'))
-      ->setDescription(t(''))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
         'allowed_values' => [
           'nginx' => 'nginx',
           'apache2' => 'apache2',
-        ]
+        ],
       ])
       ->setDefaultValue('apache2')
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 

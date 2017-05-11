@@ -141,6 +141,15 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
     return $route;
   }
 
+  /**
+   * Gets the status page route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
   protected function getStatusRoute(EntityTypeInterface $entity_type) {
     $entity_type_id = $entity_type->id();
     $parameters = [
@@ -160,6 +169,15 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
     return $route;
   }
 
+  /**
+   * Gets the delete instance page route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
   protected function getDeleteInstanceRoute(EntityTypeInterface $entity_type) {
     $entity_type_id = $entity_type->id();
     $parameters = [

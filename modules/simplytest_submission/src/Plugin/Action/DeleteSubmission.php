@@ -28,9 +28,6 @@ class DeleteSubmission extends ActionBase implements ContainerFactoryPluginInter
 
   /**
    * {@inheritdoc}
-   *
-   * @param \Drupal\simplytest_submission\SubmissionService $submission_service
-   *   The submission service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, SubmissionService $submission_service) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);

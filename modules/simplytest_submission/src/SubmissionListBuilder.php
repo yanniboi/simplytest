@@ -33,9 +33,9 @@ class SubmissionListBuilder extends EntityListBuilder {
     $row['name'] = $this->l(
       $entity->label(),
       new Url(
-        'entity.simplytest_submission.edit_form', array(
+        'entity.simplytest_submission.edit_form', [
           'simplytest_submission' => $entity->id(),
-        )
+        ]
       )
     );
     return $row + parent::buildRow($entity);
@@ -62,9 +62,9 @@ class SubmissionListBuilder extends EntityListBuilder {
         'title' => t('Status'),
         'weight' => 0,
         'url' => new Url(
-          'entity.simplytest_submission.status', array(
+          'entity.simplytest_submission.status', [
             'simplytest_submission' => $entity->id(),
-          )
+          ]
         ),
       ];
     }
@@ -75,9 +75,9 @@ class SubmissionListBuilder extends EntityListBuilder {
         'title' => t('Delete Instance'),
         'weight' => 100,
         'url' => new Url(
-          'entity.simplytest_submission.delete_instance', array(
+          'entity.simplytest_submission.delete_instance', [
             'simplytest_submission' => $entity->id(),
-          )
+          ]
         ),
       ];
     }
