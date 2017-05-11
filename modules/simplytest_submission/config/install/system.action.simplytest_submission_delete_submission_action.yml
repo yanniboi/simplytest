@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - simplytest_submission
+id: simplytest_submission_delete_submission_action
+label: 'Delete Submission(s)'
+type: simplytest_submission
+plugin: simplytest_submission_delete_submission_action
+configuration: {  }

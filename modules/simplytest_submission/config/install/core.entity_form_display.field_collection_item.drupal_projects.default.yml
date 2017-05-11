@@ -1,0 +1,50 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.field_collection_item.drupal_projects.project_identifier
+    - field.field.field_collection_item.drupal_projects.project_install
+    - field.field.field_collection_item.drupal_projects.project_patches
+    - field.field.field_collection_item.drupal_projects.project_source
+    - field.field.field_collection_item.drupal_projects.project_version
+    - field_collection.field_collection.drupal_projects
+  module:
+    - link
+id: field_collection_item.drupal_projects.default
+targetEntityType: field_collection_item
+bundle: drupal_projects
+mode: default
+content:
+  project_identifier:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+  project_install:
+    weight: 3
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+  project_patches:
+    weight: 4
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+  project_source:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+  project_version:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+hidden: {  }

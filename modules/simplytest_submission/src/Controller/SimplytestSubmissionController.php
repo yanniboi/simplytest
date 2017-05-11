@@ -5,9 +5,10 @@ namespace Drupal\simplytest_submission\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\simplytest_submission\Plugin\Action\DeleteSubmission;
+use Drupal\simplytest_submission\SubmissionInterface;
+use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\node\Controller\NodeViewController;
 
 /**
  * Returns responses for Node routes.
@@ -41,55 +42,120 @@ class SimplytestSubmissionController extends ControllerBase implements Container
   }
 
   /**
-   * Displays a node.
-   *
-   * @todo non-js support
-   *
-   * @param int $node_id
-   *   The node ID.
-   *
+   * Displays deployment progress.
+   * 
+   * @param \Drupal\simplytest_submission\SubmissionInterface $simplytest_submission
+   *   The submission being deployed.
+   * 
    * @return array
-   *   An array suitable for drupal_render().
+   *   Drupal render array.
    */
-  public function progress(EntityInterface $node) {
-    $page = [
-      '#type' => 'page',
-      '#show_messages' => TRUE,
-      '#title' => $node->title->value,
-      'content' => array(
-        '#theme' => 'progress_bar',
-        '#percent' => 30, // @todo actual progress
-        '#message' => array('#markup' => '<pre id="simplytest_submission_progress"></pre>'), // @todo clean solution // @todo print current task
-        '#label' => t('Launching @node', array('@node' => $node->title->value)),
-        '#attached' => array(
-          'library' => [ 'simplytest_submission/progress' ],
-          'html_head' => array(
-            array(
-              array(
-                // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
-                // @todo necessary?
-                '#tag' => 'meta',
-                '#noscript' => TRUE,
-                '#attributes' => array(
-                  'http-equiv' => 'Refresh',
-                  'content' => '1; URL=.',
-                ),
-              ),
-              'batch_progress_meta_refresh',
-            ),
-          ),
-          // Adds JavaScript code and settings for clients where JavaScript is enabled.
-          'drupalSettings' => [
-            'simplytest_submission' => [
-              'container_id' => $node->title->value,
-              'container_token' => $node->field_container_token->value,
-              'container_url' => $node->field_container_url->value,
-              'service_url' => SIMPLYTEST_SUBMISSION_SERVICE_URL,
+  public function submissionProgress(SubmissionInterface $simplytest_submission) {
+    $page = [];
+    $page['progress'] = [
+      '#theme' => 'progress_bar',
+      '#percent' => 30, // @todo actual progress
+      '#label' => t('Launching @name', ['@name' => $simplytest_submission->getName()]),
+      '#attached' => [
+        'library' => [ 'simplytest_submission/progress' ],
+        'html_head' => [
+          [
+            [
+              // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
+              // @todo necessary?
+              '#tag' => 'meta',
+              '#noscript' => TRUE,
+              '#attributes' => [
+                'http-equiv' => 'Refresh',
+                'content' => '1; URL=.',
+              ],
             ],
+            'batch_progress_meta_refresh',
           ],
-        ),
-      ),
+        ],
+        // Adds JavaScript code and settings for clients where JavaScript is enabled.
+        'drupalSettings' => [
+          'simplytest_submission' => [
+            'container_id' => $simplytest_submission->container_id->value,
+            'container_token' => $simplytest_submission->container_token->value,
+            'container_url' => $simplytest_submission->container_url->value,
+            'service_url' => SubmissionInterface::SERVICE_URL,
+          ],
+        ],
+      ],
     ];
+
+    $page['debug'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Log output'),
+      'processed' => [
+        '#type' => 'html_tag',
+        '#tag' => 'h5',
+        '#value' => $this->t('Response from build server:'),
+      ],
+      'message' => [
+        '#type' => 'html_tag',
+        '#tag' => 'pre',
+        '#attributes' => ['id' => ['simplytest_submission_progress']],
+        '#value' => '',
+      ]
+    ];
+
     return $page;
+  }
+
+  public function submissionStatus(SubmissionInterface $simplytest_submission) {
+    $page = [];
+
+    if (!$simplytest_submission->container_id->value || !$simplytest_submission->container_token->value) {
+      return ['#markup' => 'Missing data'];
+    }
+    
+    $url = SubmissionInterface::SERVICE_URL;
+    $url .= '/' . $simplytest_submission->container_id->value;
+    $url .= '?token=' . $simplytest_submission->container_token->value;
+    $client = \Drupal::httpClient();
+
+    try {
+//      $request = $client->delete($url);
+      $request = $client->get($url);
+      $response = $request->getBody();
+      $contents = $response->getContents();
+    }
+    catch (RequestException $e) {
+      watchdog_exception('my_module', $e);
+      return ['#markup' => $e->getMessage()];
+    }
+
+
+
+    $page['debug'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Log output'),
+      'processed' => [
+        '#type' => 'html_tag',
+        '#tag' => 'h5',
+        '#value' => $this->t('Response from build server:'),
+      ],
+      'message' => [
+        '#type' => 'html_tag',
+        '#tag' => 'pre',
+        '#value' => $contents,
+      ]
+    ];
+
+    return $page;
+  }
+
+  public function deleteSubmissionInstance(SubmissionInterface $simplytest_submission) {
+    /* @var $action  DeleteSubmission */
+    $action = \Drupal::service('plugin.manager.action')->createInstance('simplytest_submission_delete_submission_action');
+    $response = $action->execute($simplytest_submission);
+
+    if ($response) {
+      return ['#markup' => $response];
+    }
+
+    return ['#markup' => 'Something went wrong.'];
   }
 }
