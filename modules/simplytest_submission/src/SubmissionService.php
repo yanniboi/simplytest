@@ -123,8 +123,6 @@ class SubmissionService {
    */
   public function buildScript(EntityInterface $entity) {
     $this->buildEntity = $entity;
-    $this->debug('No results from spawn.sh.');
-    $this->debug($entity, 'Entity object.');
 
     $script = [];
     try {
