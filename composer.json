@@ -10,7 +10,6 @@
     }
   ],
   "require": {
-    "drupal/field_group": "~1.0",
     "drupal/field_collection": "~1.0"
   },
   "autoload": {
