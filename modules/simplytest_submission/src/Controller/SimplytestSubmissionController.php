@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\simplytest_submission\SubmissionInterface;
+use Drupal\simplytest_submission\SubmissionService;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,13 +23,23 @@ class SimplytestSubmissionController extends ControllerBase implements Container
   protected $renderer;
 
   /**
+   * The submission service.
+   *
+   * @var \Drupal\simplytest_submission\SubmissionService
+   */
+  protected $submissionService;
+
+  /**
    * Constructs a SimplytestSubmissionController object.
    *
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer service.
+   * @param \Drupal\simplytest_submission\SubmissionService $submission_service
+   *   The submission service.
    */
-  public function __construct(RendererInterface $renderer) {
+  public function __construct(RendererInterface $renderer, SubmissionService $submission_service) {
     $this->renderer = $renderer;
+    $this->submissionService = $submission_service;
   }
 
   /**
@@ -36,7 +47,8 @@ class SimplytestSubmissionController extends ControllerBase implements Container
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->get('simplytest_submission.submission_service')
     );
   }
 
@@ -148,6 +160,23 @@ class SimplytestSubmissionController extends ControllerBase implements Container
     if (!$simplytest_submission->container_id->value || !$simplytest_submission->container_token->value) {
       return ['#markup' => 'Missing data'];
     }
+
+    $script = $this->submissionService->buildScript($simplytest_submission);
+
+    $page['script'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Build script'),
+      'processed' => [
+        '#type' => 'html_tag',
+        '#tag' => 'h5',
+        '#value' => $this->t('Current script:'),
+      ],
+      'message' => [
+        '#type' => 'html_tag',
+        '#tag' => 'pre',
+        '#value' => $script,
+      ],
+    ];
 
     $url = SubmissionInterface::SERVICE_URL;
     $url .= '/' . $simplytest_submission->container_id->value;
