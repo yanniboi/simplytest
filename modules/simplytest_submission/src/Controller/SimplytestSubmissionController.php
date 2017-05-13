@@ -101,7 +101,7 @@ class SimplytestSubmissionController extends ControllerBase implements Container
         '#attributes' => [
           'id' => [
             'simplytest_submission_autoscroll',
-            ],
+          ],
           'checked' => 'checked',
         ],
       ],
