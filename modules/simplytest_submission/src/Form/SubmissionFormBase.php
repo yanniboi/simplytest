@@ -83,6 +83,12 @@ abstract class SubmissionFormBase extends ContentEntityForm {
    *   The form state.
    */
   public function alterForm(array &$form, FormStateInterface $form_state) {
+    // @todo Do a more generic request query lookup.
+    if (isset($_GET['project']) && $_GET['project'] === 'social') {
+      $widget = &$form['drupal_projects']['widget'][0];
+      $widget['project_identifier']['widget']['0']['value']['#default_value'] = 'social';
+      $widget['project_install']['widget']['value']['#default_value'] = FALSE;
+    }
   }
 
   /**
