@@ -14,12 +14,27 @@
     attach: function (context, settings) {
       var url = 'spawn.sh/' + settings.simplytest_submission.container_id + '?token=' + settings.simplytest_submission.container_token;
       var preEl = document.getElementById('simplytest_submission_progress');
+
+      $( preEl ).css("width", '100%');
+      $( preEl ).css("max-height", '300px');
+      $( preEl ).css("overflow", 'auto');
+
       var exampleSocket = new WebSocket('wss://' + url);
       exampleSocket.onmessage = function (event) {
         var reader = new FileReader();
         reader.onloadend = function () {
-          // @todo some better way to display the log? with autoscrolling?
           preEl.textContent += reader.result;
+
+          $('#simplytest_submission_autoscroll').each(function(){
+            if($(this).prop('checked')) {
+              var objDiv = $(preEl);
+              if (objDiv.length > 0){
+                objDiv[0].scrollTop = objDiv[0].scrollHeight;
+              }
+            }
+          });
+
+
         };
         reader.readAsBinaryString(event.data);
       };
@@ -27,7 +42,11 @@
         $.getJSON('https://' + url, function (data) {
           if (data.url) {
             // @todo maybe a button instead of instantly redirecting?
-            window.location = data.url;
+            $('#simplytest_submission_redirect').each(function(){
+              if($(this).prop('checked')) {
+                window.location = data.url;
+              }
+            });
           }
         });
       };

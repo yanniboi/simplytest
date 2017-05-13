@@ -88,10 +88,32 @@ class SimplytestSubmissionController extends ControllerBase implements Container
     $page['debug'] = [
       '#type' => 'details',
       '#title' => $this->t('Log output'),
+      '#open' => TRUE,
       'processed' => [
         '#type' => 'html_tag',
         '#tag' => 'h5',
         '#value' => $this->t('Response from build server:'),
+      ],
+      'auto_scroll' => [
+        '#type' => 'checkbox',
+        '#title' => 'Auto-Scroll',
+        '#default_value' => 1,
+        '#attributes' => [
+          'id' => [
+            'simplytest_submission_autoscroll',
+            ],
+          'checked' => 'checked',
+        ],
+      ],
+      'auto_redirect' => [
+        '#type' => 'checkbox',
+        '#title' => 'Redirect on completion',
+        '#default_value' => 0,
+        '#attributes' => [
+          'id' => [
+            'simplytest_submission_redirect',
+          ],
+        ],
       ],
       'message' => [
         '#type' => 'html_tag',
