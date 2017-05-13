@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.field_collection_item.project_patches
+    - field_collection.field_collection.drupal_projects
+  module:
+    - link
+id: field_collection_item.drupal_projects.project_patches
+field_name: project_patches
+entity_type: field_collection_item
+bundle: drupal_projects
+label: Patches
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  link_type: 16
+  title: 0
+field_type: link

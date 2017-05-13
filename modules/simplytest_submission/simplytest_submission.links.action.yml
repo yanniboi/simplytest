@@ -1,0 +1,5 @@
+entity.simplytest_submission.add_form:
+  route_name: 'entity.simplytest_submission.add_form'
+  title: 'Add Submission'
+  appears_on:
+    - entity.simplytest_submission.collection

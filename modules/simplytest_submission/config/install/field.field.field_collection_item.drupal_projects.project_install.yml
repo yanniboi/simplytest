@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.field_collection_item.project_install
+    - field_collection.field_collection.drupal_projects
+id: field_collection_item.drupal_projects.project_install
+field_name: project_install
+entity_type: field_collection_item
+bundle: drupal_projects
+label: 'Install project'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

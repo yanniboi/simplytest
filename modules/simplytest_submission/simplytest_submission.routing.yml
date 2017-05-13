@@ -1,7 +1,0 @@
-entity.node.simplytest_submission_progress: # @todo entity. necessary?
-  path: '/progress/{node}' # @todo serial numbers => this leaks information!
-  defaults:
-    _controller: '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::progress'
-  requirements:
-    _permission: 'create submission content'
-    node: \d+

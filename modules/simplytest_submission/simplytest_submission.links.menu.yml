@@ -1,0 +1,7 @@
+# Submission menu item definition
+entity.simplytest_submission.collection:
+  title: 'Submission list'
+  route_name: entity.simplytest_submission.collection
+  description: 'All submission entities'
+  parent: system.admin_structure
+  weight: 100

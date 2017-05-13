@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.simplytest_submission.drupal_projects
+  module:
+    - field_collection
+id: simplytest_submission.simplytest_submission.drupal_projects
+field_name: drupal_projects
+entity_type: simplytest_submission
+bundle: simplytest_submission
+label: Projects
+description: ''
+required: false
+translatable: false
+default_value:
+  - {  }
+  - {  }
+default_value_callback: ''
+settings: {  }
+field_type: field_collection

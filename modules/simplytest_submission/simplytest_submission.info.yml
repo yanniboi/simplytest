@@ -4,6 +4,5 @@ description: Launch and management of simplytest.me service submissions.
 package: simplytest.me
 core: 8.x
 dependencies:
-  - node
   - field_group
   - field_collection
