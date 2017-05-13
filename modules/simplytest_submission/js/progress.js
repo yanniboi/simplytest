@@ -14,11 +14,6 @@
     attach: function (context, settings) {
       var url = 'spawn.sh/' + settings.simplytest_submission.container_id + '?token=' + settings.simplytest_submission.container_token;
       var preEl = document.getElementById('simplytest_submission_progress');
-
-      $( preEl ).css("width", '100%');
-      $( preEl ).css("max-height", '300px');
-      $( preEl ).css("overflow", 'auto');
-
       var exampleSocket = new WebSocket('wss://' + url);
       exampleSocket.onmessage = function (event) {
         var reader = new FileReader();
