@@ -3,7 +3,6 @@ status: true
 dependencies:
   module:
     - field_collection
-    - node
 id: simplytest_submission.drupal_projects
 field_name: drupal_projects
 entity_type: simplytest_submission

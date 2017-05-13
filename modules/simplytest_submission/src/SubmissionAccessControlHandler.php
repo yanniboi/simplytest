@@ -43,7 +43,7 @@ class SubmissionAccessControlHandler extends EntityAccessControlHandler {
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
     $result = parent::checkCreateAccess($account, $context, $entity_bundle);
     if ($result->isNeutral()) {
-      return AccessResult::allowedIfHasPermission($account, 'add submission entities');
+      return AccessResult::allowed();
     }
     return $result;
   }
