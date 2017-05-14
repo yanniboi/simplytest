@@ -79,6 +79,7 @@ class SimplytestSubmissionController extends ControllerBase implements Container
             'container_id' => $simplytest_submission->container_id->value,
             'container_token' => $simplytest_submission->container_token->value,
             'container_url' => $simplytest_submission->container_url->value,
+            'percent' => 30,
             'service_url' => SubmissionInterface::SERVICE_URL,
           ],
         ],
@@ -88,7 +89,7 @@ class SimplytestSubmissionController extends ControllerBase implements Container
     $page['debug'] = [
       '#type' => 'details',
       '#title' => $this->t('Log output'),
-      '#open' => TRUE,
+      '#open' => FALSE,
       'processed' => [
         '#type' => 'html_tag',
         '#tag' => 'h5',
@@ -121,6 +122,12 @@ class SimplytestSubmissionController extends ControllerBase implements Container
         '#attributes' => ['id' => ['simplytest_submission_progress']],
         '#value' => '',
       ],
+    ];
+
+    $page['action'] = [
+      '#type' => 'button',
+      '#attributes' => ['id' => ['simplytest_submission_submit']],
+      '#value' => $this->t('Go to Site'),
     ];
 
     return $page;
