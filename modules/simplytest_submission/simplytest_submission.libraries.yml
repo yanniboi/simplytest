@@ -6,6 +6,9 @@ submission:
 
 progress:
   version: 0.x
+  css:
+    theme:
+      css/progress.css: {}
   js:
     js/progress.js: {}
   dependencies:

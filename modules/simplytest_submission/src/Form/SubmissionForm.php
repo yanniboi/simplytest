@@ -14,9 +14,10 @@ class SubmissionForm extends SubmissionFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    $form = parent::buildForm($form, $form_state);
-    return $form;
+  public function alterForm(array &$form, FormStateInterface $form_state) {
+    parent::alterForm($form, $form_state);
+    // Add submission theme library.
+    $form['#attached']['library'][] = 'simplytest_submission/submission';
   }
 
   /**

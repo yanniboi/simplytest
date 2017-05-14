@@ -157,6 +157,7 @@ class SubmissionService {
     $script[] = '#!/bin/bash';
     $script[] = 'export DEBIAN_FRONTEND=noninteractive';
     $script[] = 'set -x';
+    $script[] = 'echo "Starting next script - Build Server"';
     $script[] = 'apt-get update';
     $script[] = 'apt-get upgrade -y';
     // For some reason service startup is a lot faster without cloud-init.
@@ -331,6 +332,7 @@ class SubmissionService {
     $script[] = '#!/bin/bash';
     $script[] = 'export DEBIAN_FRONTEND=noninteractive';
     $script[] = 'set -x';
+    $script[] = 'echo "Starting next script - Build Drupal"';
     // @todo actually download more than drupal core
     // @todo do this with non root user
     if ($this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_identifier->value === 'social') {
@@ -375,6 +377,7 @@ class SubmissionService {
     $script[] = '#!/bin/bash';
     $script[] = 'export DEBIAN_FRONTEND=noninteractive';
     $script[] = 'set -x';
+    $script[] = 'echo "Starting next script - Build Project"';
 
     // Start up database.
     switch ($this->buildEntity->webspace_dbs->value) {
@@ -432,6 +435,8 @@ class SubmissionService {
     // Snapshot; Snapshot installed state.
     $script[] = 'export DEBIAN_FRONTEND=noninteractive';
     $script[] = 'set -x';
+    $script[] = 'echo "Starting next script - Build Tasks"';
+
     // Start up database.
     switch ($this->buildEntity->webspace_dbs->value) {
       case 'mariadb':
