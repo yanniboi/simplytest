@@ -56,19 +56,6 @@ class SubmissionListBuilder extends EntityListBuilder {
       ];
     }
 
-    // Add status operation.
-    if ($entity->access('view')) {
-      $operations['status'] = [
-        'title' => t('Status'),
-        'weight' => 0,
-        'url' => new Url(
-          'entity.simplytest_submission.status', [
-            'simplytest_submission' => $entity->id(),
-          ]
-        ),
-      ];
-    }
-
     // Add delete_instance operation.
     if ($entity->access('delete')) {
       $operations['delete_instance'] = [

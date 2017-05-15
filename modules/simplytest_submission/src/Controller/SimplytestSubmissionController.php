@@ -4,41 +4,12 @@ namespace Drupal\simplytest_submission\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Render\RendererInterface;
 use Drupal\simplytest_submission\SubmissionInterface;
-use GuzzleHttp\Exception\RequestException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns responses for Node routes.
  */
 class SimplytestSubmissionController extends ControllerBase implements ContainerInjectionInterface {
-
-  /**
-   * The renderer service.
-   *
-   * @var \Drupal\Core\Render\RendererInterface
-   */
-  protected $renderer;
-
-  /**
-   * Constructs a SimplytestSubmissionController object.
-   *
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer service.
-   */
-  public function __construct(RendererInterface $renderer) {
-    $this->renderer = $renderer;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('renderer')
-    );
-  }
 
   /**
    * Displays deployment progress.
@@ -128,55 +99,6 @@ class SimplytestSubmissionController extends ControllerBase implements Container
       '#type' => 'button',
       '#attributes' => ['id' => ['simplytest_submission_submit']],
       '#value' => $this->t('Go to Site'),
-    ];
-
-    return $page;
-  }
-
-  /**
-   * Page callback for a submission instance status.
-   *
-   * @param \Drupal\simplytest_submission\SubmissionInterface $simplytest_submission
-   *   Submission entity to get instance data from.
-   *
-   * @return array
-   *   Render array.
-   */
-  public function submissionStatus(SubmissionInterface $simplytest_submission) {
-    $page = [];
-
-    if (!$simplytest_submission->container_id->value || !$simplytest_submission->container_token->value) {
-      return ['#markup' => 'Missing data'];
-    }
-
-    $url = SubmissionInterface::SERVICE_URL;
-    $url .= '/' . $simplytest_submission->container_id->value;
-    $url .= '?token=' . $simplytest_submission->container_token->value;
-    $client = \Drupal::httpClient();
-
-    try {
-      $request = $client->get($url);
-      $response = $request->getBody();
-      $contents = $response->getContents();
-    }
-    catch (RequestException $e) {
-      watchdog_exception('my_module', $e);
-      return ['#markup' => $e->getMessage()];
-    }
-
-    $page['debug'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Log output'),
-      'processed' => [
-        '#type' => 'html_tag',
-        '#tag' => 'h5',
-        '#value' => $this->t('Response from build server:'),
-      ],
-      'message' => [
-        '#type' => 'html_tag',
-        '#tag' => 'pre',
-        '#value' => $contents,
-      ],
     ];
 
     return $page;

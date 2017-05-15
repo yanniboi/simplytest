@@ -25,15 +25,25 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
       $collection->add("entity.$entity_type_id.progress", $progress_route);
     }
 
-    if ($status_route = $this->getStatusRoute($entity_type)) {
-      $collection->add("entity.$entity_type_id.status", $status_route);
-    }
-
     if ($delete_instance_route = $this->getDeleteInstanceRoute($entity_type)) {
       $collection->add("entity.$entity_type_id.delete_instance", $delete_instance_route);
     }
 
     return $collection;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getCanonicalRoute(EntityTypeInterface $entity_type) {
+    $route = parent::getCanonicalRoute($entity_type);
+
+    $route->setDefaults([
+      '_controller' => '\Drupal\simplytest_submission\Controller\SubmissionViewController::view',
+      '_title_callback' => '\Drupal\Core\Entity\Controller\EntityController::title',
+    ]);
+
+    return $route;
   }
 
   /**
@@ -138,34 +148,6 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
       ->setRequirement('_permission', 'create submission content');
 
     $route->setOption('parameters', $parameters);
-    return $route;
-  }
-
-  /**
-   * Gets the status page route.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type.
-   *
-   * @return \Symfony\Component\Routing\Route|null
-   *   The generated route, if available.
-   */
-  protected function getStatusRoute(EntityTypeInterface $entity_type) {
-    $entity_type_id = $entity_type->id();
-    $parameters = [
-      $entity_type_id => ['type' => 'entity:' . $entity_type_id],
-    ];
-    $route = new Route("/admin/submission/{simplytest_submission}/status");
-    $route
-      ->setDefaults([
-        '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::submissionStatus',
-        '_title' => "View Submission status",
-      ])
-      ->setRequirement('_permission', 'create submission content');
-
-    $route->setOption('parameters', $parameters)
-      ->setOption('_admin_route', TRUE);
-
     return $route;
   }
 

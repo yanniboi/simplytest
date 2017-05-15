@@ -1,0 +1,93 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.simplytest_submission.simplytest_submission.drupal_projects
+  module:
+    - field_collection
+    - options
+    - simplytest_submission
+id: simplytest_submission.simplytest_submission.default
+targetEntityType: simplytest_submission
+bundle: simplytest_submission
+mode: default
+content:
+  container_id:
+    type: string
+    weight: 9
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  container_token:
+    type: string
+    weight: 10
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  container_url:
+    type: string
+    weight: 11
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  drupal_projects:
+    type: field_collection_items
+    weight: 1
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+  instance_image:
+    type: list_key
+    weight: 8
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+  instance_runtime:
+    type: list_key
+    weight: 7
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+  instance_snapshot_cache:
+    type: boolean
+    weight: 6
+    label: inline
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+  status:
+    type: list_key
+    weight: 0
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+  webspace_dbs:
+    type: list_key
+    weight: 3
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+  webspace_interpreter:
+    type: list_key
+    weight: 2
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+  webspace_secondary_dbs:
+    type: list_key
+    weight: 4
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+  webspace_webserver:
+    type: list_key
+    weight: 5
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }
