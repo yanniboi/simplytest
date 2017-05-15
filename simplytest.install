@@ -6,6 +6,7 @@
  */
 
 use Drupal\user\Entity\User;
+use Drupal\user\RoleInterface;
 
 /**
  * Implements hook_install().
@@ -21,6 +22,10 @@ function simplytest_install() {
   // Allow visitor account creation with administrative approval.
   $user_settings = \Drupal::configFactory()->getEditable('user.settings');
   $user_settings->set('register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save(TRUE);
+
+  // Enable default permissions for system roles.
+  user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, ['create submission entities']);
+  user_role_grant_permissions(RoleInterface::AUTHENTICATED_ID, ['create submission entities']);
 
   // Assign user 1 the "administrator" role.
   $user = User::load(1);

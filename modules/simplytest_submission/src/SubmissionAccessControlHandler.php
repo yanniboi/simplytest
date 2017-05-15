@@ -22,16 +22,13 @@ class SubmissionAccessControlHandler extends EntityAccessControlHandler {
     if ($result->isNeutral()) {
       switch ($operation) {
         case 'view':
-          return AccessResult::allowedIfHasPermission($account, 'view submission entities');
+          return AccessResult::allowedIfHasPermission($account, 'administer submission entities');
 
         case 'update':
-          return AccessResult::allowedIfHasPermission($account, 'edit submission entities');
-
-        case 'manage':
-          return AccessResult::allowedIfHasPermission($account, 'manage submission entities');
+          return AccessResult::allowedIfHasPermission($account, 'administer submission entities');
 
         case 'delete':
-          return AccessResult::allowedIfHasPermission($account, 'delete submission entities');
+          return AccessResult::allowedIfHasPermission($account, 'administer submission entities');
       }
     }
     return $result;
@@ -43,7 +40,7 @@ class SubmissionAccessControlHandler extends EntityAccessControlHandler {
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
     $result = parent::checkCreateAccess($account, $context, $entity_bundle);
     if ($result->isNeutral()) {
-      return AccessResult::allowed();
+      return AccessResult::allowedIfHasPermission($account, 'create submission entities');
     }
     return $result;
   }

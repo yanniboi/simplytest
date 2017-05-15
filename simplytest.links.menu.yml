@@ -2,3 +2,8 @@ simplytest.front_page:
   title: 'Home'
   route_name: '<front>'
   menu_name: main
+
+simplytest.submission_list:
+  title: 'Submissions'
+  route_name: 'entity.simplytest_submission.collection'
+  menu_name: main

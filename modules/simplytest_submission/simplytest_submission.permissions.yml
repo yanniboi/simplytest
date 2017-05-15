@@ -1,0 +1,5 @@
+administer submission entities:
+  title: 'Administer submissions and submissions settings'
+  restrict access: true
+create submission entities:
+  title: 'Create submissions'
