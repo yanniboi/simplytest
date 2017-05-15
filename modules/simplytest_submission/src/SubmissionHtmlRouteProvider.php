@@ -54,7 +54,7 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
           '_entity_list' => $entity_type_id,
           '_title' => "{$entity_type->getLabel()} list",
         ])
-        ->setRequirement('_permission', 'view submission entities')
+        ->setRequirement('_permission', 'administer submission entities')
         ->setOption('_admin_route', TRUE);
 
       return $route;
@@ -135,7 +135,7 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
         '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::submissionProgress',
         '_title' => "Thank your for your submission",
       ])
-      ->setRequirement('_permission', 'create submission content');
+      ->setRequirement('_permission', 'create submission entities');
 
     $route->setOption('parameters', $parameters);
     return $route;
@@ -189,7 +189,7 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
         '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::deleteSubmissionInstance',
         '_title' => "Delete Instance",
       ])
-      ->setRequirement('_permission', 'delete submission content');
+      ->setRequirement('_permission', 'administer submission entities');
 
     $route->setOption('parameters', $parameters)
       ->setOption('_admin_route', TRUE);

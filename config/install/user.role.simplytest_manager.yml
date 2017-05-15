@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies: {  }
+id: simplytest_manager
+label: Manager
+weight: 3
+is_admin: false
+permissions:
+  - administer submission entities
+  - create submission entities
