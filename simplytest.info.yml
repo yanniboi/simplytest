@@ -23,4 +23,5 @@ dependencies:
 
 themes:
   - bartik
+  - simplytesty
   - seven

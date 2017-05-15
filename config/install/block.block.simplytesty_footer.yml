@@ -6,9 +6,9 @@ dependencies:
   module:
     - system
   theme:
-    - bartik
-id: bartik_footer
-theme: bartik
+    - simplytesty
+id: simplytesty_footer
+theme: simplytesty
 region: footer_fifth
 weight: 0
 provider: null

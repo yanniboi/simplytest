@@ -4,9 +4,9 @@ dependencies:
   module:
     - system
   theme:
-    - bartik
-id: bartik_breadcrumbs
-theme: bartik
+    - simplytesty
+id: simplytesty_breadcrumbs
+theme: simplytesty
 region: breadcrumb
 weight: 0
 provider: null

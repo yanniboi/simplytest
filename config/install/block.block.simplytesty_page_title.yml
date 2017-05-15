@@ -2,9 +2,9 @@ langcode: en
 status: true
 dependencies:
   theme:
-    - bartik
-id: bartik_page_title
-theme: bartik
+    - simplytesty
+id: simplytesty_page_title
+theme: simplytesty
 region: content
 weight: -50
 provider: null
