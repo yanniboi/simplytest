@@ -5,7 +5,9 @@ namespace Drupal\simplytest_submission\Form;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
 use Drupal\simplytest_submission\SubmissionService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -45,6 +47,26 @@ abstract class SubmissionFormBase extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    if (!$this->submissionService->isActive()) {
+      $args = [
+        // @todo Write up documentation on Drupal.org or module help page.
+        '@link' => Link::fromTextAndUrl('Read more', Url::fromUri('https://github.com/yanniboi/simplytest', [
+          'attributes' => ['target' => 'blank_'],
+        ]))->toString(),
+        '@spawn' => Link::fromTextAndUrl('spawn.sh', Url::fromUri('https://spawn.sh', [
+          'attributes' => ['target' => 'blank_'],
+        ]))->toString(),
+      ];
+      drupal_set_message(t('You cannot create a submission without a @spawn token.<br>@link.', $args), 'warning');
+      $form['#title'] = $this->t('Missing Configuration');
+      $form['message'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('No API token found.'),
+      ];
+      return $form;
+    }
+
     $form = parent::buildForm($form, $form_state);
 
     // Allow sub-forms to make fields read-only.
