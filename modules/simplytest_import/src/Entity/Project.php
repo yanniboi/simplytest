@@ -75,44 +75,44 @@ class Project extends ContentEntityBase implements ProjectInterface {
       ->setDescription(t('The shortname/id of the Project entity.'))
       ->setRequired(TRUE)
       ->setReadOnly(TRUE)
-      ->setSettings(array(
+      ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'string',
         'weight' => 0,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setDescription(t('The name of the Project entity.'))
-      ->setSettings(array(
+      ->setSettings([
         'text_processing' => 0,
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'string',
         'weight' => 1,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 1,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-    
+
     $fields['type'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Type'))
       ->setDescription(t('The type of Drupal project.'))
-      ->setSettings(array(
+      ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
         'allowed_values' => [
@@ -121,16 +121,16 @@ class Project extends ContentEntityBase implements ProjectInterface {
           ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_THEME => 'Theme',
           ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_DISTRO => 'Distribution',
         ],
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'string',
         'weight' => 2,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'options_select',
         'weight' => 2,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -144,15 +144,15 @@ class Project extends ContentEntityBase implements ProjectInterface {
       ->setLabel(t('Sandbox'))
       ->setDescription(t('Is this a sandbox project?'))
       ->setDefaultValue(FALSE)
-      ->setSettings(array(
+      ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'boolean',
         'weight' => 3,
-      ))
+      ])
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => 3,
@@ -163,22 +163,21 @@ class Project extends ContentEntityBase implements ProjectInterface {
     $fields['creator'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Creator'))
       ->setDescription(t('The name of the Project owner.'))
-      ->setSettings(array(
+      ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
-      ))
-      ->setDisplayOptions('view', array(
+      ])
+      ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'string',
         'weight' => 4,
-      ))
-      ->setDisplayOptions('form', array(
+      ])
+      ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => 4,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-
 
     return $fields;
   }

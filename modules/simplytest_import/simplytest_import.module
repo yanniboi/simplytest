@@ -33,13 +33,13 @@ function simplytest_import_batch_operation_download_xml() {
 /**
  * Inserts initial project data into database by a SimpleXML object.
  *
- * @param $xml
+ * @param SimpleXMLElement $xml
  *   Xml object to be parsed.
  *
  * @return bool|int
  *   Either SAVED_NEW or FALSE if unsuccessful.
  */
-function simplytest_projects_xml_insert_project($xml) {
+function simplytest_projects_xml_insert_project(SimpleXMLElement $xml) {
   // Try to figure out project type by term.
   if (!isset($xml->terms->term[0]->value)) {
     return FALSE;
@@ -89,7 +89,7 @@ function simplytest_projects_xml_insert_project($xml) {
 /**
  * Compare type with known list of Drupal types.
  *
- * @param $term
+ * @param string $term
  *   Project term to compare.
  *
  * @return bool|string
@@ -123,12 +123,14 @@ function simplytest_projects_get_project_type($term) {
 }
 
 /**
+ * Batch process operation. Import XML information into Project entities.
+ *
  * @param string $file
  *   File location to be used for lookup.
- * @param $context
+ * @param array $context
  *   The batch process context.
  */
-function simplytest_import_batch_operation_process_xml($file, &$context) {
+function simplytest_import_batch_operation_process_xml($file, array &$context) {
   // @todo Remove hard coded file location.
   $file = '/home/simplytest/www/sites/default/modules/simplytest/modules/simplytest_import/projects-1495025331.xml';
 

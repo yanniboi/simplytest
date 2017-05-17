@@ -17,10 +17,10 @@ class ProjectController extends ControllerBase {
     $operations = [];
     $operations[] = ['simplytest_import_batch_operation_process_xml', ['file']];
 
-    $batch = array(
+    $batch = [
       'title' => t('Processing Drupal.org Projects import'),
-      'operations' => $operations
-    );
+      'operations' => $operations,
+    ];
 
     batch_set($batch);
     return batch_process(Url::fromRoute('entity.simplytest_project.collection'));

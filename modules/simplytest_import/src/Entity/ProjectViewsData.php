@@ -16,20 +16,14 @@ class ProjectViewsData extends EntityViewsData implements EntityViewsDataInterfa
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    $data['simplytest_project']['table']['base'] = array(
+    $data['simplytest_project']['table']['base'] = [
       'field' => 'id',
       'title' => $this->t('Project'),
       'help' => $this->t('The Project ID.'),
-    );
+    ];
 
     $data['simplytest_project']['sandbox']['filter']['type'] = 'yes-no';
     $data['simplytest_project']['sandbox']['filter']['use_equal'] = TRUE;
-
-//    $data['simplytest_project']['type']['filter']['id'] = 'list_field';
-//    $data['simplytest_project']['type']['argument']['id'] = 'string_list_field';
-
-
-    dpm($data);
 
     return $data;
   }

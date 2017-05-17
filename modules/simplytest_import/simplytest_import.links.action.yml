@@ -15,4 +15,3 @@ simplytest_import.import:
   title: 'Import Projects'
   appears_on:
     - entity.simplytest_project.collection
-

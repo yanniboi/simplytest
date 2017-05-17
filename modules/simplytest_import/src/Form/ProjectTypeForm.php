@@ -19,23 +19,23 @@ class ProjectTypeForm extends EntityForm {
     $form = parent::form($form, $form_state);
 
     $simplytest_project_type = $this->entity;
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $simplytest_project_type->label(),
       '#description' => $this->t("Label for the Project type."),
       '#required' => TRUE,
-    );
+    ];
 
-    $form['id'] = array(
+    $form['id'] = [
       '#type' => 'machine_name',
       '#default_value' => $simplytest_project_type->id(),
-      '#machine_name' => array(
+      '#machine_name' => [
         'exists' => '\Drupal\simplytest_import\Entity\ProjectType::load',
-      ),
+      ],
       '#disabled' => !$simplytest_project_type->isNew(),
-    );
+    ];
 
     /* You will need additional form elements for your custom properties. */
 
