@@ -183,6 +183,7 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
         'weight' => 0,
       ])
       ->setDefaultValue('ubuntu:16.04/amd64')
+      ->setRequired(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -201,6 +202,7 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
         'weight' => 0,
       ])
       ->setDefaultValue('1h')
+      ->setRequired(TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
@@ -227,6 +229,7 @@ class Submission extends ContentEntityBase implements SubmissionInterface {
         ],
       ])
       ->setDefaultValue('mysql')
+      ->setRequired(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'options_select',
         'settings' => [],
