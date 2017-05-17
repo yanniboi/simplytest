@@ -63,6 +63,22 @@ class SubmissionService {
   }
 
   /**
+   * Check to see if the service is active.
+   *
+   * Look to see if API settings are configured.
+   *
+   * @return bool
+   *   True if service is active, false otherwise.
+   */
+  public function isActive() {
+    if (!empty($this->settings)) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Deploys submission instance on service server.
    *
    * @param SubmissionInterface $entity
