@@ -1,0 +1,7 @@
+name: Project management
+type: module
+description: Import and management of Drupal projects.
+package: simplytest.me
+core: 8.x
+dependencies:
+  - field_collection

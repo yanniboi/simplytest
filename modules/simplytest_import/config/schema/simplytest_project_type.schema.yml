@@ -1,0 +1,10 @@
+simplytest_import.simplytest_project_type.*:
+  type: config_entity
+  label: 'Project type config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'

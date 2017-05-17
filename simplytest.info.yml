@@ -20,6 +20,7 @@ dependencies:
   - views
   - views_ui
   - simplytest_submission
+  - simplytest_import
 
 themes:
   - bartik

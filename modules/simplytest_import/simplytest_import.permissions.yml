@@ -1,0 +1,5 @@
+administer project entities:
+  title: 'Administer projects and project settings'
+  restrict access: true
+create project entities:
+  title: 'Create projects'
