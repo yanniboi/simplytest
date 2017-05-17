@@ -143,7 +143,7 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
     $route
       ->setDefaults([
         '_controller' => '\Drupal\simplytest_submission\Controller\SimplytestSubmissionController::submissionProgress',
-        '_title' => "Thank your for your submission",
+        '_title' => "Submission is being processed",
       ])
       ->setRequirement('_permission', 'create submission entities');
 

@@ -224,7 +224,7 @@ abstract class SubmissionFormBase extends ContentEntityForm {
     if (empty($this->entity->container_id->value)) {
       $actions['deploy'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Deploy Sandbox'),
+        '#value' => $this->t('Deploy Site'),
         '#submit' => ['::submitForm', '::save', '::submitDeploy'],
       ];
       unset($actions['submit']);
