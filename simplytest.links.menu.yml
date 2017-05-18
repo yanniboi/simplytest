@@ -1,5 +1,5 @@
 simplytest.front_page:
-  title: 'Home'
+  title: 'Test Drupal core'
   route_name: '<front>'
   menu_name: main
 
@@ -7,3 +7,16 @@ simplytest.submission_list:
   title: 'Submissions'
   route_name: 'entity.simplytest_submission.collection'
   menu_name: main
+  weight: 100
+
+simplytest.submission_add_contacts:
+  title: 'Test Contacts'
+  route_name: 'entity.simplytest_submission.add_contacts'
+  menu_name: main
+  weight: 10
+
+simplytest.submission_add_social:
+  title: 'Test Open Social'
+  route_name: 'entity.simplytest_submission.add_social'
+  menu_name: main
+  weight: 9

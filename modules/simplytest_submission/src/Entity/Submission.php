@@ -25,6 +25,8 @@ use Drupal\simplytest_submission\SubmissionInterface;
  *     "form" = {
  *       "default" = "Drupal\simplytest_submission\Form\SubmissionForm",
  *       "add" = "Drupal\simplytest_submission\Form\SubmissionForm",
+ *       "contacts" = "Drupal\simplytest_submission\Form\ContactsSubmissionForm",
+ *       "social" = "Drupal\simplytest_submission\Form\SocialSubmissionForm",
  *       "edit" = "Drupal\simplytest_submission\Form\SubmissionForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
@@ -42,6 +44,8 @@ use Drupal\simplytest_submission\SubmissionInterface;
  *   links = {
  *     "canonical" = "/admin/submission/{simplytest_submission}",
  *     "add-form" = "/submission/add",
+ *     "add-contacts-form" = "/submission/add/contacts",
+ *     "add-social-form" = "/submission/add/social",
  *     "edit-form" = "/admin/submission/{simplytest_submission}/edit",
  *     "delete-form" = "/admin/submission/{simplytest_submission}/delete",
  *     "collection" = "/admin/submission",

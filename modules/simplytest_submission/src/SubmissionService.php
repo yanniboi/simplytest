@@ -8,6 +8,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\devel\DevelDumperManagerInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
+use Drupal\field_collection\Plugin\Field\FieldType\FieldCollection;
 
 /**
  * Service for handling communication with Service Server.
@@ -335,14 +336,20 @@ class SubmissionService {
     $script[] = 'echo "Starting next script - Build Drupal"';
     // @todo actually download more than drupal core
     // @todo do this with non root user
-    if ($this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_identifier->value === 'social') {
-      $script[] = 'composer create-project goalgorilla/social_template:dev-master /var/www/drupal --no-interaction';
-      $script[] = 'ln -s /var/www/drupal/html /var/www/drupal/web';
-      $script[] = 'mkdir /var/www/drupal/html/sites/default/files';
-      $script[] = 'chmod 777 /var/www/drupal/html/sites/default/files';
-      $script[] = 'cp /var/www/drupal/html/sites/default/default.settings.php /var/www/drupal/html/sites/default/settings.php';
-      $script[] = 'chmod 777 /var/www/drupal/html/sites/default/settings.php';
-      $script[] = 'echo "
+    $main_poject_id = $this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_identifier->target_id;
+    switch ($main_poject_id) {
+      case 'drupal':
+        $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
+        break;
+
+      case 'social':
+        $script[] = 'composer create-project goalgorilla/social_template:dev-master /var/www/drupal --no-interaction';
+        $script[] = 'ln -s /var/www/drupal/html /var/www/drupal/web';
+        $script[] = 'mkdir /var/www/drupal/html/sites/default/files';
+        $script[] = 'chmod 777 /var/www/drupal/html/sites/default/files';
+        $script[] = 'cp /var/www/drupal/html/sites/default/default.settings.php /var/www/drupal/html/sites/default/settings.php';
+        $script[] = 'chmod 777 /var/www/drupal/html/sites/default/settings.php';
+        $script[] = 'echo "
       \$settings[\'hash_salt\'] = \'notasecret\';
       \$databases[\'default\'][\'default\'] = array (
         \'database\' => \'drupal\',
@@ -354,10 +361,33 @@ class SubmissionService {
         \'namespace\' => \'Drupal\\Core\\Database\\Driver\\mysql\',
         \'driver\' => \'mysql\',
       );" >> /var/www/drupal/html/sites/default/settings.php';
+        break;
+
+      default:
+        $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction --no-install';
+
+        $key = 0;
+        foreach ($this->buildEntity->drupal_projects as $key => $project) {
+          /* @var $project FieldCollection */
+          $project = $project->getFieldCollectionItem();
+
+          $id = $project->project_identifier->target_id;
+          $tag = $project->project_version->value;
+          $script[] = "git clone https://git.drupal.org/project/$id.git /var/www/$id";
+          $script[] = "cd /var/www/$id";
+          $script[] = "git checkout $tag";
+          $script[] = 'rm .git -rf';
+          $script[] = 'cd /var/www/drupal';
+          $script[] = "composer config repositories.$key path /var/www/$id";
+        }
+        $key++;
+        $script[] = "composer config repositories.$key composer https://packages.drupal.org/8";
+        $script[] = 'composer config extra.enable-patching true';
+
+        $script[] = "composer require drupal/$main_poject_id dev-master";
+        break;
     }
-    else {
-      $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
-    }
+
     $script[] = 'rm -rf /var/www/html';
     $script[] = 'ln -s /var/www/drupal/web /var/www/html';
 
@@ -419,6 +449,10 @@ class SubmissionService {
           break;
       }
     }
+
+    // Reset file permissions for webserver.
+    // @todo Make sure that www-data is the right user for all config options.
+    $script[] = 'chown -R www-data:www-data /var/www/drupal/web';
 
     return implode("\n", $script);
   }

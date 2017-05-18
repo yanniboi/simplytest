@@ -25,6 +25,14 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
       $collection->add("entity.$entity_type_id.progress", $progress_route);
     }
 
+    if ($add_contacts_route = $this->getAddContactsFormRoute($entity_type)) {
+      $collection->add("entity.$entity_type_id.add_contacts", $add_contacts_route);
+    }
+
+    if ($add_social_route = $this->getAddSocialFormRoute($entity_type)) {
+      $collection->add("entity.$entity_type_id.add_social", $add_social_route);
+    }
+
     if ($delete_instance_route = $this->getDeleteInstanceRoute($entity_type)) {
       $collection->add("entity.$entity_type_id.delete_instance", $delete_instance_route);
     }
@@ -92,6 +100,72 @@ class SubmissionHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route
         ->setDefaults([
           '_controller' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::addForm',
+          '_title_callback' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::getAddFormTitle',
+        ])
+        ->setRequirement('_entity_create_access', $entity_type_id);
+
+      $route
+        ->setOption('parameters', $parameters)
+        ->setOption('_admin_route', FALSE);
+
+      return $route;
+    }
+  }
+
+  /**
+   * Gets the add-form route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
+  protected function getAddContactsFormRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('add-contacts-form')) {
+      $entity_type_id = $entity_type->id();
+      $parameters = [
+        $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+      ];
+
+      $route = new Route($entity_type->getLinkTemplate('add-contacts-form'));
+      // Content entities with bundles are added via a dedicated controller.
+      $route
+        ->setDefaults([
+          '_controller' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::addContacts',
+          '_title_callback' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::getAddFormTitle',
+        ])
+        ->setRequirement('_entity_create_access', $entity_type_id);
+
+      $route
+        ->setOption('parameters', $parameters)
+        ->setOption('_admin_route', FALSE);
+
+      return $route;
+    }
+  }
+
+  /**
+   * Gets the add-form route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return \Symfony\Component\Routing\Route|null
+   *   The generated route, if available.
+   */
+  protected function getAddSocialFormRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('add-social-form')) {
+      $entity_type_id = $entity_type->id();
+      $parameters = [
+        $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+      ];
+
+      $route = new Route($entity_type->getLinkTemplate('add-social-form'));
+      // Content entities with bundles are added via a dedicated controller.
+      $route
+        ->setDefaults([
+          '_controller' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::addSocial',
           '_title_callback' => 'Drupal\simplytest_submission\Controller\SubmissionAddController::getAddFormTitle',
         ])
         ->setRequirement('_entity_create_access', $entity_type_id);

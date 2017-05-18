@@ -17,11 +17,11 @@ bundle: drupal_projects
 mode: default
 content:
   project_identifier:
-    type: string
+    type: entity_reference_label
     weight: 0
     label: inline
     settings:
-      link_to_entity: false
+      link: false
     third_party_settings: {  }
   project_install:
     type: boolean
