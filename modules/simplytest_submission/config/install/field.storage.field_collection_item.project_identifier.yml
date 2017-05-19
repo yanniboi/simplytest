@@ -3,14 +3,13 @@ status: true
 dependencies:
   module:
     - field_collection
+    - simplytest_import
 id: field_collection_item.project_identifier
 field_name: project_identifier
 entity_type: field_collection_item
-type: string
+type: entity_reference
 settings:
-  max_length: 255
-  is_ascii: false
-  case_sensitive: false
+  target_type: simplytest_project
 module: core
 locked: false
 cardinality: 1

@@ -1,0 +1,32 @@
+# Submission routing definition
+entity.simplytest_project.canonical:
+  route_name: entity.simplytest_project.canonical
+  base_route: entity.simplytest_project.canonical
+  title: 'View'
+
+entity.simplytest_project.edit_form:
+  route_name: entity.simplytest_project.edit_form
+  base_route: entity.simplytest_project.canonical
+  title: Edit
+
+entity.simplytest_project.delete_form:
+  route_name:  entity.simplytest_project.delete_form
+  base_route:  entity.simplytest_project.canonical
+  title: Delete
+  weight: 10
+
+entity.simplytest_project.collection:
+  title: Collection
+  route_name: entity.simplytest_project.collection
+  base_route: entity.simplytest_project.collection
+
+entity.simplytest_project_type.edit_form:
+  title: Edit
+  route_name: entity.simplytest_project_type.edit_form
+  base_route: entity.simplytest_project_type.edit_form
+
+entity.simplytest_project_type.delete_form:
+  route_name:  entity.simplytest_project_type.delete_form
+  base_route: entity.simplytest_project_type.edit_form
+  title: Delete
+  weight: 10

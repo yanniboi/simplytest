@@ -1,0 +1,6 @@
+simplytest_import.import:
+  path: '/import'
+  defaults:
+    _controller: '\Drupal\simplytest_import\Controller\ProjectController::import'
+  requirements:
+    _permission: 'administer project entities'

@@ -17,11 +17,9 @@ mode: default
 content:
   project_identifier:
     weight: 1
-    settings:
-      size: 60
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
-    type: string_textfield
+    type: options_select
   project_install:
     weight: 3
     settings:

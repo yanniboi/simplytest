@@ -6,6 +6,8 @@ use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\simplytest_import\Entity\Project;
+use Drupal\simplytest_import\ProjectInterface;
 use Drupal\simplytest_submission\SubmissionService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -84,10 +86,29 @@ abstract class SubmissionFormBase extends ContentEntityForm {
    */
   public function alterForm(array &$form, FormStateInterface $form_state) {
     // @todo Do a more generic request query lookup.
-    if (isset($_GET['project']) && $_GET['project'] === 'social') {
-      $widget = &$form['drupal_projects']['widget'][0];
-      $widget['project_identifier']['widget']['0']['value']['#default_value'] = 'social';
-      $widget['project_install']['widget']['value']['#default_value'] = FALSE;
+    $allowed = ['drupal', 'social', 'contacts'];
+    $widget = &$form['drupal_projects']['widget'][0];
+    // Check for query parameter for allowed projects.
+    if (isset($_GET['project']) && in_array($_GET['project'], $allowed)) {
+      $project = Project::load($_GET['project']);
+
+      if ($project->type->value == ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_DISTRO) {
+        // Force manual installation for distributions.
+        $widget['project_install']['widget']['value']['#default_value'] = FALSE;
+      }
+    }
+    else {
+      $project = Project::load('drupal');
+    }
+
+    if ($project) {
+      // Set project to be built.
+      if (isset($widget['project_identifier']['widget']['#type']) && in_array($widget['project_identifier']['widget']['#type'], ['select', 'radios'])) {
+        $widget['project_identifier']['widget']['#default_value'] = $project->id();
+      }
+      else {
+        $widget['project_identifier']['widget']['0']['target_id']['#default_value'] = $project;
+      }
     }
   }
 

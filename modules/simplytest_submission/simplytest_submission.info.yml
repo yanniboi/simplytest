@@ -5,3 +5,4 @@ package: simplytest.me
 core: 8.x
 dependencies:
   - field_collection
+  - simplytest_import

@@ -4,6 +4,7 @@ dependencies:
   config:
     - field.storage.field_collection_item.project_identifier
     - field_collection.field_collection.drupal_projects
+    - simplytest_import.simplytest_project_type.drupal_org
 id: field_collection_item.drupal_projects.project_identifier
 field_name: project_identifier
 entity_type: field_collection_item
@@ -16,5 +17,14 @@ default_value:
   -
     value: drupal
 default_value_callback: ''
-settings: {  }
-field_type: string
+settings:
+  handler: 'default:simplytest_project'
+  handler_settings:
+    target_bundles:
+      drupal_org: drupal_org
+    sort:
+      field: shortname
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

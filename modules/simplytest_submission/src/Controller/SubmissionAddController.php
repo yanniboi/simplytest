@@ -67,8 +67,8 @@ class SubmissionAddController extends ControllerBase {
    *   added or if there is only one type defined for the site, the function
    *   returns the add page for that type.
    */
-  public function addPassenger(Request $request) {
-    return $this->add($request, 'data_collection');
+  public function addContacts(Request $request) {
+    return $this->add($request, 'contacts');
   }
 
   /**
@@ -82,8 +82,8 @@ class SubmissionAddController extends ControllerBase {
    *   added or if there is only one type defined for the site, the function
    *   returns the add page for that type.
    */
-  public function addStaff(Request $request) {
-    return $this->add($request, 'processing');
+  public function addSocial(Request $request) {
+    return $this->add($request, 'social');
   }
 
   /**

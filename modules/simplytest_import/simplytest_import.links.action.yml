@@ -1,0 +1,17 @@
+entity.simplytest_project.add_form:
+  route_name: 'entity.simplytest_project.add_form'
+  title: 'Add Project'
+  appears_on:
+    - entity.simplytest_project.collection
+
+entity.simplytest_project_type.add_form:
+  route_name: 'entity.simplytest_project_type.add_form'
+  title: 'Add Project type'
+  appears_on:
+    - entity.simplytest_project_type.collection
+
+simplytest_import.import:
+  route_name: 'simplytest_import.import'
+  title: 'Import Projects'
+  appears_on:
+    - entity.simplytest_project.collection

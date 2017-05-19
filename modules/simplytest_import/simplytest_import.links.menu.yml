@@ -1,0 +1,15 @@
+# Project menu item definition
+entity.simplytest_project.collection:
+  title: 'Project list'
+  route_name: entity.simplytest_project.collection
+  description: 'All project entities'
+  parent: system.admin_structure
+  weight: 100
+
+# Project type menu item definition
+entity.simplytest_project_type.collection:
+  title: 'Project types'
+  route_name: entity.simplytest_project_type.collection
+  description: 'List project types'
+  parent: system.admin_structure
+  weight: 100

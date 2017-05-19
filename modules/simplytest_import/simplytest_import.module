@@ -1,0 +1,166 @@
+<?php
+
+/**
+ * @file
+ * Contains helper functions and hook implementations for simplytest import.
+ */
+
+use Drupal\simplytest_import\Entity\Project;
+use Drupal\simplytest_import\ProjectInterface;
+
+/**
+ * Batch operation; Download the XML file.
+ */
+function simplytest_import_batch_operation_download_xml() {
+  // Try to set max_execution_time to unlimited during download.
+  set_time_limit(0);
+
+  $file = 'temporary://projects-' . REQUEST_TIME . '.xml';
+
+  // Download file with cURL.
+  $fp = fopen($file, 'w+');
+  $ch = curl_init(ProjectInterface::SIMPLYTEST_DRUPAL_ORG_UPDATE);
+
+  curl_setopt($ch, CURLOPT_TIMEOUT, 90);
+  curl_setopt($ch, CURLOPT_FILE, $fp);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+
+  curl_exec($ch);
+  curl_close($ch);
+  fclose($fp);
+}
+
+/**
+ * Inserts initial project data into database by a SimpleXML object.
+ *
+ * @param SimpleXMLElement $xml
+ *   Xml object to be parsed.
+ *
+ * @return bool|int
+ *   Either SAVED_NEW or FALSE if unsuccessful.
+ */
+function simplytest_projects_xml_insert_project(SimpleXMLElement $xml) {
+  // Try to figure out project type by term.
+  if (!isset($xml->terms->term[0]->value)) {
+    return FALSE;
+  }
+  $term = (string) $xml->terms->term[0]->value;
+  $type = simplytest_projects_get_project_type($term);
+
+  if ($type === FALSE) {
+    // Loop over other options.
+    foreach ($xml->terms->term as $term) {
+      $term = (string) $term->value;
+      $type = simplytest_projects_get_project_type($term);
+
+      if ($type) {
+        break;
+      }
+    }
+
+    // We don't import unsupported project types.
+    if ($type === FALSE) {
+      return FALSE;
+    }
+  }
+
+  // Build an associative array of the projects data from the XML file.
+  $data = [
+    'name' => (string) $xml->title,
+    'shortname' => (string) $xml->short_name,
+    // Sandbox project?
+    'sandbox' => (int) (is_numeric((string) $xml->short_name) && substr($xml->link, 0, 31) === ProjectInterface::SIMPLYTEST_DRUPAL_ORG . 'sandbox/'),
+    // Get project type, as it is referenced as tag.
+    'type' => $type,
+    'source' => 'drupal_org',
+    // Git creator name (for sandbox projects).
+    'creator' => (string) substr(substr($xml->link, 31), 0, -(strlen($xml->short_name) + 1)),
+  ];
+
+  // Check for duplicate and create entity.
+  if (!$project = Project::load($data['shortname'])) {
+    $project = Project::create($data);
+    return $project->save();
+  }
+
+  return FALSE;
+}
+
+/**
+ * Compare type with known list of Drupal types.
+ *
+ * @param string $term
+ *   Project term to compare.
+ *
+ * @return bool|string
+ *   The type to use, or FALSE if not found.
+ */
+function simplytest_projects_get_project_type($term) {
+  switch (strtolower(trim($term))) {
+    case 'drupal core':
+    case 'core':
+    case 'project_core':
+      return ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_CORE;
+
+    case 'modules':
+    case 'module':
+    case 'project_module':
+      return ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_MODULE;
+
+    case 'themes':
+    case 'theme':
+    case 'project_theme':
+      return ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_THEME;
+
+    case 'distributions':
+    case 'distribution':
+    case 'project_distribution':
+      return ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_DISTRO;
+
+    default:
+      return FALSE;
+  }
+}
+
+/**
+ * Batch process operation. Import XML information into Project entities.
+ *
+ * @param string $file
+ *   File location to be used for lookup.
+ * @param array $context
+ *   The batch process context.
+ */
+function simplytest_import_batch_operation_process_xml($file, array &$context) {
+  // @todo Remove hard coded file location.
+  $file = '/home/simplytest/www/sites/default/modules/simplytest/modules/simplytest_import/projects-1495025331.xml';
+
+  // Load the projects data as a SimpleXML object.
+  $xml = simplexml_load_file($file);
+
+  // Setup the batch information on first run.
+  if (!isset($context['sandbox']['index'])) {
+    $context['sandbox']['max'] = count($xml->project);
+    $context['sandbox']['count'] = 100;
+    $context['sandbox']['index'] = 0;
+  }
+
+  // Iterate through projects.
+  $count = 0;
+  while ($context['sandbox']['index'] < $context['sandbox']['max'] && $count < $context['sandbox']['count']) {
+    if (isset($xml->project[$context['sandbox']['index']])) {
+      simplytest_projects_xml_insert_project($xml->project[$context['sandbox']['index']]);
+    }
+
+    $context['sandbox']['index']++;
+    $count++;
+  }
+
+  // Provide contextual information for the Batch API frontend.
+  $context['message'] = t('Projects imported: @index of @max.', [
+    '@index' => $context['sandbox']['index'],
+    '@max' => $context['sandbox']['max'],
+  ]);
+  if ($context['sandbox']['index'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['index'] / $context['sandbox']['max'];
+  }
+}

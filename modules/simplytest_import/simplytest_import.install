@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Contains helper functions and hook implementations for simplytest import.
+ */
+
+use Drupal\simplytest_import\ProjectInterface;
+use Drupal\simplytest_import\Entity\Project;
+
+/**
+ * Implements hook_install().
+ */
+function simplytest_import_install() {
+  $projects = [
+    [
+      'shortname' => 'drupal',
+      'name' => 'Drupal Core',
+      'type' => ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_CORE,
+    ],
+    [
+      'shortname' => 'contacts',
+      'name' => 'Contacts',
+      'type' => ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_MODULE,
+    ],
+    [
+      'shortname' => 'social',
+      'name' => 'Open Social',
+      'type' => ProjectInterface::SIMPLYTEST_PROJECTS_TYPE_DISTRO,
+    ]
+  ];
+
+  foreach ($projects as $values) {
+    $values += [
+      'sandbox' => FALSE,
+      'source' => 'drupal_org',
+    ];
+    $project = Project::create($values);
+    $project->save();
+  }
+}
