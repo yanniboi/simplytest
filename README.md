@@ -1,3 +1,6 @@
+[![8.x-3.x Build Status](https://travis-ci.org/yanniboi/simplytest.svg?branch=8.x-3.x)](https://travis-ci.org/yanniboi/simplytest)
+[![Stories in Ready](https://badge.waffle.io/yanniboi/simplytest.png?label=ready&title=Ready+issues)](http://waffle.io/yanniboi/simplytest)
+
 simplytest.me
 =============
 
