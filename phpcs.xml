@@ -1,0 +1,12 @@
+<ruleset name="Simplytest coding standards">
+  <description>Drupal 8 coding standards</description>
+
+  <rule ref="Drupal"/>
+
+  <!-- The following rules are intentionally disabled. -->
+  <rule ref="Drupal.Files.TxtFileLineLength">
+    <exclude-pattern>*.md</exclude-pattern>
+  </rule>
+
+</ruleset>
+
