@@ -310,6 +310,9 @@ class SubmissionService {
 
           case 'mod-php7':
             $packages[] = 'libapache2-mod-php7.0';
+            $packages_script[] = 'echo "
+            [PHP]
+            max_execution_time = 300" >> /etc/php/7.0/apache2/php.ini';
             break;
 
           case 'php7-cgi':
