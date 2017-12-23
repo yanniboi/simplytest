@@ -374,6 +374,29 @@ class SubmissionService {
         \'driver\' => \'mysql\',
       );" >> /var/www/drupal/html/sites/default/settings.php';
     }
+    elseif ($this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_identifier->value !== 'drupal') {
+      $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction --no-install';
+
+      $key = 0;
+      foreach ($this->buildEntity->drupal_projects as $key => $project) {
+        $project = $project->getFieldCollectionItem();
+
+        $id = $project->project_identifier->value;
+        $tag = $project->project_version->value;
+        $script[] = "git clone https://git.drupal.org/project/$id.git /var/www/$id";
+        $script[] = "cd /var/www/$id";
+        $script[] = "git checkout $tag";
+        $script[] = 'rm .git -rf';
+        $script[] = 'cd /var/www/drupal';
+        $script[] = "composer config repositories.$key path /var/www/$id";
+      }
+      $key++;
+      $script[] = "composer config repositories.$key composer https://packages.drupal.org/8";
+      $script[] = 'composer config extra.enable-patching true';
+
+      $main = $this->buildEntity->drupal_projects[0]->getFieldCollectionItem()->project_identifier->value;
+      $script[] = "composer require drupal/$main dev-master";
+    }
     else {
       $script[] = 'composer create-project drupal-composer/drupal-project:8.x-dev /var/www/drupal --stability dev --no-interaction';
     }
@@ -438,6 +461,10 @@ class SubmissionService {
           break;
       }
     }
+
+    // Reset file permissions for webserver.
+    // @todo Make sure that www-data is the right user for all config options.
+    $script[] = 'chown -R www-data:www-data /var/www/drupal/web';
 
     return implode("\n", $script);
   }
