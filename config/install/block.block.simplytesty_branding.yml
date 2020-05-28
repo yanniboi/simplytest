@@ -4,9 +4,9 @@ dependencies:
   module:
     - system
   theme:
-    - bartik
-id: bartik_branding
-theme: bartik
+    - simplytesty
+id: simplytesty_branding
+theme: simplytesty
 region: header
 weight: 0
 provider: null
